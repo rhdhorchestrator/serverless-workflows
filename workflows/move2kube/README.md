@@ -5,11 +5,11 @@ This workflow is using https://move2kube.konveyor.io/ to migrate the existing co
 Once the transformation is over, move2kube provides a zip file containing the transformed repo.
 
 ### Design diagram
-![sequence_diagram.svg](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/workflows/move2kube/sequence_diagram.jpg?raw=true)
-![design.svg](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/workflows/move2kube/design.svg?raw=true)
+![sequence_diagram.svg](https://github.com/rhdhorchestrator/serverless-workflows/blob/v1.5.x/workflows/move2kube/sequence_diagram.jpg?raw=true)
+![design.svg](https://github.com/rhdhorchestrator/serverless-workflows/blob/v1.5.x/workflows/move2kube/design.svg?raw=true)
 
 ### Workflow
-![m2k.svg](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/workflows/move2kube/m2k.svg?raw=true)
+![m2k.svg](https://github.com/rhdhorchestrator/serverless-workflows/blob/v1.5.x/workflows/move2kube/m2k.svg?raw=true)
 
 Note that if an error occurs during the migration planning there is no feedback given by the move2kube instance API. To overcome this, we defined a maximum amount of retries  (`move2kube_get_plan_max_retries`) to execute while getting the planning before exiting with an error. By default the value is set to 10 and it can be overridden with the environment variable `MOVE2KUBE_GET_PLAN_MAX_RETRIES`.
 
@@ -49,7 +49,7 @@ The use case has the following components:
 
 ## Installation
 
-See [official installation guide](https://github.com/rhdhorchestrator/serverless-workflows-config/blob/main/docs/main/move2kube)
+See [official installation guide](https://github.com/rhdhorchestrator/serverless-workflows-config/blob/main/docs/release-1.5/move2kube)
 
 ## Usage
 1. Create a workspace and a project under it in your move2kube instance
