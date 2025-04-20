@@ -51,5 +51,5 @@ Then the `schemas/workflow-output-schema.json` can look like (referencing the [W
 
 ---
 [1]: https://github.com/serverlessworkflow/specification/tree/main?tab=readme-ov-file#documentation
-[2]: https://github.com/rhdhorchestrator/orchestrator-helm-operator
+[2]: https://github.com/rhdhorchestrator/orchestrator-go-operator
 [3]: https://github.com/rhdhorchestrator/serverless-workflows/blob/main/workflows/shared/schemas/workflow-result-schema.json
