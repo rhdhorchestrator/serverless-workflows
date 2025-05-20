@@ -1,0 +1,66 @@
+id: patch-k8s-resource
+version: "1.0"
+specVersion: "0.8"
+name: patch-k8s-resource
+description: This is a workflow for the Optimizations plugin and the Optimizer app. They use it for patching resources such as Deployments.
+dataInputSchema: schemas/patch-k8s-resource.json
+start: SetApiVersion
+functions:
+  - name: logFunction
+    type: custom
+    operation: sysout
+  - name: patch
+    operation: "specs/patch-k8s-resource.yaml#patchResource"
+states:
+  - name: SetApiVersion
+    type: switch
+    dataConditions:
+      - condition: '${.resourceType == "deploymentconfig"}'
+        transition: "SetApiVersion2"
+      - condition: '${.resourceType == "replicationcontroller"}'
+        transition: "SetApiVersion3"
+    defaultCondition:
+      transition: "SetApiVersion1"
+  - name: SetApiVersion1
+    type: inject
+    data:
+      resourceApiVersion: "apis/apps/v1"
+    transition: Patch
+  - name: SetApiVersion2
+    type: inject
+    data:
+      resourceApiVersion: "apis/apps.openshift.io/v1"
+    transition: Patch
+  - name: SetApiVersion3
+    type: inject
+    data:
+      resourceApiVersion: "api/v1"
+    transition: Patch
+  - name: Patch
+    type: operation
+    actions:
+      - name: patch
+        functionRef:
+          refName: patch
+          arguments:
+            apiVersion: .resourceApiVersion
+            namespace: .resourceNamespace
+            kind: '.resourceType+"s"'
+            name: .resourceName
+            payload:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: .containerName
+                        resources: .containerResources
+    transition: LogSuccess
+  - name: LogSuccess
+    type: operation
+    actions:
+      - name: log
+        functionRef:
+          refName: logFunction
+          arguments:
+            message: '"patched resource " + .resourceKind + ":" + .resourceNamespace + "." + .resourceName in cluster .clusterName'
+    end: true
