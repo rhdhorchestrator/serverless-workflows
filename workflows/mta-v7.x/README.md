@@ -1,3 +1,7 @@
+> **🚨 Deprecation Notice: 🚨**  
+> From Orchestrator release version 1.7, Workflow Types will be retired. All workflows will act as infrastructure workflows, and no workflow will act as an assesment workflow. <br>
+> This workflow, being an assessment workflow, will be obsolete and irrelevant. 
+
 # MTA - migration analysis workflow
 
 # Synopsis
