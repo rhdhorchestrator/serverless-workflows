@@ -1,0 +1,78 @@
+{
+  "$id": "classpath:/schemas/patch-k8s-resource.json",
+  "title": "Data Input Schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "clusterName": {
+      "title": "clusterName",
+      "type": "string"
+    },
+    "resourceType": {
+      "title": "resourceType",
+      "type": "string",
+      "enum": [
+        "deployment",
+        "replicaset",
+        "daemonset",
+        "statefulset",
+        "deploymentconfig",
+        "replicationcontroller"
+      ]
+    },
+    "resourceNamespace": {
+      "title": "resourceNamespace",
+      "type": "string"
+    },
+    "resourceName": {
+      "title": "resourceName",
+      "type": "string"
+    },
+    "containerName": {
+      "title": "containerName",
+      "type": "string"
+    },
+    "containerResources": {
+      "title": "containerResources",
+      "type": "object",
+      "properties": {
+        "limits": {
+          "title": "limits",
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "title": "cpu",
+              "type": "number"
+            },
+            "memory": {
+              "title": "memory",
+              "type": "integer"
+            }
+          }
+        },
+        "requests": {
+          "title": "requests",
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "title": "cpu",
+              "type": "number"
+            },
+            "memory": {
+              "title": "memory",
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "clusterName",
+    "resourceType",
+    "resourceNamespace",
+    "resourceName",
+    "containerName",
+    "containerResources"
+  ]
+}

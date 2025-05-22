@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  title: Kubernetes
+  version: v1.29.10+67d3387
+servers:
+  - url: /
+paths:
+  "/{apiVersion}/namespaces/{namespace}/{kind}/{name}":
+    patch:
+      tags:
+        - apps_v1
+      description: partially update the specified resource
+      operationId: patchResource
+      parameters:
+        - name: apiVersion
+          in: path
+          description: example apis/apps/v1
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          description: name of the resource
+          required: true
+          schema:
+            type: string
+        - name: namespace
+          in: path
+          description: "resource namespace"
+          required: true
+          schema:
+            type: string
+        - name: kind
+          in: path
+          description: "resource kind in plural"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/strategic-merge-patch+json:
+            schema:
+              $ref: "#/components/schemas/io.k8s.apimachinery.pkg.apis.meta.v1.Patch"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+        "401":
+          description: Unauthorized
+          content: {}
+      security:
+        - BearerToken: []
+components:
+  schemas:
+    io.k8s.apimachinery.pkg.apis.meta.v1.Patch:
+      type: object
+      description: >-
+        Patch is provided to give a concrete name and type to the Kubernetes
+        PATCH request body.
+  securitySchemes:
+    BearerToken:
+      type: http
+      description: Bearer Token authentication
+      scheme: bearer
