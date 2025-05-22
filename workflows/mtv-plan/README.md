@@ -1,3 +1,7 @@
+> **🚨 Deprecation Notice: 🚨**  
+> From Orchestrator release version 1.7, Workflow Types will be retired. All workflows will act as infrastructure workflows, and no workflow will act as an assesment workflow. <br>
+> This workflow, being an assessment workflow, will be obsolete and irrelevant. 
+
 # MTV assessment - MTV Plan assessment workflow
 This workflow is an assessment workflow type, that creates an MTV Plan resource and waits for its final condition. Final condition is either success or failure. It is important to note that we rely on MTV to reach a final state. We do not impose our own timeout.
 [MTV Migration Plan documentation](https://docs.redhat.com/en/documentation/migration_toolkit_for_virtualization/2.6/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console_mtv#creating-migration-plans-ui)
