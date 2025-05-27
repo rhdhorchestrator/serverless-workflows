@@ -5,7 +5,7 @@ This workflow is a component in the solution provided by the Optimizations plugi
 * Credentials for accessing the OCP cluster.
 
 ## Workflow diagram
-![Path K8S resource workflow diagram](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/patch-k8s-resource/mtv.svg?raw=true)
+![Path K8S resource workflow diagram](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/patch-k8s-resource/patch-k8s-resource.svg?raw=true)
 
 ## Workflow application configuration
 Application properties can be initialized from environment variables before running the application:
