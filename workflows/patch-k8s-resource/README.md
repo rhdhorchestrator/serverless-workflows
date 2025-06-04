@@ -5,7 +5,7 @@ This workflow is a component in the solution provided by the Optimizations plugi
 * Credentials for accessing the OCP cluster.
 
 ## Workflow diagram
-![Path K8S resource workflow diagram](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/patch-k8s-resource/patch-k8s-resource.svg?raw=true)
+![Path K8S resource workflow diagram](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/workflows/patch-k8s-resource/patch-k8s-resource.svg?raw=true)
 
 ## Workflow application configuration
 Application properties can be initialized from environment variables before running the application:
@@ -14,3 +14,6 @@ Application properties can be initialized from environment variables before runn
 |-----------------------|-------------|-----------|---------------|
 | `OCP_URL`  | The OpensShift API Server URL | ✅ | |
 | `OCP_TOKEN`| The OpensShift API Server Token | ✅ | |
+
+## Deploying in OCP with OSL
+If you have OSL (OpenShift Serverless Logic, a.k.a SonataFlow) operator installed, you can use the [manifests](./manifests) folder for deploying the workflow. Create the resources in the OSL namespace (usually sonataflow-infra). The application configuration is in the first file.
