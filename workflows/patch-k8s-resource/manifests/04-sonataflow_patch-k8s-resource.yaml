@@ -1,0 +1,122 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: patch-k8s-resource
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: patch-k8s-resource
+    sonataflow.org/workflow-app: patch-k8s-resource
+  name: patch-k8s-resource
+spec:
+  flow:
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/patch-k8s-resource.json
+    functions:
+      - name: logFunction
+        operation: sysout
+        type: custom
+      - name: patch
+        operation: specs/patch-k8s-resource.yaml#patchResource
+        type: rest
+    start:
+      stateName: SetApiVersion
+    states:
+      - dataConditions:
+          - condition: ${.resourceType == "deploymentconfig"}
+            transition:
+              nextState: SetApiVersion2
+          - condition: ${.resourceType == "replicationcontroller"}
+            transition:
+              nextState: SetApiVersion3
+        defaultCondition:
+          transition:
+            nextState: SetApiVersion1
+        name: SetApiVersion
+        type: switch
+      - data:
+          resourceApiVersion: apis/apps/v1
+        name: SetApiVersion1
+        transition:
+          nextState: Patch
+        type: inject
+      - data:
+          resourceApiVersion: apis/apps.openshift.io/v1
+        name: SetApiVersion2
+        transition:
+          nextState: Patch
+        type: inject
+      - data:
+          resourceApiVersion: api/v1
+        name: SetApiVersion3
+        transition:
+          nextState: Patch
+        type: inject
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                apiVersion: .resourceApiVersion
+                kind: .resourceType+"s"
+                name: .resourceName
+                namespace: .resourceNamespace
+                payload:
+                  spec:
+                    template:
+                      spec:
+                        containers:
+                          - name: .containerName
+                            resources: .containerResources
+              invoke: sync
+              refName: patch
+            name: patch
+        name: Patch
+        transition:
+          nextState: LogSuccess
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                message: '"patched resource " + .resourceKind + ":" + .resourceNamespace + "." + .resourceName in cluster .clusterName'
+              invoke: sync
+              refName: logFunction
+            name: log
+        end:
+          terminate: true
+        name: LogSuccess
+        type: operation
+  podTemplate:
+    container:
+      resources: {}
+      image: quay.io/orchestrator/serverless-workflow-patch-k8s-resource:latest
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-patch-k8s-resource-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-patch-k8s-resource-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: patch-k8s-resource
+status:
+  address: {}
+  lastTimeRecoverAttempt: null

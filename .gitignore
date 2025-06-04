@@ -1,5 +1,3 @@
-# Serverless workflows generated files
-workflows/*/manifests/
 
 #Maven
 **/target/
