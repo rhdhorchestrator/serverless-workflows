@@ -122,8 +122,8 @@ jobs:
           # Set notification external access token
           echo " Set notification external access token"
           BACKEND_SECRET=$(kubectl get secret orchestrator-auth -o jsonpath={.data.backend-secret})
-          yq --inplace ".data.NOTIFICATIONS_BEARER_TOKEN=\"$BACKEND_SECRET\"" manifests/0?-secret_m2k.yaml # notsecret
-          cat manifests/0?-secret_m2k.yaml
+          yq --inplace ".data.NOTIFICATIONS_BEARER_TOKEN=\"$BACKEND_SECRET\"" manifests/0?-secret_m2k-secrets.yaml # notsecret
+          cat manifests/0?-secret_m2k-secrets.yaml
 
           # deploy the manifests created by the  ${{ steps.build-image.outputs.image }}"
           kubectl apply -f manifests
