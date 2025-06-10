@@ -100,7 +100,7 @@ jobs:
       - name: Deploy MTA serverless workflow
         run: |
           # Set the endpoint to the tackle-ui service
-          yq --inplace '.spec.podTemplate.container.env |= ( . + [{"name": "QUARKUS_REST_CLIENT_MTA_JSON_URL", "value": "http://tackle-ui.my-konveyor-operator.svc:8080"}, {"name": "BACKSTAGE_NOTIFICATIONS_URL", "value": "http://orchestrator-backstage.default.svc.cluster.local:7007/"}] )' manifests/04-sonataflow_mta-analysis-v7.yaml
+          yq --inplace '.spec.podTemplate.container.env |= ( . + [{"name": "QUARKUS_REST_CLIENT_MTA_JSON_URL", "value": "http://tackle-ui.my-konveyor-operator.svc:8080"}, {"name": "BACKSTAGE_NOTIFICATIONS_URL", "value": "http://orchestrator-backstage.default.svc.cluster.local:7007/"}] )' manifests/05-sonataflow_mta-analysis-v7.yaml
 
           # reuse orchestrator psql persistence for e2e tests
           kubectl patch secret orchestrator-postgresql  --patch='{"stringData": { "postgres-username": "postgres" }}'
@@ -127,15 +127,15 @@ jobs:
           cat manifests/01-configmap_mta-analysis-v7-props.yaml
           echo "---"
 
-          echo "manifests/04-sonataflow_mta-analysis-v7.yaml"
-          cat manifests/04-sonataflow_mta-analysis-v7.yaml
+          echo "manifests/05-sonataflow_mta-analysis-v7.yaml"
+          cat manifests/05-sonataflow_mta-analysis-v7.yaml
           echo "---"
 
           # Set notification external access token
           echo " Set notification external access token"
           BACKEND_SECRET=$(kubectl get secret orchestrator-auth -o jsonpath={.data.backend-secret})
-          yq --inplace ".data.NOTIFICATIONS_BEARER_TOKEN=\"$BACKEND_SECRET\"" manifests/0?-secret_mta-analysis-v7.yaml # notsecret
-          cat manifests/0?-secret_mta-analysis-v7.yaml
+          yq --inplace ".data.NOTIFICATIONS_BEARER_TOKEN=\"$BACKEND_SECRET\"" manifests/0?-secret_mta-analysis-v7-secrets.yaml # notsecret
+          cat manifests/0?-secret_mta-analysis-v7-secrets.yaml
 
           # deploy the manifests created by the ${{ steps.build-image.outputs.image }} image
           kubectl apply -f manifests/
