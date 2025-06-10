@@ -4,7 +4,15 @@
 ARG BUILDER_IMAGE
 
 # The default builder image is the latest publicly released OSL https://catalog.redhat.com/software/containers/openshift-serverless-1/logic-swf-builder-rhel8/6614edd826a5be569c111884?container-tabs=gti
-FROM ${BUILDER_IMAGE:-registry.redhat.io/openshift-serverless-1/logic-swf-builder-rhel8@sha256:5590b799420769ee2fe316bc0425bec10f7a29433765244702a23348150e621e} AS builder
+# Official Red Hat OpenShift Serverless Logic SWF Builder image
+#FROM ${BUILDER_IMAGE:-registry.redhat.io/openshift-serverless-1/logic-swf-builder-rhel8@sha256:5590b799420769ee2fe316bc0425bec10f7a29433765244702a23348150e621e} AS builder
+
+# Midstream builder image
+# This image is used for development and testing purposes, and is not intended for production use.
+#FROM ${BUILDER_IMAGE:-quay.io/kubesmarts/incubator-kie-sonataflow-builder:9.103.x-prod} AS builder
+
+# Image used for disconnected environments, with JDBC and PostgreSQL support included, based on the latest OSL builder image
+FROM ${BUILDER_IMAGE:-quay.io/orchestrator/logic-swf-builder-rhel8:1.36.0-rc1-disconnected} AS builder
 
 #ENV MAVEN_REPO_URL=https://maven.repository.redhat.com/earlyaccess/all
 
@@ -13,7 +21,7 @@ FROM ${BUILDER_IMAGE:-registry.redhat.io/openshift-serverless-1/logic-swf-builde
 # When using nightly:
 # ARG QUARKUS_EXTENSIONS=org.kie:kogito-addons-quarkus-jobs-knative-eventing:999-SNAPSHOT,org.kie:kie-addons-quarkus-persistence-jdbc:999-SNAPSHOT,io.quarkus:quarkus-jdbc-postgresql:3.8.4,io.quarkus:quarkus-agroal:3.8.4,org.kie:kie-addons-quarkus-monitoring-prometheus:999-SNAPSHOT,org.kie:kie-addons-quarkus-monitoring-sonataflow:999-SNAPSHOT
 # When using prod:
-ARG QUARKUS_EXTENSIONS=io.quarkiverse.openapi.generator:quarkus-openapi-generator:2.9.1-lts,org.kie:kie-addons-quarkus-monitoring-sonataflow:10.0.0,org.kie:kogito-addons-quarkus-jobs-knative-eventing:10.0.0,org.kie:kie-addons-quarkus-persistence-jdbc:10.0.0,io.quarkus:quarkus-jdbc-postgresql:3.8.6,io.quarkus:quarkus-agroal:3.8.6
+ARG QUARKUS_EXTENSIONS=io.quarkiverse.openapi.generator:quarkus-openapi-generator:2.9.1-lts,org.kie:kie-addons-quarkus-monitoring-sonataflow,org.kie:kogito-addons-quarkus-jobs-knative-eventing,org.kie:kie-addons-quarkus-persistence-jdbc,io.quarkus:quarkus-jdbc-postgresql:3.15.4.redhat-00001,io.quarkus:quarkus-agroal:3.15.4.redhat-00001
 
 # Args to pass to the Quarkus CLI
 # add extension command
