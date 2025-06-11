@@ -38,4 +38,4 @@ Application properties can be initialized from environment variables before runn
 
 ## Installation
 
-See [official installation guide](https://github.com/rhdhorchestrator/serverless-workflows-config/blob/main/docs/main/create-ocp-project)
+See [official installation guide](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/docs/main/create-ocp-project)
