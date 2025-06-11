@@ -16,7 +16,7 @@ on:
         default: true
 
 env:
-  WF_CONFIG_REPO: rhdhorchestrator/serverless-workflows-config
+  WF_CONFIG_REPO: rhdhorchestrator/serverless-workflows
   REGISTRY_REPO: orchestrator
   GH_TOKEN: ${{ secrets.HELM_REPO_TOKEN }}
 
