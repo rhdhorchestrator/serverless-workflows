@@ -1,0 +1,75 @@
+  openapi: 3.0.0
+  info:
+    title: Kubernetes
+    version: v1.27.3
+  paths:
+
+    /api/v1/namespaces/{namespace}/secrets/{name}: 
+      get:
+        tags:
+        - core_v1
+        description: read the specified Secret
+        operationId: readCoreV1NamespacedSecret
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/io.k8s.api.core.v1.Secret"
+              application/json;stream=watch:
+                schema:
+                  $ref: '#/components/schemas/io.k8s.api.core.v1.Secret'
+              application/vnd.kubernetes.protobuf:
+                schema:
+                  $ref: '#/components/schemas/io.k8s.api.core.v1.Secret'
+              application/vnd.kubernetes.protobuf;stream=watch:
+                schema:
+                  $ref: '#/components/schemas/io.k8s.api.core.v1.Secret'
+              application/yaml:
+                schema:
+                  $ref: '#/components/schemas/io.k8s.api.core.v1.Secret'
+          "401":
+            description: Unauthorized
+          "403":
+            description: Unauthorized
+        x-kubernetes-action: get
+        x-kubernetes-group-version-kind:
+          group: ''
+          version: v1
+          kind: Secret
+        security:
+            - BearerToken: []
+      parameters:
+      - name: name
+        in: path
+        description: name of the Secret
+        required: true
+        schema:
+          type: string
+          uniqueItems: true
+      - name: namespace
+        in: path
+        description: object name and auth scope, such as for teams and projects
+        required: true
+        schema:
+          type: string
+          uniqueItems: true
+      - name: pretty
+        in: query
+        description: If 'true', then the output is pretty printed.
+        schema:
+          type: string
+          uniqueItems: true
+
+  components:
+    schemas:
+      io.k8s.api.core.v1.Secret:
+        type: object
+
+    securitySchemes:
+      BearerToken:
+        type: http
+        scheme: bearer
+        description: Bearer Token authentication
+

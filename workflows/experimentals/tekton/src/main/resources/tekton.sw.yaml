@@ -1,0 +1,112 @@
+specVersion: "0.8"
+id: tekton
+name: Tekton
+annotations:
+  - "workflow-type/infrastructure"
+version: 0.0.1
+timeouts:
+  workflowExecTimeout: PT24H
+start: CreateK8sNamespace
+functions:
+  - name: createK8sNamespace
+    operation: specs/kube.yaml#createCoreV1Namespace
+  - name: createTask
+    operation: specs/kube.yaml#createTask
+  - name: createPipeline
+    operation: specs/kube.yaml#createPipeline
+  - name: createPipelineRun
+    operation: specs/kube.yaml#createPipelineRun
+
+states:
+  - name: CreateK8sNamespace
+    type: operation
+    actions:
+      - functionRef:
+          refName: createK8sNamespace
+          arguments:
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: "tekton-example"
+        actionDataFilter:
+          toStateData: .createdNamespace
+    transition: CreateTasks
+    stateDataFilter:
+      output: "{createdNamespace: .}"
+  - name: CreateTasks
+    type: operation
+    actions:
+      - functionRef:
+          refName: createTask
+          arguments:
+            namespace: tekton-example
+            apiVersion: tekton.dev/v1beta1
+            kind: Task
+            metadata:
+              name: task-1
+            spec:
+              steps:
+                - name: echo
+                  image: busybox
+                  script: |
+                    #!/bin/sh
+                    echo "Hi I am task #1"
+      - functionRef:
+          refName: createTask
+          arguments:
+            namespace: tekton-example
+            apiVersion: tekton.dev/v1beta1
+            kind: Task
+            metadata:
+              name: task-2
+            spec:
+              steps:
+                - name: echo
+                  image: busybox
+                  script: |
+                    #!/bin/sh
+                    echo "Hi I am task #2"
+    transition: CreatePipeline
+    stateDataFilter:
+      output: "{createdTasks: .}"
+  - name: CreatePipeline
+    type: operation
+    actions:
+      - functionRef:
+          refName: createPipeline
+          arguments:
+            namespace: tekton-example
+            apiVersion: tekton.dev/v1beta1
+            kind: Pipeline
+            metadata:
+              name: pipeline-1
+            spec:
+              tasks:
+              - name: task-1
+                taskRef:
+                  name: task-1
+              - name: task-2
+                runAfter:
+                  - task-1
+                taskRef:
+                  name: task-2
+    transition: CreatePipelineRun
+    stateDataFilter:
+      output: "{createdPipeline: .}"
+  - name: CreatePipelineRun
+    type: operation
+    actions:
+      - functionRef:
+          refName: createPipelineRun
+          arguments:
+            namespace: tekton-example
+            apiVersion: tekton.dev/v1beta1
+            kind: PipelineRun
+            metadata:
+              name: pipeline-1
+            spec:
+              pipelineRef:
+                name: pipeline-1
+    stateDataFilter:
+      output: "{createdPipelineRun: .}"
+    end: true

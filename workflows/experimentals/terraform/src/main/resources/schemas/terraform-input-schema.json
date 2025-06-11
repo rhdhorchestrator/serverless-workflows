@@ -1,0 +1,30 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Terraform input parameters",
+    "type": "object",
+    "properties": {
+        "workspaceId": {
+            "type": "string"
+        },
+        "tarArchiveSourceURL": {
+            "type": "string",
+            "description": "Link to a raw github tar file to hold Terraform Configurations"
+        },
+        "recipients": {
+            "title": "Recipients",
+            "type": "array",
+            "description": "A list of recipients for the notification in the format of 'user:<namespace>/<username>' or 'group:<namespace>/<groupname>', i.e. 'user:default/jsmith'",
+            "items": {
+              "title": "Recipient",
+              "type": "string",
+              "pattern": "^(user|group):[A-Za-z0-9]([-A-Za-z0-9]*[A-Za-z0-9])?/([A-Za-z0-9]([-A-Za-z0-9]*[A-Za-z0-9])?)$"
+            },
+            "minItems": 1
+          }
+    },
+    "required": [
+        "workspaceId",
+        "tarArchiveSourceURL",
+        "recipients"
+    ]
+}

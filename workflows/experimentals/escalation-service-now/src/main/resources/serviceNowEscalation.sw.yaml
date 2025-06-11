@@ -1,0 +1,110 @@
+specVersion: "0.8"
+id: servicenow-escalation
+name: ServiceNow Change Request escalation
+annotations:
+  - "workflow-type/infrastructure"
+version: 0.0.1
+timeouts:
+  workflowExecTimeout: PT24H
+start: CreateChangeRequest
+extensions:
+  - extensionid: workflow-uri-definitions
+    definitions:
+      notifications: https://raw.githubusercontent.com/rhdhorchestrator/serverless-workflows/main/shared/specs/notifications-openapi.yaml
+dataInputSchema: schemas/servicenow-escalation-schema.json
+functions:
+  - name: createChangeRequest
+    operation: specs/servicenow.yaml#createChangeRequest
+  - name: getChangeRequest
+    operation: specs/servicenow.yaml#getChangeRequest
+  - name: createNotification
+    operation: notifications#createNotification
+  - name: logInfo
+    type: custom
+    operation: "sysout:INFO"
+states:
+  - name: CreateChangeRequest
+    type: operation
+    actions:
+      - functionRef:
+          refName: createChangeRequest
+          arguments:
+            description: ".description"
+            short_description: ".short_description"
+            comments: ".comments"
+            state: ".state"
+            assigned_to: ".assigned_to"
+            additional_assignee_list: ".additional_assignee_list"
+            assignment_group: ".assignment_group"
+        actionDataFilter:
+          toStateData: .createdChangeRequest
+    transition: GetChangeRequest
+  - name: GetChangeRequest
+    type: operation
+    actions:
+      - name: "SleepBeforeChecking"
+        functionRef:
+          refName: "logInfo"
+          arguments:
+            message: "\"Sleeping before checking the change request \\(.createdChangeRequest.result)\""
+        sleep:
+          after: PT30S
+      - name: "getChangeRequest"
+        functionRef:
+          refName: getChangeRequest
+          arguments:
+            sys_id: ".createdChangeRequest.result.sys_id"
+        actionDataFilter:
+          toStateData: .readChangeRequest
+    transition: IsApproved
+  - name: IsApproved
+    type: switch
+    dataConditions:
+      # Change request state is new, wait for it to come to assessment phase
+      - condition: (.readChangeRequest.result.state == "-5")
+        transition:
+          nextState: GetChangeRequest
+      # Change request is now in assessment phase
+      - condition: (.readChangeRequest.result.state == "-4")
+        transition:
+          nextState: RemindManagerToApprove
+      # Change request is approved
+      - condition: (.readChangeRequest.result.state == "-3")
+        transition:
+          nextState: ThankAndTerminate
+    defaultCondition:
+      transition: GetChangeRequest
+  - name: RemindManagerToApprove
+    type: operation
+    actions:
+      - name: "RemindManagerToApprove"
+        functionRef:
+          refName: "createNotification"
+          arguments:
+            recipients:
+              type: entity
+              entityRef:  ["user:default/manager"]
+            payload:
+              title: " \"Please approve: \" + (.createdChangeRequest.result.number) "
+              description: "\"Manager, please approve this change request: \\(.createdChangeRequest.result.number)\""
+              scope: "Serverless Workflow Example"
+              topic: "Approval Request"
+              link: " (.sn_url) + \"/nav_to.do?uri=change_request.do?sys_id=\" + (.createdChangeRequest.result.sys_id) "
+    transition: GetChangeRequest
+  - name: ThankAndTerminate
+    type: operation
+    actions:
+      - name: "ThankAndTerminate"
+        functionRef:
+          refName: "createNotification"
+          arguments:
+            recipients:
+              type: entity
+              entityRef:  ["user:default/manager"]
+            payload:
+              title: " \"Thanks for approving: \" + (.createdChangeRequest.result.number) "
+              description: "\"Manager, thanks a ton for approving the change request: \\(.createdChangeRequest.result.number)\""
+              scope: "Serverless Workflow Example"
+              topic: "Approval Request"
+              link: " (.sn_url) + \"/nav_to.do?uri=change_request.do?sys_id=\" + (.createdChangeRequest.result.sys_id) "
+    end: true

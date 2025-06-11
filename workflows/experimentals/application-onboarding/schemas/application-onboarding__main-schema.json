@@ -1,0 +1,19 @@
+{
+  "$id": "classpath:/schemas/application-onboarding-schema.json",
+  "title": "Data input schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "inputs": {
+      "title": "Inputs",
+      "type": "object",
+      "properties": {
+        "projectKey": {
+          "title": "Project Key",
+          "description": "JIRA project key",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

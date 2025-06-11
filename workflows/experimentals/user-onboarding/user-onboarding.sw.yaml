@@ -1,0 +1,141 @@
+id: user-onboarding
+version: "1.0"
+specVersion: "0.8"
+name: "User Onboarding"
+description: Onboarding users - e.g for testing
+dataInputSchema: schemas/user-onboarding-schema.json
+extensions:
+  - extensionid: workflow-output-schema
+    outputSchema: schemas/workflow-output-schema.json
+  - extensionid: workflow-uri-definitions
+    definitions:
+      notifications: "https://raw.githubusercontent.com/rhdhorchestrator/serverless-workflows/main/workflows/shared/specs/notifications-openapi.yaml"
+functions:
+  - name: checkUserOnboardingStatus
+    operation: specs/onboarding-openapi.yaml#onboardUser
+  - name: createNotification
+    operation: notifications#createNotification
+  - name: print
+    type: custom
+    operation: sysout
+  - name: successResult
+    type: expression
+    operation: |
+      {
+        "result": {
+        "message": "User " + .userId + " is ready",
+        "outputs":[
+          {
+            "key":"User ID",
+            "value": .userId,
+            "format":"text"
+          },
+          {
+            "key":"Iteration Number",
+            "value": .iterationNum|tostring,
+            "format":"number"
+          }
+        ]
+        }
+      }
+  - name: userStatusInProgressResult
+    type: expression
+    operation: |
+      {
+        "result": {
+        "message": "User " + .userId + " is in progress",
+        "outputs":[
+          {
+            "key":"User ID",
+            "value": .userId,
+            "format":"text"
+          },
+          {
+            "key":"Iteration Number",
+            "value": .iterationNum|tostring,
+            "format":"number"
+          }
+        ]
+        }
+      }
+start: "Send new user request"
+states:
+  - name: Send new user request
+    type: operation
+    actions:
+      - name: checkUserOnboardingStatus
+        functionRef:
+          refName: checkUserOnboardingStatus
+          arguments:
+            user_id: .userId
+            name: .username
+        actionDataFilter:
+          toStateData: .userOnboardingResponse
+      - name: setOutput
+        functionRef:
+          refName: userStatusInProgressResult
+    transition: "Notify: New user created"
+  - name: "Notify: New user created"
+    type: operation
+    actions:
+      - name: "Create notification: New user created"
+        functionRef:
+          refName: createNotification
+          arguments:
+            recipients:
+              type: "entity"
+              entityRef: .recipients
+            payload:
+              title: '"New user " + .userOnboardingResponse.user_id + " created"'
+              description: "New user created"
+              topic: "Onboarding users"
+              severity: "normal"
+      - name: setOutput
+        functionRef:
+          refName: userStatusInProgressResult
+    transition: Poll user onboarding status
+  - name: Poll user onboarding status
+    type: operation
+    actions:
+      - name: Get user onboarding status
+        actionDataFilter:
+          toStateData: .userOnboardingResponse
+        functionRef:
+          refName: checkUserOnboardingStatus
+          arguments:
+            user_id: .userId
+            name: .username
+        sleep:
+          before: PT3S
+    transition: Check user onboarding completed
+  - name: Check user onboarding completed
+    type: switch
+    dataConditions:
+      - name: User onboarding in progress
+        condition: .userOnboardingResponse.status == "In Progress"
+        transition: Poll user onboarding status
+      - name: User onboarding completed
+        condition: .userOnboardingResponse.status == "Ready"
+        transition: "Notify: User onboarding completed"
+    defaultCondition:
+      transition:
+        nextState: Poll user onboarding status
+  - name: "Notify: User onboarding completed"
+    type: operation
+    actions:
+      - name: "Create notification: Onboarding user completed"
+        functionRef:
+          refName: createNotification
+          arguments:
+            recipients:
+              type: "entity"
+              entityRef: .recipients
+            payload:
+              title: '"Onboarding user " + .userId + " completed"'
+              description: "Onboarding user completed"
+              topic: "Onboarding users"
+              severity: "normal"
+      - name: setOutput
+        functionRef:
+          refName: successResult
+    end: true

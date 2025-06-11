@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "Change request description"
+    },
+    "short_description": {
+      "type": "string",
+      "description": "Change request short_description"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Change request assigned_to",
+      "enum": ["manager"]
+    },
+    "assignment_group": {
+      "type": "string",
+      "description": "Change request assignment_group",
+      "enum": ["Approvers"]
+    }
+  },
+  "required": [
+    "description",
+    "short_description",
+    "assigned_to",
+    "assignment_group"
+  ]
+}

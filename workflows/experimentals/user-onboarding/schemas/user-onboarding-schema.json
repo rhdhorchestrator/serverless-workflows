@@ -1,0 +1,41 @@
+  {
+    "$id": "classpath:/schemas/user-onboarding-schema.json",
+    "title": "Workflow input data",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "userId": {
+        "title": "The user ID that triggers the workflow",
+        "description": "The user that triggers the workflow",
+        "type": "string",
+        "default": "user:default/guest"
+      },
+      "iterationNum": {
+        "title": "The iteration number for running the workflow",
+        "description": "The iteration number for running the workflow",
+        "type": "integer"
+      },
+      "username": {
+        "title": "The name of the user",
+        "description": "The name of the user",
+        "type": "string",
+        "pattern": "^[a-zA-Z]*"
+      },
+      "recipients": {
+        "title": "Recipients",
+        "type": "array",
+        "description": "A list of recipients for the notification in the format of 'user:<namespace>/<username>' or 'group:<namespace>/<groupname>', i.e. 'user:default/jsmith'",
+        "items": {
+          "title": "Recipient",
+          "type": "string",
+          "pattern": "^(user|group):[a-z0-9]([-a-z0-9]*[a-z0-9])?/([a-z0-9]([-a-z0-9]*[a-z0-9])?)$"
+        },
+        "minItems": 1
+      }
+    },
+    "required": [
+      "userId",
+      "iterationNum",
+      "recipients"
+    ]
+  }
