@@ -41,12 +41,18 @@ bump_version() {
     local line_name="$1"
     local increment_type="$2"
     local should_release="$3"
-    local version_line=$(grep "^${line_name}" "${CHART_FILE}")
-    local current_version=$(echo "${version_line}" | awk '{print $2}')
-    local major=$(echo "${current_version}" | cut -d '.' -f1)
-    local minor=$(echo "${current_version}" | cut -d '.' -f2)
-    local patch=$(echo "${current_version}" | cut -d '.' -f3 | awk -F-rc '{ print $1 }')
-    local tag=$(echo "${current_version}" | awk -F-rc '{ print $2 }')
+    local version_line
+    version_line=$(grep "^${line_name}" "${CHART_FILE}")
+    local current_version
+    current_version=$(echo "${version_line}" | awk '{print $2}')
+    local major
+    major=$(echo "${current_version}" | cut -d '.' -f1)
+    local minor
+    minor=$(echo "${current_version}" | cut -d '.' -f2)
+    local patch
+    patch=$(echo "${current_version}" | cut -d '.' -f3 | awk -F-rc '{ print $1 }')
+    local tag
+    tag=$(echo "${current_version}" | awk -F-rc '{ print $2 }')
     
     case "${increment_type}" in
         minor)
