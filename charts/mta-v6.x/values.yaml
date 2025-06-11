@@ -1,0 +1,2 @@
+mta:
+  url: http://mta-ui.openshift-mta.svc.cluster.local:8080 # The MTA URL

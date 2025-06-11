@@ -1,0 +1,706 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: Workflow to execute MTA Analysis
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: mta-analysis-v7
+    sonataflow.org/workflow-app: mta-analysis-v7
+  name: mta-analysis-v7
+spec:
+  flow:
+    annotations:
+      - workflow-type/assessment
+    dataInputSchema:
+      failOnValidationErrors: false
+      schema: schemas/mta-input.json
+    functions:
+      - name: filterApplication
+        operation: '{application: .applications|map(select(.repository.url == .repositoryURL))[0]}'
+        type: expression
+      - name: deleteTaskGroup
+        operation: specs/mta.json#deleteTaskGroup
+        type: rest
+      - name: getApplication
+        operation: specs/mta.json#getApplications
+        type: rest
+      - name: getApplicationAnalysis
+        operation: specs/mta.json#getApplicationAnalysis
+        type: rest
+      - name: createApplication
+        operation: specs/mta.json#createApplication
+        type: rest
+      - name: createTaskgroup
+        operation: specs/mta.json#createTaskgroup
+        type: rest
+      - name: submitTaskgroup
+        operation: specs/mta.json#submitTaskgroup
+        type: rest
+      - name: getTaskgroup
+        operation: specs/mta.json#getTaskgroup
+        type: rest
+      - name: getTrackers
+        operation: specs/mta.json#getTrackers
+        type: rest
+      - name: getTracker
+        operation: specs/mta.json#getTracker
+        type: rest
+      - name: getTrackerProjects
+        operation: specs/mta.json#getTrackerProjects
+        type: rest
+      - name: getTrackerProject
+        operation: specs/mta.json#getTrackerProject
+        type: rest
+      - name: getTrackerProjectIssueTypes
+        operation: specs/mta.json#getTrackerProjectIssueTypes
+        type: rest
+      - name: getMigrationwaves
+        operation: specs/mta.json#getMigrationwaves
+        type: rest
+      - name: getMigrationwave
+        operation: specs/mta.json#getMigrationwave
+        type: rest
+      - name: createMigrationwave
+        operation: specs/mta.json#createMigrationwave
+        type: rest
+      - name: batchCreateTickets
+        operation: specs/mta.json#batchCreateTickets
+        type: rest
+      - name: createTicket
+        operation: specs/mta.json#createTicket
+        type: rest
+      - name: getTickets
+        operation: specs/mta.json#getTickets
+        type: rest
+      - name: getTicket
+        operation: specs/mta.json#getTicket
+        type: rest
+      - name: createNotification
+        operation: notifications#createNotification
+        type: rest
+      - name: logInfo
+        operation: sysout:INFO
+        type: custom
+      - name: countMandatoriesIncidents
+        operation: .applicationAnalysis | [select (.issues[].category=="mandatory")][0] | [.issues[]?.incidents //[]] | .[-1][-1].id
+        type: expression
+      - name: countNonMandatoriesIncidents
+        operation: .applicationAnalysis | [select (.issues[].category!="mandatory")][0] | [.issues[]?.incidents //[]] | .[-1][-1].id
+        type: expression
+      - name: TaskFailedErrorExitMessage
+        operation: '{ exitMessage: "The 1st task of the taskGroup " + (.taskgroup.id|tostring) + " is in failed state" }'
+        type: expression
+      - name: TrackersDoesNotExistErrorExitMessage
+        operation: '{ exitMessage: "There are no trackers configured in MTA, cannot export to the issue manager" }'
+        type: expression
+      - name: TrackerDoesNotExistErrorExitMessage
+        operation: '{ exitMessage: "The tracker with the id " + (.trackers[0].id|tostring) + " does not exist, cannot export to the issue manager" }'
+        type: expression
+      - name: TrackerProjectsDoesNotExistErrorExitMessage
+        operation: '{ exitMessage: "There are no trackerProjects associated with the tracker with the id " + (.tracker.id|tostring) + ", cannot export to the issue manager" }'
+        type: expression
+      - name: TrackerProjectDoesNotExistErrorExitMessage
+        operation: '{ exitMessage: "The trackerProject with the id " + (.trackerProjects[0].id|tostring) + " of the tracker with the id " + (.tracker.id|tostring) + " does not exist, cannot export to the issue manager" }'
+        type: expression
+      - name: TrackerProjectIssueTypesDoesNotExistErrorExitMessage
+        operation: '{ exitMessage: "There are no trackerProjectIssueTypes in the trackerProject with the id " + (.trackerProject.id|tostring) + " of the tracker with the id "+ (.tracker.id|tostring) +", cannot export to the issue manager" }'
+        type: expression
+      - name: successResult
+        operation: '{ result: { message: "MTA v7.x analysis completed for " + .repositoryURL, outputs:[ { key:"MTA Analysis Result URL", value: $SECRET.mta.url + "/hub/applications/" + (.application.id|tostring) + "/analysis/report", format:"link" }, { key:"Migration Wave Ticket URL", value: (if .migrationWaveJiraTicket != null then .migrationWaveJiraTicket.link else "" end), format:"link" } ], nextWorkflows:[ { id:"m2k", name:"Move2Kube workflow" } ] } }'
+        type: expression
+      - name: mandatoriesIncidentsResult
+        operation: '{ result: { message: "MTA analysis for " + .application.repository.url + " completed with " + (.application.mandatoriesIncidents|tostring) + " incidents in mandatory issues that need to be fixed before being able to provide any next possible workflow. Check the analysis report." + (if .migrationWaveJiraTicket != null then " Application was exported to issue manager." else "" end), outputs: [ { key:"MTA Analysis Result URL", value: ($SECRET.mta.url + "/hub/applications/" + (.application.id|tostring) + "/analysis/report"), format: "link" }, { key:"Migration Wave Ticket URL", value: (if .migrationWaveJiraTicket != null then .migrationWaveJiraTicket.link else "" end), format: "link" } ] } }'
+        type: expression
+      - name: errorResult
+        operation: '{ result: { message: "MTA analysis for " + .application.repository.url + " failed: " + .exitMessage + ". Check logs of task pod: " + .taskgroup.tasks[0].pod } }'
+        type: expression
+      - name: abortResult
+        operation: '{ result: { message: "MTA analysis for " + .application.repository.url + " aborted, all in progress tasks were cancelled." } }'
+        type: expression
+    start:
+      stateName: CreateApplication
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .application
+              useResults: true
+            functionRef:
+              arguments:
+                name: $WORKFLOW.instanceId + "_" + .repositoryURL
+                repository:
+                  kind: git
+                  url: .repositoryURL
+              invoke: sync
+              refName: createApplication
+            name: createApplication
+        name: CreateApplication
+        transition:
+          nextState: CreateTaskgroup
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .taskgroup
+              useResults: true
+            functionRef:
+              arguments:
+                addon: analyzer
+                data:
+                  mode:
+                    binary: false
+                    withDeps: false
+                  rules:
+                    labels:
+                      included:
+                        - konveyor.io/target=cloud-readiness
+                  scope:
+                    withKnownLibs: false
+                  tagger:
+                    enabled: true
+                name: taskgroup.analyzer
+              invoke: sync
+              refName: createTaskgroup
+            name: createTaskgroup
+        name: CreateTaskgroup
+        transition:
+          nextState: SubmitAnalysis
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                addon: analyzer
+                bucket:
+                  id: .application.bucket.id
+                createUser: admin
+                data: .taskgroup.data
+                id: .taskgroup.id
+                name: taskgroup.analyzer
+                state: Created
+                tasks:
+                  - application:
+                      id: .application.id
+                      name: .application.name
+                    name: .application.name + ".1.analyzer"
+                updateUser: ""
+              invoke: sync
+              refName: submitTaskgroup
+            name: submitTaskgroup
+        compensatedBy: CancelTaskOnAbort
+        name: SubmitAnalysis
+        transition:
+          nextState: pollResults
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .taskgroup
+              useResults: true
+            functionRef:
+              arguments:
+                id: .taskgroup.id
+              invoke: sync
+              refName: getTaskgroup
+            name: getTaskgroup
+            sleep:
+              before: PT30S
+        compensatedBy: CancelTaskOnAbort
+        name: pollResults
+        transition:
+          nextState: checkReportDone
+        type: operation
+      - compensatedBy: CancelTaskOnAbort
+        dataConditions:
+          - condition: (.taskgroup.state == "Ready" and (.taskgroup.tasks[0].state == "Running" or (.taskgroup.tasks[0].state == "Pending" or .taskgroup.tasks[0].state == "Postponed")))
+            name: taskNotCompleted
+            transition:
+              nextState: pollResults
+          - condition: (.taskgroup.state == "Ready" and .taskgroup.tasks[0].state == "Failed")
+            name: taskFailed
+            transition:
+              nextState: TaskFailedError
+        defaultCondition:
+          transition:
+            nextState: GetApplicationAnalysis
+        name: checkReportDone
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: TaskFailedErrorExitMessage
+            name: Fill exitMessage
+        name: TaskFailedError
+        transition:
+          nextState: NotifyFailureBackstage
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .applicationAnalysis
+              useResults: true
+            functionRef:
+              arguments:
+                id: .application.id
+              invoke: sync
+              refName: getApplicationAnalysis
+            name: getApp
+        name: GetApplicationAnalysis
+        transition:
+          nextState: CountMandatoriesIncidents
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .application.mandatoriesIncidents
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: countMandatoriesIncidents
+            name: countApplicationMandatoryIncident
+        name: CountMandatoriesIncidents
+        transition:
+          nextState: CountNonMandatoriesIncidents
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .application.nonMandatoriesIncidents
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: countNonMandatoriesIncidents
+            name: countApplicationNotMandatoryIncident
+        name: CountNonMandatoriesIncidents
+        transition:
+          nextState: CheckMandatoriesIncidents
+        type: operation
+      - dataConditions:
+          - condition: .application.mandatoriesIncidents > 0
+            name: hasMandatoriesIncidents
+            transition:
+              nextState: NotifyMandatoriesIncidentsInApplication
+          - condition: .exportToIssueManager == "true"
+            name: NotifyTracker
+            transition:
+              nextState: GetTrackers
+        defaultCondition:
+          transition:
+            nextState: NotifyCompletion
+        name: CheckMandatoriesIncidents
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .trackers
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: getTrackers
+            name: GetTrackers
+        name: GetTrackers
+        transition:
+          nextState: TrackersExist
+        type: operation
+      - dataConditions:
+          - condition: (.trackers != null)
+            transition:
+              nextState: GetTracker
+        defaultCondition:
+          transition:
+            nextState: TrackersDoesNotExistError
+        name: TrackersExist
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: TrackersDoesNotExistErrorExitMessage
+            name: Fill exitMessage
+        name: TrackersDoesNotExistError
+        transition:
+          nextState: NotifyFailureBackstage
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .tracker
+              useResults: true
+            condition: .trackers != null
+            functionRef:
+              arguments:
+                id: .trackers[0].id
+              invoke: sync
+              refName: getTracker
+        name: GetTracker
+        transition:
+          nextState: TrackerExists
+        type: operation
+      - dataConditions:
+          - condition: (.tracker != null)
+            transition:
+              nextState: GetTrackerProjects
+        defaultCondition:
+          transition:
+            nextState: TrackerDoesNotExistError
+        name: TrackerExists
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: TrackerDoesNotExistErrorExitMessage
+            name: Fill exitMessage
+        name: TrackerDoesNotExistError
+        transition:
+          nextState: NotifyFailureBackstage
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .trackerProjects
+              useResults: true
+            condition: .tracker != null
+            functionRef:
+              arguments:
+                id: .tracker.id
+              invoke: sync
+              refName: getTrackerProjects
+        name: GetTrackerProjects
+        transition:
+          nextState: TrackerProjectsExist
+        type: operation
+      - dataConditions:
+          - condition: (.trackerProjects != null)
+            transition:
+              nextState: GetTrackerProject
+        defaultCondition:
+          transition:
+            nextState: TrackerProjectsDoesNotExistError
+        name: TrackerProjectsExist
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: TrackerProjectsDoesNotExistErrorExitMessage
+            name: Fill exitMessage
+        name: TrackerProjectsDoesNotExistError
+        transition:
+          nextState: NotifyFailureBackstage
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .trackerProject
+              useResults: true
+            condition: .trackerProjects != null
+            functionRef:
+              arguments:
+                id: .tracker.id
+                id2: .trackerProjects[0].id
+              invoke: sync
+              refName: getTrackerProject
+        name: GetTrackerProject
+        transition:
+          nextState: TrackerProjectExist
+        type: operation
+      - dataConditions:
+          - condition: (.trackerProject != null)
+            transition:
+              nextState: GetTrackerProjectIssueTypes
+        defaultCondition:
+          transition:
+            nextState: TrackerProjectDoesNotExistError
+        name: TrackerProjectExist
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: TrackerProjectDoesNotExistErrorExitMessage
+            name: Fill exitMessage
+        name: TrackerProjectDoesNotExistError
+        transition:
+          nextState: NotifyFailureBackstage
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .trackerProjectIssueTypes
+              useResults: true
+            condition: .trackerProject != null
+            functionRef:
+              arguments:
+                id: .tracker.id
+                id2: .trackerProject.id
+              invoke: sync
+              refName: getTrackerProjectIssueTypes
+        name: GetTrackerProjectIssueTypes
+        transition:
+          nextState: TrackerProjectIssueTypesExist
+        type: operation
+      - dataConditions:
+          - condition: (.trackerProjectIssueTypes != null)
+            transition:
+              nextState: CreateMigrationWave
+        defaultCondition:
+          transition:
+            nextState: TrackerProjectIssueTypesDoesNotExistError
+        name: TrackerProjectIssueTypesExist
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: TrackerProjectIssueTypesDoesNotExistErrorExitMessage
+            name: Fill exitMessage
+        name: TrackerProjectIssueTypesDoesNotExistError
+        transition:
+          nextState: NotifyFailureBackstage
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .createdMigrationWave
+              useResults: true
+            functionRef:
+              arguments:
+                applications:
+                  - id: .application.id
+                    name: .application.name
+                endDate: (.migrationEndDatetime)
+                name: ("migrationWave_" + .application.name)
+                startDate: (.migrationStartDatetime)
+              invoke: sync
+              refName: createMigrationwave
+        name: CreateMigrationWave
+        transition:
+          nextState: CreateJira
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .createdJiraTicket
+              useResults: true
+            functionRef:
+              arguments:
+                application:
+                  id: .application.id
+                  name: .application.name
+                kind: .trackerProjectIssueTypes[0].id
+                parent: .trackerProject.id
+                tracker:
+                  id: .tracker.id
+                  name: .tracker.name
+              invoke: sync
+              refName: createTicket
+            name: CreateTickets
+            sleep:
+              after: PT30S
+          - actionDataFilter:
+              toStateData: .migrationWaveJiraTicket
+              useResults: true
+            functionRef:
+              arguments:
+                id: .createdJiraTicket.id
+              invoke: sync
+              refName: getTicket
+            name: GetMigrationWaveJiraTicket
+        name: CreateJira
+        transition:
+          nextState: CheckMandatoriesIncidentsAfterIssueCreation
+        type: operation
+      - dataConditions:
+          - condition: .application.mandatoriesIncidents > 0
+            name: hasMandatoriesIncidents
+            transition:
+              nextState: NotifyMandatoriesIncidentsInApplication
+        defaultCondition:
+          transition:
+            nextState: NotifyCompletion
+        name: CheckMandatoriesIncidentsAfterIssueCreation
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"MTA analysis is completed and the report for " + .application.repository.url + " is ready." + (if .migrationWaveJiraTicket != null then " Application was exported to issue manager" else "" end)'
+                  link: $SECRET.mta.url + "/hub/applications/" + (.application.id|tostring) + "/analysis/report"
+                  severity: normal
+                  title: MTA analysis completed
+                  topic: MTA Analysis Workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: successResult
+            name: reportCompletion
+        end:
+          terminate: true
+        name: NotifyCompletion
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"MTA analysis for " + .application.repository.url + " completed with " + (.application.mandatoriesIncidents|tostring) +" incidents in mandatory issues. Check the analysis report." + (if .migrationWaveJiraTicket != null then " Application was exported to issue manager." else "" end)'
+                  link: $SECRET.mta.url + "/hub/applications/" + (.application.id|tostring) + "/analysis/report"
+                  severity: high
+                  title: MTA analysis completed with incidents in mandatory issues.
+                  topic: MTA Analysis Workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: mandatoriesIncidentsResult
+            name: reportCompletionWithMandatoriesIncidentsInApplication
+        end:
+          terminate: true
+        name: NotifyMandatoriesIncidentsInApplication
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"MTA analysis for " + .application.repository.url + " failed: " + .exitMessage + ". Check logs of task pod: " + .taskgroup.tasks[0].pod'
+                  severity: critical
+                  title: MTA analysis failed
+                  topic: MTA Analysis Workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+        name: NotifyFailureBackstage
+        transition:
+          nextState: reportFailure
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: errorResult
+            name: reportFailure
+        end:
+          terminate: true
+        metadata:
+          errorMessage: '"MTA analysis for " + .application.repository.url + " failed: " + .exitMessage + ". Check logs of task pod: " + .taskgroup.tasks[0].pod'
+        name: reportFailure
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                message: '${"MTA workflow: " + $WORKFLOW.instanceId + " was aborted while task was still in progress}"'
+              invoke: sync
+              refName: logInfo
+            name: logInfo
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                id: .taskgroup.id
+              invoke: sync
+              refName: deleteTaskGroup
+            name: abortTasks
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"MTA analysis for " + .application.repository.url + " aborted while tasks still in progress, tasks were cancelled"'
+                  severity: critical
+                  title: MTA analysis aborted
+                  topic: MTA Analysis Workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: createNotification
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: abortResult
+            name: reportAbort
+        metadata:
+          errorMessage: '"MTA analysis for " + .application.repository.url + " aborted"'
+        name: CancelTaskOnAbort
+        type: operation
+        usedForCompensation: true
+    timeouts:
+      workflowExecTimeout:
+        duration: PT1H
+  podTemplate:
+    container:
+      resources: {}
+      image: quay.io/orchestrator/serverless-workflow-mta-v7.x:e783e6a7
+      envFrom:
+        - secretRef:
+            name: mta-analysis-v7-creds
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-mta-analysis-v7-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-mta-analysis-v7-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: mta-v7.x
+status:
+  address: {}
+  lastTimeRecoverAttempt: null

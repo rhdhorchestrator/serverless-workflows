@@ -1,0 +1,33 @@
+apiVersion: v1
+data:
+  greeting.sw.input-schema.json: |
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "language": {
+          "title": "Language",
+          "description": "Language to greet",
+          "type": "string",
+          "enum": ["English", "Spanish"],
+          "default": "English"
+        }
+      }
+    }
+  workflow-output-schema.json: |-
+    {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "WorkflowResult",
+        "description": "Schema of workflow output",
+        "type": "object",
+        "properties": {
+            "result": {
+                "$ref": "../shared/schemas/workflow-result-schema.json",
+                "type": "object"
+            }
+        }
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 01-greeting-resources-schemas

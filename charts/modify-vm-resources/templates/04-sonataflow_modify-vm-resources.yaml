@@ -1,0 +1,457 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: Modify VM Resources (Memory/CPU)
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: modify-vm-resources
+    sonataflow.org/workflow-app: modify-vm-resources
+  name: modify-vm-resources
+spec:
+  flow:
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/modify-vm-resources__main-schema.json
+    functions:
+      - name: readNamespacedVirtualMachine
+        operation: specs/kubevirt-openapi.yaml#readNamespacedVirtualMachine
+        type: rest
+      - name: patchNamespacedVirtualMachine
+        operation: specs/kubevirt-openapi.yaml#patchNamespacedVirtualMachine
+        type: rest
+      - name: jiraCreateIssue
+        operation: specs/jira-openapi.json#createIssue
+        type: rest
+      - name: jiraGetIssue
+        operation: specs/jira-openapi.json#getIssue
+        type: rest
+      - name: createNotification
+        operation: notifications#createNotification
+        type: rest
+      - name: print
+        operation: sysout
+        type: custom
+      - name: increaseVMStatusRunningRetries
+        operation: .vmStatusRunningRetries=.vmStatusRunningRetries + 1
+        type: expression
+      - name: fillEmptyValues
+        operation: '{ vm_new_memory:(if (.vm_new_memory == null or .vm_new_memory =="") then .vm.spec.template.spec.domain.memory.guest else .vm_new_memory end), vm_new_cpu_cores:(if .vm_new_cpu_cores == null then .vm.spec.template.spec.domain.cpu.cores else .vm_new_cpu_cores end), vm_new_cpu_sockets:(if .vm_new_cpu_sockets == null then .vm.spec.template.spec.domain.cpu.sockets else .vm_new_cpu_sockets end), vm_new_cpu_threads:if .vm_new_cpu_threads == null then .vm.spec.template.spec.domain.cpu.threads else .vm_new_cpu_threads end }'
+        type: expression
+      - name: successResult
+        operation: '{ "result": { "message": "VM " + .vm_name + " in namespace " + .vm_namespace + " updated.", "outputs":[ { "key":"Console URL", "value": $SECRET.cluster_console_url + "/k8s/ns/" + .vm_namespace + "/kubevirt.io~v1~VirtualMachine/" + .vm_name + "/console/standalone", "format":"link" } ] } }'
+        type: expression
+      - name: errorVMNotRunningResult
+        operation: '{ "result": { "message": "VM " + .vm_name + " in namespace " + .vm_namespace + " not ready after the update after checking" + (.vmStatusRunningRetries|tostring) + " times: " + (.vm.status|tostring) } }'
+        type: expression
+      - name: errorAuthorizationDeniedResult
+        operation: '{ "result": { "message": "Authorization denied to update VM " + .vm_name + " in namespace " + .vm_namespace + ". Memory: " + .vm_new_memory + ". CPU cores: " + (.vm_new_cpu_cores|tostring) + ". CPU threads: " + (.vm_new_cpu_threads|tostring) + ". CPU sockets: " + (.vm_new_cpu_sockets|tostring), "outputs":[ { "key":"Jira issue", "value": $SECRET.jira_url + "/jira/servicedesk/projects/" + .projectKey + "/issues/" + .jiraCreateIssueResult.key, "format":"link" }] } }'
+        type: expression
+    start:
+      stateName: Get VM
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .vm
+              useResults: true
+            functionRef:
+              arguments:
+                name: .vm_name
+                namespace: .vm_namespace
+              invoke: sync
+              refName: readNamespacedVirtualMachine
+            name: get VM
+        name: Get VM
+        transition:
+          nextState: Fill empty values
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: fillEmptyValues
+            name: Fill empty values
+        name: Fill empty values
+        transition:
+          nextState: Open issue on JIRA
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .jiraCreateIssueResult
+              useResults: true
+            functionRef:
+              arguments:
+                fields:
+                  description: '"Authorization request to update VM " + .vm_name + " in namespace " + .vm_namespace + ".\nMemory: " + .vm_new_memory + "\nCPU cores: " + (.vm_new_cpu_cores|tostring) + "\nCPU threads: " + (.vm_new_cpu_threads|tostring) + "\nCPU sockets: " + (.vm_new_cpu_sockets|tostring) + "\nAuto restart VM: " + (if .vm_auto_restart == true then "yes" else "no" end)'
+                  issuetype:
+                    name: Task
+                  labels:
+                    - backstage-workflow
+                    - '"workflowId=" + $WORKFLOW.instanceId'
+                  project:
+                    key: .projectKey
+                  summary: '"Authorization request to update VM " + .vm_name + " in namespace " + .vm_namespace'
+              invoke: sync
+              refName: jiraCreateIssue
+            name: callbackAction
+        name: Open issue on JIRA
+        transition:
+          nextState: 'Notify Backstage: JIRA ticket created'
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"JIRA ticket created to request update for VM " + .vm_name + " in namespace " + .vm_namespace'
+                  link: $SECRET.jira_url + "/jira/servicedesk/projects/" + .projectKey + "/issues/" + .jiraCreateIssueResult.key
+                  severity: normal
+                  title: '"JIRA ticket created for VM " + .vm_name'
+                  topic: Modify VM Resources workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: 'Create notification: JIRA ticket created'
+        name: 'Notify Backstage: JIRA ticket created'
+        transition:
+          nextState: Poll issue
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .jiraGetIssueResult
+              useResults: true
+            functionRef:
+              arguments:
+                issueIdOrKey: .jiraCreateIssueResult.id
+              invoke: sync
+              refName: jiraGetIssue
+            name: get issue
+            sleep:
+              before: PT10S
+        name: Poll issue
+        transition:
+          nextState: Check issue done
+        type: operation
+      - dataConditions:
+          - condition: .jiraGetIssueResult.fields.status.statusCategory.key == "done" and .jiraGetIssueResult.fields.resolution.name != "Done"
+            name: VM update denied
+            transition:
+              nextState: Notify VM update denied
+          - condition: .jiraGetIssueResult.fields.status.statusCategory.key == "done" and .jiraGetIssueResult.fields.resolution.name == "Done"
+            name: VM update authorized
+            transition:
+              nextState: Notify VM update authorized
+        defaultCondition:
+          transition:
+            nextState: Poll issue
+        name: Check issue done
+        type: switch
+      - branches:
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    message: '${"VM update authorized, see Jira issue: " + $SECRET.jira_url + "/jira/servicedesk/projects/" + .projectKey + "/issues/" + .jiraCreateIssueResult.key + " ==> " + .vm_name}'
+                  invoke: sync
+                  refName: print
+                name: printSystemOut
+            name: printSystemOut
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    payload:
+                      description: '"Authorization granted to update VM " + .vm_name + " in namespace " + .vm_namespace + ". Memory: " + .vm_new_memory + ". CPU cores: " + (.vm_new_cpu_cores|tostring) + ". CPU threads: " + (.vm_new_cpu_threads|tostring) + ". CPU sockets: " + (.vm_new_cpu_sockets|tostring) + ". Auto restart: " + (if .vm_auto_restart == true then "yes" else "no" end)'
+                      severity: normal
+                      title: '"Authorization granted to update VM " + .vm_name + " in namespace " + .vm_namespace'
+                      topic: Modify VM Resources workflow
+                    recipients:
+                      entityRef: .recipients
+                      type: entity
+                  invoke: sync
+                  refName: createNotification
+                name: 'Create notification: VM update authorized'
+            name: 'Create notification: VM update authorized'
+        completionType: allOf
+        name: Notify VM update authorized
+        numCompleted: 0
+        transition:
+          nextState: Update VM
+        type: parallel
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                name: .vm_name
+                namespace: .vm_namespace
+                spec:
+                  spec:
+                    running: (.vm_auto_restart|not)
+                    template:
+                      spec:
+                        domain:
+                          cpu:
+                            cores: .vm_new_cpu_cores
+                            sockets: .vm_new_cpu_sockets
+                            threads: .vm_new_cpu_threads
+                          memory:
+                            guest: .vm_new_memory
+              invoke: sync
+              refName: patchNamespacedVirtualMachine
+        name: Update VM
+        transition:
+          nextState: Check auto restart
+        type: operation
+      - dataConditions:
+          - condition: .vm_auto_restart == true
+            name: VM autorestart enabled
+            transition:
+              nextState: Restart VM
+        defaultCondition:
+          transition:
+            nextState: InitVMStatusRunningRetry
+        name: Check auto restart
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                name: .vm_name
+                namespace: .vm_namespace
+                spec:
+                  spec:
+                    running: true
+              invoke: sync
+              refName: patchNamespacedVirtualMachine
+        name: Restart VM
+        transition:
+          nextState: InitVMStatusRunningRetry
+        type: operation
+      - data:
+          vmStatusRunningRetries: 0
+        name: InitVMStatusRunningRetry
+        transition:
+          nextState: Poll VM
+        type: inject
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .vm
+              useResults: true
+            functionRef:
+              arguments:
+                name: .vm_name
+                namespace: .vm_namespace
+              invoke: sync
+              refName: readNamespacedVirtualMachine
+            name: get VM
+            sleep:
+              before: PT10S
+        name: Poll VM
+        transition:
+          nextState: IncreaseVMStatusRunningRetriesRetry
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: increaseVMStatusRunningRetries
+        name: IncreaseVMStatusRunningRetriesRetry
+        transition:
+          nextState: Check VM status
+        type: operation
+      - dataConditions:
+          - condition: .vm.status.ready == true
+            name: VM running
+            transition:
+              nextState: Notify VM running
+          - condition: (.vmStatusRunningRetries > ($SECRET.vm_check_running_max_retries | tonumber))
+            name: VM not running
+            transition:
+              nextState: Notify VM not running
+        defaultCondition:
+          transition:
+            nextState: Poll VM
+        name: Check VM status
+        type: switch
+      - branches:
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    message: 'VM running: .vm'
+                  invoke: sync
+                  refName: print
+                name: printSystemOut
+            name: printSystemOut
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    payload:
+                      description: '"VM " + .vm_name + " in namespace " + .vm_namespace + " updated."'
+                      link: $SECRET.cluster_console_url + "/k8s/ns/" + .vm_namespace + "/kubevirt.io~v1~VirtualMachine/" + .vm_name + "/console/standalone"
+                      severity: normal
+                      title: '"VM " + .vm_name + " in namespace " + .vm_namespace + " updated and ready"'
+                      topic: Modify VM Resources workflow
+                    recipients:
+                      entityRef: .recipients
+                      type: entity
+                  invoke: sync
+                  refName: createNotification
+                name: 'Create notification: VM update running'
+            name: 'Create notification: VM running'
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  invoke: sync
+                  refName: successResult
+                name: setOutput
+            name: setOutput
+        completionType: allOf
+        end:
+          terminate: true
+        name: Notify VM running
+        numCompleted: 0
+        type: parallel
+      - branches:
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    message: 'VM not running: .vm'
+                  invoke: sync
+                  refName: print
+                name: printSystemOut
+            name: printSystemOut
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    payload:
+                      description: '"VM " + .vm_name + " in namespace " + .vm_namespace + " not ready after the update after checking" + (.vmStatusRunningRetries|tostring) + " times: " + (.vm.status|tostring)'
+                      severity: high
+                      title: '"VM " + .vm_name + " in namespace " + .vm_namespace + " not ready"'
+                      topic: Modify VM Resources workflow
+                    recipients:
+                      entityRef: .recipients
+                      type: entity
+                  invoke: sync
+                  refName: createNotification
+                name: 'Create notification: VM update not running'
+            name: 'Create notification: VM not running'
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  invoke: sync
+                  refName: errorVMNotRunningResult
+                name: setOutput
+            name: setOutput
+        completionType: allOf
+        end:
+          terminate: true
+        metadata:
+          errorMessage: '"VM " + .vm_name + " in namespace " + .vm_namespace + " not ready"'
+        name: Notify VM not running
+        numCompleted: 0
+        type: parallel
+      - branches:
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    message: '${"VM update denied, see Jira issue: " + $SECRET.jira_url + "/jira/servicedesk/projects/" + .projectKey + "/issues/" + .jiraCreateIssueResult.key + " ==> " + .vm_name}'
+                  invoke: sync
+                  refName: print
+                name: printSystemOut
+            name: printSystemOut
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    payload:
+                      description: '"Authorization denied to update VM " + .vm_name + " in namespace " + .vm_namespace + ". Memory: " + .vm_new_memory + ". CPU cores: " + (.vm_new_cpu_cores|tostring) + ". CPU threads: " + (.vm_new_cpu_threads|tostring) + ". CPU sockets: " + (.vm_new_cpu_sockets|tostring)'
+                      link: $SECRET.jira_url + "/jira/servicedesk/projects/" + .projectKey + "/issues/" + .jiraCreateIssueResult.key
+                      severity: high
+                      title: '"Authorization denied to create VM " + .vm_name + " in namespace " + .vm_namespace'
+                      topic: Modify VM Resources workflow
+                    recipients:
+                      entityRef: .recipients
+                      type: entity
+                  invoke: sync
+                  refName: createNotification
+                name: 'Create notification: VM update denied'
+            name: 'Create notification: VM update denied'
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  invoke: sync
+                  refName: errorAuthorizationDeniedResult
+                name: setOutput
+            name: setOutput
+        completionType: allOf
+        end:
+          terminate: true
+        metadata:
+          errorMessage: '"Authorization denied to create VM " + .vm_name + " in namespace " + .vm_namespace'
+        name: Notify VM update denied
+        numCompleted: 0
+        type: parallel
+  podTemplate:
+    container:
+      resources: {}
+      image: quay.io/orchestrator/serverless-workflow-modify-vm-resources:96d772297d3ee964ab9775d7aae7dbbd4f070dd7
+      envFrom:
+        - secretRef:
+            name: modify-vm-resources-creds
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-modify-vm-resources-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-modify-vm-resources-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: modify-vm-resources
+status:
+  address: {}
+  lastTimeRecoverAttempt: null

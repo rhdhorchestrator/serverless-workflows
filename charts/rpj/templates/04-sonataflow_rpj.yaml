@@ -1,0 +1,171 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: Workflow to execute RPJ
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: rpj
+    sonataflow.org/workflow-app: rpj
+  name: rpj
+spec:
+  flow:
+    annotations:
+      - workflow-type/infrastructure
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/rpj-input.json
+    functions:
+      - name: run
+        operation: specs/rpj.json#run
+        type: rest
+      - name: createNotification
+        operation: notifications#createNotification
+        type: rest
+      - name: systemOut
+        operation: sysout
+        type: custom
+      - name: successResult
+        operation: '{ "result": { "message": "RPJ workflow  " + $WORKFLOW.instanceId + " was successful", "outputs": [ { "key":"Launch ID", "value": .launchId }, { "key":"Epic code", "value": (if .epicCode == null then "None provided" else .epicCode end) } ] } }'
+        type: expression
+      - name: errorResult
+        operation: '{ "result": { "message": "RPJ workflow  " + $WORKFLOW.instanceId + " failed", "outputs": [ { "key":"Launch ID", "value": .launchId }, { "key":"Epic code", "value": (if .epicCode == null then "None provided" else .epicCode end) }, { "key":"Run result message", "value": .runResults.message } ] } }'
+        type: expression
+    start:
+      stateName: Run
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .runResults
+              useResults: true
+            functionRef:
+              arguments:
+                epic: .epicCode
+                launch_id: .launchId
+              invoke: sync
+              refName: run
+            name: getApp
+        name: Run
+        transition:
+          nextState: CheckResults
+        type: operation
+      - dataConditions:
+          - condition: .runResults.success == true
+            name: success
+            transition:
+              nextState: NotifyBackstage
+          - condition: .runResults.success == false
+            name: failure
+            transition:
+              nextState: NotifyFailureBackstage
+        defaultCondition:
+          transition:
+            nextState: NotifyFailureBackstage
+        name: CheckResults
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                message: '"RPJ run results for launch " + .launchId + ": " + (.runResults|tostring)'
+              invoke: sync
+              refName: systemOut
+            name: printSystemOut
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"RPJ result for launch " + .launchId + ": Message: " + .runResults.message '
+                  title: RPJ run results
+                  topic: RPJ Workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: createNotification
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: successResult
+            name: setOutput
+        end:
+          terminate: true
+        name: NotifyBackstage
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                message: '"RPJ run failed with results for launch " + .launchId + ": " + (.runResults|tostring)'
+              invoke: sync
+              refName: systemOut
+            name: printSystemOut
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"RPJ run failed for launch " + .launchId + ". Message: " + .runResults.message '
+                  title: RPJ run failed
+                  topic: RPJ Workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: createFailureNotification
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: errorResult
+            name: setOutput
+        end:
+          terminate: true
+        metadata:
+          errorMessage: '"RPJ run failed for launch " + .launchId'
+        name: NotifyFailureBackstage
+        type: operation
+    timeouts:
+      workflowExecTimeout:
+        duration: PT1H
+  podTemplate:
+    container:
+      resources: {}
+      image: quay.io/orchestrator/serverless-workflow-rpj:96d772297d3ee964ab9775d7aae7dbbd4f070dd7
+      envFrom:
+        - secretRef:
+            name: rpj-creds
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-rpj-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-rpj-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: rpj
+status:
+  address: {}
+  lastTimeRecoverAttempt: null

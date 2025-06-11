@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rpj-proxy-configmap
+data:
+  TARGET_URL: ""
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rpj-proxy
+spec:
+  selector:
+    matchLabels:
+      app: rpj-proxy
+  template:
+    metadata:
+      labels:
+        app: rpj-proxy
+    spec:
+      containers:
+      - name: rpj-proxy
+        image: quay.io/orchestrator/rpj-proxy:9dfe4aca
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: rpj-proxy-configmap
+        livenessProbe:
+          httpGet:
+            path: /health        
+            port: 8080           
+          initialDelaySeconds: 10
+          periodSeconds: 15      
+          failureThreshold: 3    
+        readinessProbe:
+          httpGet:
+            path: /health        
+            port: 8080           
+          initialDelaySeconds: 5 
+          periodSeconds: 10      
+          failureThreshold: 3    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rpj-proxy-service
+spec:
+  selector:
+    app: rpj-proxy
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080

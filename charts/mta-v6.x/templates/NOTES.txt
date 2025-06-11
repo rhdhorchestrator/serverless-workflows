@@ -1,0 +1,22 @@
+{{/* Empty line */}}
+{{- $ns := .Release.Namespace }}
+Helm Release {{ .Release.Name }} installed in namespace {{ $ns }}.
+{{- $yes := "YES" }}
+{{- $no := "NO " }}
+{{- $mtaOperatorInstalled := $yes }} 
+{{- $mtaWorkflowInstalled := $yes }}
+{{- $timeout := "--timeout=2m" }}
+
+
+Components                                   Installed   Namespace
+==================================================================
+MTA operator                                 {{ $mtaOperatorInstalled }}         openshift-mta
+serverless workflow - mta analysis           {{ $mtaWorkflowInstalled }}         {{ $ns }}
+{{/* Empty line */}}
+
+
+Run the following commands to wait until the mta analysis workflow dependencies and build are done and workflow is running on namespace {{ $ns }}:
+  sleep 120s # to wait until the MTA operator has created all requested resources
+  oc wait --for=jsonpath='{.status.phase}=Succeeded' -n openshift-mta csv/mta-operator.v6.2.2 {{ $timeout }}
+  oc wait --for=condition=Ready=true pods -l "app.kubernetes.io/name=mta-ui" -n openshift-mta {{ $timeout }}
+  oc wait -n {{ $ns }} sonataflow/mtaanalysis --for=condition=Running {{ $timeout }}

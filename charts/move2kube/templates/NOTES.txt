@@ -1,0 +1,70 @@
+{{/* Empty line */}}
+{{- $ns := .Release.Namespace }}
+Helm Release {{ .Release.Name }} installed in namespace {{ $ns }}.
+{{- $yes := "YES" }}
+{{- $no := "NO " }}
+{{- $move2kubeInstalled := $yes }}
+{{- $move2kubeWorkflowInstalled := $yes }}
+{{- $move2kubeSaveTransformationKFuncInstalled := $yes }}
+{{- $timeout := "--timeout=2m" }}
+{{- $brokerName := "kafka-broker" }}
+
+Components                                     Installed   Namespace
+====================================================================
+move2kube instance                                   {{ $move2kubeInstalled }}   {{ $ns }}
+serverless workflow - move2kube                      {{ $move2kubeWorkflowInstalled }}   {{ $ns }}
+save move2kube transformation Knative function       {{ $move2kubeSaveTransformationKFuncInstalled }}   {{ $ns }}
+{{/* Empty line */}}
+
+Run the following commands to wait until the move2kube workflow dependencies and build are done and workflow is running on namespace {{ $ns }}:
+  oc wait -n {{ $ns }} pod --for=condition=Ready=true -l "app=m2k" {{ $timeout }}
+  oc wait -n {{ $ns }} ksvc {{ .Values.kfunction.name }} --for=condition=Ready=true {{ $timeout }}
+  oc wait -n {{ $ns }} sonataflow/{{ .Values.workflow.name }} --for=condition=Running {{ $timeout }}
+
+{{/* Empty line */}}
+To create SSH Keys secret for move2kube instance and configure SCC, run:
+oc -n {{ $ns }} adm policy add-scc-to-user anyuid -z default
+oc -n {{ $ns }} create secret generic sshkeys --from-file=id_rsa=${HOME}/.ssh/id_rsa --from-file=id_rsa.pub=${HOME}/.ssh/id_rsa.pub
+
+{{/* Empty line */}}
+Then force the pod to be recreated:
+oc -n {{ $ns }} scale deploy move2kube --replicas=0 && oc -n {{ $ns }} scale deploy move2kube --replicas=1
+
+{{/* Empty line */}}
+
+Run the following command or follow the steps prompted at the end of the workflow installation to apply it to the move2kubeURL parameter:
+
+  M2K_ROUTE=$(oc -n {{ $ns }} get routes move2kube-route -o yaml | yq -r .spec.host)
+  oc -n {{ $ns }} delete ksvc m2k-save-transformation-func && \
+    helm upgrade move2kube orchestrator-workflows/move2kube -n {{ $ns }} --set workflow.move2kubeURL=https://${M2K_ROUTE} --set brokerName={{ $brokerName }} --set brokerNamespace={{ $ns }}
+
+Once again, run the following commands to wait until the move2kube workflow dependencies and build are done and workflow is running on namespace {{ $ns }}:
+  oc wait -n {{ $ns }}  --for=condition=Ready=true {{ $timeout }} pod -l "app=m2k"
+  oc wait -n {{ $ns }} ksvc {{ .Values.kfunction.name }} --for=condition=Ready=true {{ $timeout }}
+  oc wait -n {{ $ns }} sonataflow/{{ .Values.workflow.name }} --for=condition=Running {{ $timeout }}
+
+Edit the secret {{ .Values.workflow.name }}-creds and set the value of NOTIFICATIONS_BEARER_TOKEN:
+oc -n {{ $ns }} patch secret "{{ .Values.workflow.name }}-creds" --type merge -p '{"data": { "NOTIFICATIONS_BEARER_TOKEN": "'$(oc get secret -n {{ $ns }} backstage-backend-auth-secret -o go-template="{{ `{{ .data.BACKEND_SECRET }}` }}")'"}}'
+
+Once all commands are completed, set the value of $M2K_ROUTE to the move2kube workflow m2k-props configmap:
+
+  # Get the current ConfigMap data
+  CURRENT_DATA=$(oc -n {{ $ns }} get configmap m2k-props -o jsonpath='{.data.application\.properties}')
+
+  # Update the properties in the ConfigMap data
+  UPDATED_DATA=$(echo "$CURRENT_DATA" | \
+    sed "s#^quarkus.rest-client.move2kube_yaml.url=.*#quarkus.rest-client.move2kube_yaml.url=$M2K_ROUTE#g; s#^move2kube_url=.*#move2kube_url=$M2K_ROUTE#g")
+    
+  # Replace newline characters with escape sequences
+  UPDATED_DATA=$(echo -n "$UPDATED_DATA" | sed ':a;N;$!ba;s/\n/\\n/g')
+
+  # Patch the ConfigMap with the updated data
+  oc -n {{ $ns }} patch configmap m2k-props --patch "{\"data\": {\"application.properties\": \"$UPDATED_DATA\"}}"
+
+Run the following to set MOVE2KUBE_URL and BACKSTAGE_NOTIFICATIONS_URL environment variable in the workflow:
+BACKSTAGE_NOTIFICATIONS_URL=http://backstage-backstage.rhdh-operator
+BROKER_URL=$(oc -n {{ $ns }} get broker -o yaml | yq -r .items[0].status.address.url)
+oc -n {{ $ns }} patch sonataflow m2k --type merge -p '{"spec": { "podTemplate": { "container": { "env": [{"name": "BACKSTAGE_NOTIFICATIONS_URL",  "value": "'${BACKSTAGE_NOTIFICATIONS_URL}'"},{"name": "MOVE2KUBE_URL", "value": "https://'${M2K_ROUTE}'"}]}}}}'
+
+Verify workflow is ready:
+  oc wait -n {{ $ns }} pods -l "sonataflow.org/workflow-app=m2k" --for=condition=Ready=true {{ $timeout }}
