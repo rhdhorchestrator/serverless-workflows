@@ -1,0 +1,3 @@
+mta:
+  # specify the port because of rest client bug in sonata (TODO check when is this solved)
+  endpoint: https://mta-openshift-mta.apps.rhdhorchestrator.projects.ecosystem.sysdeseng.com:443/hub/

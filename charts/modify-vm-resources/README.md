@@ -1,0 +1,1 @@
+See [documentation for the workflow](../../docs/main/modify-vm-resources/README.md)

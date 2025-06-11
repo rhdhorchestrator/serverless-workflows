@@ -1,0 +1,66 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.instance.namespace }}
+spec:
+  {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.instance.name }}
+  namespace: {{ .Values.instance.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.instance.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.instance.name }}
+    spec:
+      containers:
+        - name: {{ .Values.instance.name }}
+          image: {{ .Values.instance.image }}
+          securityContext:
+            runAsUser: 0
+            allowPrivilegeEscalation: true
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SSH_AUTH_SOCK
+              value: /tmp/unix-socket
+          volumeMounts:
+            - name: ssh-priv-key
+              readOnly: true
+              mountPath: "/root/.ssh/id_rsa"
+              subPath: id_rsa
+            - name: ssh-pub-key
+              readOnly: true
+              mountPath: "/root/.ssh/id_rsa.pub"
+              subPath: id_rsa.pub
+          lifecycle:
+            postStart:
+              exec:
+                command: [ "/bin/sh", "-c", "ssh-agent -a /tmp/unix-socket && ssh-add /root/.ssh/id_rsa && ssh git@github.com -o StrictHostKeyChecking=accept-new || true && ssh git@gitlab.com -o StrictHostKeyChecking=accept-new|| true && ssh git@bitbucket.org -o StrictHostKeyChecking=accept-new|| true" ]
+      volumes:
+        - name: ssh-priv-key
+          secret:
+            secretName: {{ .Values.sshSecretName }}
+            defaultMode: 384
+        - name: ssh-pub-key
+          secret:
+            secretName: {{ .Values.sshSecretName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.instance.name }}-svc
+  namespace: {{ .Values.instance.namespace }}
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+  selector:
+    app: {{ .Values.instance.name }}

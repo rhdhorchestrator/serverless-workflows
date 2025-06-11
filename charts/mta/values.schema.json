@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "default": {},
+  "title": "Root Schema",
+  "required": [
+      "mta"
+  ],
+  "properties": {
+      "mta": {
+          "type": "object",
+          "default": {},
+          "title": "The mta Schema",
+          "required": [
+              "endpoint"
+          ],
+          "properties": {
+              "endpoint": {
+                  "type": "string",
+                  "default": "",
+                  "title": "The endpoint Schema",
+                  "examples": [
+                      "https://mta-openshift-mta.apps.rhdhorchestrator.projects.ecosystem.sysdeseng.com:443/hub/"
+                  ]
+              }
+          },
+          "examples": [{
+              "endpoint": "https://mta-openshift-mta.apps.rhdhorchestrator.projects.ecosystem.sysdeseng.com:443/hub/"
+          }]
+      }
+  },
+  "examples": [{
+      "mta": {
+          "endpoint": "https://mta-openshift-mta.apps.rhdhorchestrator.projects.ecosystem.sysdeseng.com:443/hub/"
+      }
+  }]
+}

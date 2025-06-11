@@ -1,0 +1,14 @@
+sshSecretName: sshkeys # name of the secret holding the ssh keys that will be used by move2kube resources
+brokerName: "" # name of the broker used by Knative eventing resources
+brokerNamespace: "" # namespace of the broker used by Knative eventing resources
+workflow:
+  name: m2k # name of the workflow
+  move2kubeURL: https://move2kube-route-sonataflow-infra.apps.cluster-8xfw.redhatworkshops.io # URL for move2kube instance
+  backstageNotificationURL: http://orchestrator-backstage.orchestrator:7007/api/notifications/ # URL for backstage notification plugin
+kfunction:
+  name: m2k-save-transformation-func # name of the Knative function that save the transformation output to git
+  image: quay.io/orchestrator/serverless-workflow-m2k-kfunc:7c7b608ad8cde8510b06a171f35746ed0f3f21cd # image of the knative function
+instance:
+  name: move2kube # name of the move2kube instance deployment
+  image: quay.io/konveyor/move2kube-ui:v0.3.14 # image of the move2kube instance
+  namespace: move2kube

@@ -1,0 +1,188 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: workflow executes a plan by creating a migration and waiting for it to be successful or failed
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: mtv-migration
+    sonataflow.org/workflow-app: mtv-migration
+  name: mtv-migration
+spec:
+  flow:
+    annotations:
+      - workflow-type/infrastructure
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/mtv-input.json
+    functions:
+      - name: createNotification
+        operation: notifications#createNotification
+        type: rest
+      - name: createMigration
+        operation: specs/mtv.yaml#createMigration
+        type: rest
+      - name: getMigration
+        operation: specs/mtv.yaml#getMigration
+        type: rest
+      - name: getMigrationError
+        operation: .getStatusResult.status.conditions | map(select(.category == "Error" or .category == "Critical" or .type == "Failed"))[0].message
+        type: expression
+      - name: successResult
+        operation: '{ "result": { "message": "MTV migration " + .migrationName + " succeeded", "outputs":[] } }'
+        type: expression
+      - name: errorResult
+        operation: '{ "result": { "message": "MTV migration " + .migrationName + " failed.", "outputs":[ { "key":"Error", "value": .migrationErrorMessage } ] } }'
+        type: expression
+    start:
+      stateName: CreateMigration
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                apiVersion: forklift.konveyor.io/v1beta1
+                kind: Migration
+                metadata:
+                  name: .migrationName
+                  namespace: .migrationNamespace
+                namespace: .migrationNamespace
+                spec:
+                  plan:
+                    name: .migrationName
+                    namespace: .migrationNamespace
+              invoke: sync
+              refName: createMigration
+        name: CreateMigration
+        transition:
+          nextState: GetMigration
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .getStatusResult
+              useResults: true
+            functionRef:
+              arguments:
+                migration: .migrationName
+                namespace: .migrationNamespace
+              invoke: sync
+              refName: getMigration
+            name: getMigration
+            sleep:
+              before: PT10S
+        name: GetMigration
+        transition:
+          nextState: CheckMigrationStatus
+        type: operation
+      - dataConditions:
+          - condition: .getStatusResult.status.conditions | map(select(.category == "Error" or .category == "Critical" or .type == "Failed")) | length > 0
+            name: MigrationFailure
+            transition:
+              nextState: MigrationFailure
+          - condition: .getStatusResult.status.conditions | map(select(.type == "Succeeded")) | length > 0
+            name: MigrationSuccessful
+            transition:
+              nextState: MigrationSuccessful
+        defaultCondition:
+          transition:
+            nextState: GetMigration
+        name: CheckMigrationStatus
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .migrationErrorMessage
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: getMigrationError
+            name: setMigrationErrorMessage
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"MTV migration " + .migrationName + " failed. Error: " + .migrationErrorMessage'
+                  severity: critical
+                  title: MTV migration failed
+                  topic: MTV migration workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: createNotification
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: errorResult
+            name: setOutput
+        end:
+          terminate: true
+        metadata:
+          errorMessage: '"MTV migration " + .migrationName + " failed"'
+        name: MigrationFailure
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"MTV migration " + .migrationName + " succeeded"'
+                  severity: normal
+                  title: MTV migration successful
+                  topic: MTV migration workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: createNotification
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: successResult
+            name: setOutput
+        end:
+          terminate: true
+        name: MigrationSuccessful
+        type: operation
+  podTemplate:
+    container:
+      resources: {}
+      image: quay.io/orchestrator/serverless-workflow-mtv-migration:96d772297d3ee964ab9775d7aae7dbbd4f070dd7
+      envFrom:
+        - secretRef:
+            name: mtv-migration-creds
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-mtv-migration-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-mtv-migration-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: mtv-migration
+status:
+  address: {}
+  lastTimeRecoverAttempt: null

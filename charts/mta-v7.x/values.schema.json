@@ -1,0 +1,38 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "default": {},
+    "title": "Root Schema",
+    "required": [
+        "mta"
+    ],
+    "properties": {
+        "mta": {
+            "type": "object",
+            "default": {},
+            "title": "The mta Schema",
+            "required": [
+                "url"
+            ],
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The MTA URL",
+                    "examples": [
+                        "http://mta-ui.openshift-mta.svc.cluster.local:8080"
+                    ]
+                }
+            },
+            "examples": [{
+                "endpoint": "http://mta-ui.openshift-mta.svc.cluster.local:8080"
+            }]
+        }
+    },
+    "examples": [{
+        "mta": {
+            "endpoint": "http://mta-ui.openshift-mta.svc.cluster.local:8080"
+        }
+    }]
+  }

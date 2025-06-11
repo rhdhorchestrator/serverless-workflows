@@ -1,0 +1,1 @@
+See [documentation for the workflow](../../docs/main/create-ocp-project/README.md)
