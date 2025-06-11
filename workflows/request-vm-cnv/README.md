@@ -40,4 +40,4 @@ Application properties can be initialized from environment variables before runn
 
 ## Installation
 
-See [official installation guide](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/docs/main/request-vm-cnv)
+See [official installation guide](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/deploy/docs/main/request-vm-cnv)
