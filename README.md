@@ -45,7 +45,7 @@ Follow these steps to successfully add a new workflow:
 2. Copy `application.properties`, `onboarding.sw.yaml` into that folder
 3. Create a GitHub workflow file `.github/workflows/${workflow}.yaml` that will call `main` workflow (see greeting.yaml)
 4. Create a pull request but don't merge yet.
-5. Send a pull request to add a sub-chart under the path `charts/<WORKFLOW_ID>`, e.g. `charts/onboarding`.
+5. Send a pull request to add a sub-chart under the path `deploy/charts/<WORKFLOW_ID>`, e.g. `deploy/charts/onboarding`.
 6. Now the PR from 4 can be merged and an automatic PR will be created with the generated manifests. Review and merge.
 
 See [Continuous Integration with make](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/make.md) for implementation details of the CI pipeline.

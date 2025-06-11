@@ -7,7 +7,7 @@ Helm chart to deploy the rpj workflow.
 
 
 ## Helm Configuration
-The list of the overridable values can be found in our [git repository](https://github.com/rhdhorchestrator/serverless-workflows/blob/v1.4.x/charts/rpj/values.yaml)
+The list of the overridable values can be found in our [git repository](https://github.com/rhdhorchestrator/serverless-workflows/blob/v1.4.x/deploy/charts/rpj/values.yaml)
 
 The following table lists the configurable parameters of the RPJ chart and their default values.
 

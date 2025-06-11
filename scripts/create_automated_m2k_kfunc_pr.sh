@@ -16,9 +16,9 @@ cd config-repo || exit
 git switch -c "${WORKFLOW_ID}"-autopr-"${TIMESTAMP}"
 
 ./hack/bump_chart_version.sh "${WORKFLOW_ID}" --bump-tag-version
-mkdir -p charts/"${WORKFLOW_ID}"/templates
-cp "${WORKDIR}"/workflows/"${WORKFLOW_ID}"/manifests/* charts/"${WORKFLOW_ID}"/templates
-yq --inplace '.kfunction.image="quay.io/orchestrator/serverless-workflow-m2k-kfunc:'"${GITHUB_SHA}"'"' charts/move2kube/values.yaml
+mkdir -p deploy/charts/"${WORKFLOW_ID}"/templates
+cp "${WORKDIR}"/workflows/"${WORKFLOW_ID}"/manifests/* deploy/charts/"${WORKFLOW_ID}"/templates
+yq --inplace '.kfunction.image="quay.io/orchestrator/serverless-workflow-m2k-kfunc:'"${GITHUB_SHA}"'"' deploy/charts/move2kube/values.yaml
 git add -A
 
 git commit -m "(m2k-kfunc) Automated PR"

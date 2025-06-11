@@ -7,7 +7,7 @@ Helm chart to deploy the move2kube workflow.
 
 
 ## Helm Configuration
-The list of the overridable values can be found in our [git repository](https://github.com/rhdhorchestrator/serverless-workflows/blob/v1.4.x/charts/move2kube/values.yaml)
+The list of the overridable values can be found in our [git repository](https://github.com/rhdhorchestrator/serverless-workflows/blob/v1.4.x/deploy/move2kube/values.yaml)
 
 The following table lists the configurable parameters of the Move2kube chart and their default values.
 

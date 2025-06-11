@@ -24,7 +24,7 @@ FLAGS=("$@")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Check if the directory exists in the charts directory
-CHART_DIR="${SCRIPT_DIR}/../charts/${WORKFLOW_ID}"
+CHART_DIR="${SCRIPT_DIR}/../deploy/charts/${WORKFLOW_ID}"
 if [ ! -d "$CHART_DIR" ]; then
     echo "Error: Directory '${WORKFLOW_ID}' not found in charts directory."
     exit 1
