@@ -7,7 +7,7 @@ Helm chart to deploy the move2kube workflow.
 
 
 ## Helm Configuration
-The list of the overridable values can be found in our [git repository](https://github.com/rhdhorchestrator/serverless-workflows-config/blob/v1.2.x/charts/move2kube/values.yaml)
+The list of the overridable values can be found in our [git repository](https://github.com/rhdhorchestrator/serverless-workflows/blob/v1.2.x/charts/move2kube/values.yaml)
 
 The following table lists the configurable parameters of the Move2kube chart and their default values.
 
@@ -86,7 +86,7 @@ If you do not have ssh keys, you can generate them with `ssh-keygen` command. Yo
 
 Note that those ssh keys need to be added to your git repository as well. For bitbucket, it should be on the [account level](https://bitbucket.org/account/settings/ssh-keys/)
 
-View the [Move2Kube README](https://github.com/rhdhorchestrator/serverless-workflows-config/blob/main/charts/move2kube/README.md) on GitHub.
+View the [Move2Kube README](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/charts/move2kube/README.md) on GitHub.
 
 ### Installation
 

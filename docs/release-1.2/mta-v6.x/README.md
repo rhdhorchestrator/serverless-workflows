@@ -37,7 +37,7 @@ helm install mta workflows/mta -n sonataflow-infra
 ```
 
 ## Configuration
-View the [MTA README on GitHub](https://github.com/rhdhorchestrator/serverless-workflows-config/blob/main/charts/mta/README.md)
+View the [MTA README on GitHub](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/charts/mta/README.md)
 
 ## Installation
 - Run 
