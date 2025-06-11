@@ -1,0 +1,209 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: Onboarding users - e.g for testing
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: user-onboarding
+    sonataflow.org/workflow-app: user-onboarding
+  name: user-onboarding
+  namespace: ""
+spec:
+  flow:
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/user-onboarding-schema.json
+    functions:
+      - name: checkUserOnboardingStatus
+        operation: specs/onboarding-openapi.yaml#onboardUser
+        type: rest
+      - name: createNotification
+        operation: notifications#createNotification
+        type: rest
+      - name: print
+        operation: sysout
+        type: custom
+      - name: successResult
+        operation: |
+          {
+            "result": {
+            "message": "User " + .userId + " is ready",
+            "outputs":[
+              {
+                "key":"User ID",
+                "value": .userId,
+                "format":"text"
+              },
+              {
+                "key":"Iteration Number",
+                "value": .iterationNum|tostring,
+                "format":"number"
+              }
+            ]
+            }
+          }
+        type: expression
+      - name: userStatusInProgressResult
+        operation: |
+          {
+            "result": {
+            "message": "User " + .userId + " is in progress",
+            "outputs":[
+              {
+                "key":"User ID",
+                "value": .userId,
+                "format":"text"
+              },
+              {
+                "key":"Iteration Number",
+                "value": .iterationNum|tostring,
+                "format":"number"
+              }
+            ]
+            }
+          }
+        type: expression
+    start:
+      stateName: Send new user request
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .userOnboardingResponse
+              useResults: true
+            functionRef:
+              arguments:
+                name: .username
+                user_id: .userId
+              invoke: sync
+              refName: checkUserOnboardingStatus
+            name: checkUserOnboardingStatus
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: userStatusInProgressResult
+            name: setOutput
+        name: Send new user request
+        transition:
+          nextState: 'Notify: New user created'
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: New user created
+                  severity: normal
+                  title: '"New user " + .userOnboardingResponse.user_id + " created"'
+                  topic: Onboarding users
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: 'Create notification: New user created'
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: userStatusInProgressResult
+            name: setOutput
+        name: 'Notify: New user created'
+        transition:
+          nextState: Poll user onboarding status
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .userOnboardingResponse
+              useResults: true
+            functionRef:
+              arguments:
+                name: .username
+                user_id: .userId
+              invoke: sync
+              refName: checkUserOnboardingStatus
+            name: Get user onboarding status
+            sleep:
+              before: PT3S
+        name: Poll user onboarding status
+        transition:
+          nextState: Check user onboarding completed
+        type: operation
+      - dataConditions:
+          - condition: .userOnboardingResponse.status == "In Progress"
+            name: User onboarding in progress
+            transition:
+              nextState: Poll user onboarding status
+          - condition: .userOnboardingResponse.status == "Ready"
+            name: User onboarding completed
+            transition:
+              nextState: 'Notify: User onboarding completed'
+        defaultCondition:
+          transition:
+            nextState: Poll user onboarding status
+        name: Check user onboarding completed
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: Onboarding user completed
+                  severity: normal
+                  title: '"Onboarding user " + .userId + " completed"'
+                  topic: Onboarding users
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: 'Create notification: Onboarding user completed'
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: successResult
+            name: setOutput
+        end:
+          terminate: true
+        name: 'Notify: User onboarding completed'
+        type: operation
+  podTemplate:
+    container:
+      resources: {}
+      image: quay.io/orchestrator/demo-user-onboarding:latest
+      envFrom:
+        - secretRef:
+            name: user-onboarding-creds
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-user-onboarding-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-user-onboarding-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: user-onboarding
+status:
+  address: {}
+  lastTimeRecoverAttempt: null

@@ -1,0 +1,93 @@
+openapi: 3.0.3
+info:
+  title: Table API
+  description: Allows you to perform create, read, update and delete (CRUD) operations on existing tables
+  version: latest
+externalDocs:
+  url: https://docs.servicenow.com/?context=CSHelp:REST-Table-API
+paths:
+  /api/now/table/change_request:
+    post:
+      description: "Create a record"
+      operationId: createChangeRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChangeRequest'
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateChangeRequestResponse'
+      security:
+        - basicAuth: [ ]
+  /api/now/table/change_request/{sys_id}:
+    get:
+      description: "Retrieve a record"
+      operationId: getChangeRequest
+      parameters:
+      - name: "sys_id"
+        in: "path"
+        required: true
+        schema: {}
+      responses:
+        "200":
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetChangeRequestResponse'
+      security:
+        - basicAuth: [ ]
+
+components:
+  schemas:
+    CreateChangeRequest:
+      type: object
+      properties:
+        description: 
+          type: string
+        short_description: 
+          type: string
+        comments: 
+          type: string
+        state: 
+          type: string
+        assigned_to: 
+          type: string
+        additional_assignee_list: 
+          type: string
+        assignment_group: 
+          type: string
+    CreateChangeRequestResponse:
+      type: object
+      properties:
+        result: 
+          type: object
+          properties: 
+            sys_id: 
+              type: string
+            state: 
+              type: string
+            number: 
+              type: string
+    GetChangeRequestResponse:
+      type: object
+      properties:
+        result: 
+          type: object
+          properties: 
+            sys_id: 
+              type: string
+            state: 
+              type: string
+            number: 
+              type: string
+  securitySchemes:
+    basicAuth:
+      type: http
+      description: You can access this resource via basic auth.
+      scheme: basic

@@ -1,0 +1,97 @@
+specVersion: "0.8"
+id: clusteronboarding
+name: ClusterOnboarding
+annotations:
+  - "workflow-type/infrastructure"
+version: 0.0.1
+start: GetServiceAccountInfo
+dataInputSchema: schema/input-schema.json
+errors:
+  - name: notFound
+    code: '404'
+functions:
+  - name: logOuput
+    type: custom
+    operation: "sysout:INFO"
+  - name: getSecretFunc
+    operation: "specs/kube.yaml#readCoreV1NamespacedSecret"
+  - name: getServiceAccountInfoFunc
+    type: custom
+    operation: service:java:com.redhat.rhdhorchestrator.workflow.clusteronboarding.FileReader::readValue
+  - name: sendCloudEvent
+    type: custom
+    operation: rest:post:http://broker-ingress.knative-eventing.svc.cluster.local/cluster-onboarding/default
+events:
+  - name: sendEvent
+    source: ClusterOnboardingWF
+    type: cluster-onboarding
+    kind: produced
+  - name: receiveEvent
+    source: ClusterOnboardingWF
+    type: cluster-onboarding-deploy
+    kind: consumed
+states:
+  - name: GetServiceAccountInfo
+    type: operation
+    actions:
+      - name: getNamespaceAction
+        functionRef:
+          refName: getServiceAccountInfoFunc
+          arguments:
+            filePath: $SECRET.SERVICEACCOUNT_PATH + "/namespace"
+            fieldName: namespace
+        actionDataFilter:
+          toStateData: .
+    transition: GetTargetClusterSecret
+  - name: GetTargetClusterSecret
+    type: operation
+    actions:
+      - name: printAction
+        functionRef:
+          refName: logOuput
+          arguments:
+            message: .namespace
+      - name: getSecretAction
+        functionRef:
+          refName: getSecretFunc
+          arguments:
+            namespace: .namespace
+            name: .secretName
+        actionDataFilter:
+          toStateData: .secret
+    onErrors:
+      - errorRef: notFound
+        transition: SecretNotFound
+    transition: ClusterOnboard
+  - name: ClusterOnboard
+    type: callback
+    action:
+      name: ClusterOnboardAction
+      eventRef:
+        triggerEventRef: sendEvent
+        data:
+          "{
+            workflowCallerId: $WORKFLOW.instanceId,
+            clusterApiUrl: .clusterAPIUrl,
+            namespace: \"onboarding\",
+            token: .secret.data.token,
+            cacert: .secret.data[\"ca.crt\"],
+            image: $SECRET.image
+          }"
+    eventRef: receiveEvent
+    timeouts:
+      stateExecTimeout: PT5M
+    eventDataFilter:
+      toStateData: .result
+    stateDataFilter:
+      output: "del(.secret)"
+    end: true
+  - name: SecretNotFound
+    type: operation
+    actions:
+      - name: printAction
+        functionRef:
+          refName: logOuput
+          arguments:
+            message: "\"secret: \\(.secretName) is not found\""
+    end: true

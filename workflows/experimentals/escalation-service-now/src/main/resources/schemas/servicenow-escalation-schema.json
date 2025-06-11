@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "Change request description"
+    },
+    "short_description": {
+      "type": "string",
+      "description": "Change request short_description"
+    },
+    "comments": {
+      "type": "string",
+      "description": "Change request comments"
+    },
+    "state": {
+      "type": "string",
+      "description": "Change request state"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Change request assigned_to"
+    },
+    "additional_assignee_list": {
+      "type": "string",
+      "description": "Change request additional_assignee_list"
+    },
+    "assignment_group": {
+      "type": "string",
+      "description": "Change request assignment_group"
+    }
+  },
+  "required": [
+    "description",
+    "short_description",
+    "comments",
+    "state",
+    "assigned_to",
+    "additional_assignee_list",
+    "assignment_group"
+  ]
+}

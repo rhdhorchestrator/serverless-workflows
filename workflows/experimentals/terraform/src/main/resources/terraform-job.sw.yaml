@@ -1,0 +1,157 @@
+specVersion: "0.8"
+id: terraform
+version: 0.0.1
+name: Terraform
+description: "Workflow that provisions infrastructure using Terraform Cloud API"
+start: GetTargetURLString
+extensions:
+  - extensionid: workflow-uri-definitions
+    definitions:
+      notifications: "https://raw.githubusercontent.com/rhdhorchestrator/serverless-workflows/main/workflows/shared/specs/notifications-openapi.yaml"
+annotations:
+  - "workflow-type/infrastructure"
+dataInputSchema: schemas/terraform-input-schema.json
+functions:
+  - name: getTargetURLString
+    operation: specs/terraform-openapi.yaml#listConfigurationVersions
+  - name: getWorkspaceInfo
+    operation: specs/terraform-openapi.yaml#getWorkspaceInfo
+  - name: getLatestTerraformRun
+    operation: specs/terraform-openapi.yaml#getRun
+  - name: HandleTerraformConfigUpload
+    type: custom
+    operation: "service:java:io.janus.workflow.terraform.HandleTerraformConfigUpload::UploadTerraformConfig"
+  - name: logInfo
+    type: custom
+    operation: "sysout:INFO"
+  - name: createNotification
+    operation: notifications#createNotification
+states:
+  - name: GetTargetURLString
+    type: operation
+    actions:
+      - functionRef:
+          refName: getTargetURLString
+          arguments:
+            workspaceId: .workspaceId
+            data:
+              type: "configuration-versions"
+        actionDataFilter:
+          toStateData: .configurationVersions
+      - functionRef:
+          refName: logInfo
+          arguments:
+            message: .configurationVersions
+    transition: HandleTerraformConfigUpload
+
+  - name: HandleTerraformConfigUpload
+    type: operation
+    actions:
+      - name: HandleTerraformConfigUpload
+        functionRef:
+          refName: HandleTerraformConfigUpload
+          arguments:
+            tarArchiveSourceURL: .tarArchiveSourceURL
+            targetURLString: .configurationVersions.data.attributes."upload-url"
+        actionDataFilter:
+          toStateData: .returnObject
+    transition: EvaluateConfigUploadStatus
+
+  - name: EvaluateConfigUploadStatus
+    type: switch
+    dataConditions:
+      - condition: (.returnObject.returnCode >= 200) and (.returnObject.returnCode < 300)
+        transition:
+          nextState: GetTerraformRun
+    defaultCondition:
+      transition: SendFailureNotificationHTTP
+
+  - name: GetTerraformRun
+    type: operation
+    actions:
+      - functionRef:
+          refName: logInfo
+          arguments:
+            message: '"Sleeping before checking the run ID "'
+        sleep:
+          after: PT15S
+      - functionRef:
+          refName: getWorkspaceInfo
+          arguments:
+            workspaceId: .workspaceId
+        actionDataFilter:
+          toStateData: .workspaceInfo
+
+      - functionRef:
+          refName: getLatestTerraformRun
+          arguments:
+            runId: .workspaceInfo.data.relationships."latest-run".data.id
+        actionDataFilter:
+          toStateData: .terraformRun
+    transition: IsRunDone
+
+  - name: IsRunDone
+    type: switch
+    dataConditions:
+      - condition: (.terraformRun.data.attributes.status == "applied")
+        transition:
+          nextState: SendSuccessNotification
+      - condition: (.terraformRun.data.attributes.status == "discarded")
+        transition:
+          nextState: SendFailureNotification
+      - condition: (.terraformRun.data.attributes.status == "canceled")
+        transition:
+          nextState: SendFailureNotification
+      - condition: (.terraformRun.data.attributes.status == "errored")
+        transition:
+          nextState: SendFailureNotification
+    defaultCondition:
+      transition: GetTerraformRun
+
+  - name: SendFailureNotification
+    type: operation
+    actions:
+      - functionRef:
+          refName: createNotification
+          arguments:
+            recipients:
+              type: "entity"
+              entityRef: .recipients
+            payload:
+              title: '"Terraform Workflow Failed"'
+              description: '"Terraform job workflow id: " + $WORKFLOW.instanceId + " has failed to provision the Terraform configurations and finished with the following status: " + .terraformRun.data.attributes.status'
+              scope: "Terraform Job Workflow"
+              topic: "Terraform Job Workflow"
+              link: .launchedJob.outputUrl
+    end: true
+  - name: SendFailureNotificationHTTP
+    type: operation
+    actions:
+      - functionRef:
+          refName: createNotification
+          arguments:
+            recipients:
+              type: "entity"
+              entityRef: .recipients
+            payload:
+              title: '"Terraform Workflow Failed"'
+              description: '"Terraform job workflow id: " + $WORKFLOW.instanceId + " has failed to provision the Terraform configurations. The HTTP client retured the error code: " + .returnObject.returnCode + " and the error message: " + .returnObject.errorMessage '
+              scope: "Terraform Job Workflow"
+              topic: "Terraform Job Workflow"
+    end: true
+  - name: SendSuccessNotification
+    type: operation
+    actions:
+      - functionRef:
+          refName: createNotification
+          arguments:
+            recipients:
+              type: "entity"
+              entityRef: .recipients
+            payload:
+              title: '"Terraform Workflow Succeeded"'
+              description: '"Terraform job workflow id: " + $WORKFLOW.instanceId + " has successfully applied the Terraform Config and finished with the following status: " + .terraformRun.data.attributes.status"'
+              scope: "Terraform Job Workflow"
+              topic: "Terraform Job Workflow"
+              link: .launchedJob.outputUrl
+    end: true

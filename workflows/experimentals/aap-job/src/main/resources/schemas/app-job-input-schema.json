@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "jobTemplateId": {
+      "type": "integer",
+      "description": "Job template id"
+    },
+    "inventoryGroup": {
+      "type": "string",
+      "description": "Inventory group"
+    },
+    "limit": {
+      "type": "string",
+      "description": "Exta variables"
+    },
+    "backstageUser": {
+      "type": "string",
+      "description": "The user that will receive the notifications"
+    }
+  },
+  "required": [
+    "jobTemplateId",
+    "inventoryGroup",
+    "backstageUser"
+  ],
+  "examples": [
+    {
+      "jobTemplateId": 17,
+      "limit": "fancy-seal",
+      "inventoryGroup": "ALL_rhel"
+    }
+  ]
+}

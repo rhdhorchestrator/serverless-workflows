@@ -1,0 +1,32 @@
+specVersion: "0.8"
+id: notifications
+name: Notifications
+annotations:
+  - "workflow-type/infrastructure"
+version: 0.0.1
+timeouts:
+  workflowExecTimeout: PT24H
+extensions:
+  - extensionid: workflow-uri-definitions
+    definitions:
+      notifications: https://raw.githubusercontent.com/rhdhorchestrator/serverless-workflows/main/shared/specs/notifications-openapi.yaml
+start: CreateNotification
+functions:
+  - name: CreateNotification
+    operation: notifications#createNotification
+states:
+  - name: CreateNotification
+    type: operation
+    actions:
+      - functionRef:
+          refName: CreateNotification
+          arguments:
+            recipients:
+              type: 'entity'
+              entityRef: ['user:development/guest']
+            payload:
+              title: 'serverless-workflow-examples title'
+              severity: critical
+    stateDataFilter:
+      output: "{createdNotification: .}"
+    end: true

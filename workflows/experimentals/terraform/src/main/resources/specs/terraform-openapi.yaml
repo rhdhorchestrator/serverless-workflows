@@ -1,0 +1,148 @@
+openapi: 3.0.3
+info:
+  title: Terraform Cloud API
+  version: v2
+servers:
+  - url: https://app.terraform.io
+security:
+  - BearerToken: []
+paths:
+  /api/v2/workspaces/{workspaceId}/configuration-versions/:
+    post:
+      description: List configuration versions for a workspace
+      operationId: listConfigurationVersions
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema: {}
+      requestBody:
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: "#/components/schemas/configVersionRequest"
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/configVersionResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        "415":
+          description: Unsupported Media
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnsupportedMedia"
+  /api/v2/runs/{runId}/:
+    get:
+      description: Get Run Information
+      operationId: getRun
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema: {}
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/runResponse"
+        "404":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/runNotFoundOrUnauthorized"
+  /api/v2/workspaces/{workspaceId}/:
+    get:
+      description: Get Workspace Information
+      operationId: getWorkspaceInfo
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema: {}
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/wsResponse"
+        "404":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/runNotFoundOrUnauthorized"
+components:
+  schemas:
+    configVersionRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+            attributes:
+              type: object
+      additionalProperties: false
+    configVersionResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            attributes:
+              type: object
+              properties:
+                upload-url:
+                  type: string
+    runResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            attributes:
+              type: object
+              properties:
+                status:
+                  type: string
+    wsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            relationships:
+              type: object
+              properties:
+                latest-run:
+                  type: object
+                  properties:
+                    data:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+    UnauthorizedError:
+      type: object
+    UnsupportedMedia:
+      type: object
+    runNotFoundOrUnauthorized:
+      type: object
+  securitySchemes:
+    BearerToken:
+      type: http
+      scheme: bearer

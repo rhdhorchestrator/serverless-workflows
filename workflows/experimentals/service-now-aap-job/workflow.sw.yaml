@@ -1,0 +1,279 @@
+specVersion: "0.8"
+id: service-now-app-job
+name: ServiceNow - APP job run
+annotations:
+  - "workflow-type/infrastructure"
+version: 0.0.1
+timeouts:
+  workflowExecTimeout: PT24H
+start: CreateChangeRequest
+extensions:
+  - extensionid: workflow-uri-definitions
+    definitions:
+      notifications: https://raw.githubusercontent.com/rhdhorchestrator/serverless-workflows/main/shared/specs/notifications-openapi.yaml
+dataInputSchema: schemas/service-now-app-job-input-schema.json
+functions:
+  - name: createChangeRequest
+    operation: specs/servicenow.yaml#createChangeRequest
+  - name: getChangeRequest
+    operation: specs/servicenow.yaml#getChangeRequest
+  - name: createNotification
+    operation: notifications#createNotification
+  - name: LaunchAAPJob
+    operation: specs/aap-openapi.yaml#launchJob
+  - name: GetAAPJob
+    operation: specs/aap-openapi.yaml#getJob
+  - name: logInfo
+    type: custom
+    operation: "sysout:INFO"
+  - name: upddateAPPJobPreviousStatus
+    type: expression
+    operation: ".aap.readJob.previousStatus=.aap.readJob.status"
+states:
+  - name: CreateChangeRequest
+    type: operation
+    actions:
+      - functionRef:
+          refName: createChangeRequest
+          arguments:
+            description: ".serviceNow.description"
+            short_description: ".serviceNow.short_description"
+            # This status code '-4' put the change request under assessment so it can be reviewed by the approver (New -> Asses (here) -> Authorized -> ...)
+            state: "-4"
+            assigned_to: $SECRET.service_now_approver
+            assignment_group: $SECRET.service_now_approver_group
+        actionDataFilter:
+          toStateData: .serviceNow.createdChangeRequest
+    transition: NotifyChangeRequestCreated
+  - name: NotifyChangeRequestCreated
+    type: operation
+    actions:
+      - functionRef:
+          refName: createNotification
+          arguments:
+            recipients:
+              type: "entity"
+              entityRef: .recipients
+            payload:
+              title: '"Change request " + (.serviceNow.createdChangeRequest.result.number) + " created"'
+              description: '"Change request " + (.serviceNow.createdChangeRequest.result.number) + " created"'
+              topic: "Service Now - APP Job run"
+              link: " ($SECRET.sn_url) + \"/nav_to.do?uri=change_request.do?sys_id=\" + (.serviceNow.createdChangeRequest.result.sys_id) "
+      - name: "LogNotifyChangeRequestCreated"
+        functionRef:
+          refName: "logInfo"
+          arguments:
+            message: '"Change request " + (.serviceNow.createdChangeRequest.result.number) + " created"'
+    transition: GetChangeRequest
+  - name: GetChangeRequest
+    type: operation
+    actions:
+      - name: "SleepBeforeChecking"
+        functionRef:
+          refName: "logInfo"
+          arguments:
+            message: "\"Sleeping before checking the change request \\(.serviceNow.createdChangeRequest.result)\""
+        sleep:
+          after: PT10S
+      - name: "getChangeRequest"
+        functionRef:
+          refName: getChangeRequest
+          arguments:
+            sys_id: ".serviceNow.createdChangeRequest.result.sys_id"
+        actionDataFilter:
+          toStateData: .serviceNow.readChangeRequest
+    transition: IsApproved
+  - name: IsApproved
+    type: switch
+    dataConditions:
+      - condition: (.serviceNow.readChangeRequest.result.state == "-5")
+        name: rejected
+        transition:
+          nextState: NotifyChangeRequestRejected
+      - condition: (.serviceNow.readChangeRequest.result.state == "-3")
+        name: approved
+        transition:
+          nextState: TriggerAPPJob
+    defaultCondition:
+      transition: GetChangeRequest
+  - name: NotifyChangeRequestRejected
+    type: operation
+    actions:
+      - name: "NotifyChangeRequestRejected"
+        functionRef:
+          refName: "createNotification"
+          arguments:
+            recipients:
+              type: entity
+              entityRef: .recipients
+            payload:
+              title: '"Ticket: " + (.serviceNow.createdChangeRequest.result.number) + " rejected"'
+              description: '"Ticket: " + (.serviceNow.createdChangeRequest.result.number) + " rejected"'
+              topic: "Service Now - APP Job run"
+              link: " ($SECRET.sn_url) + \"/nav_to.do?uri=change_request.do?sys_id=\" + (.serviceNow.createdChangeRequest.result.sys_id) "
+      - name: "LogChangeRequestRejected"
+        functionRef:
+          refName: "logInfo"
+          arguments:
+            message: '"Ticket: " + .serviceNow.createdChangeRequest.result.number + " rejected:" + $SECRET.sn_url + "/nav_to.do?uri=change_request.do?sys_id=" + .serviceNow.createdChangeRequest.result.sys_id'
+    end: true
+  - name: TriggerAPPJob
+    type: operation
+    actions:
+      - name: "NotifyTicketApproved"
+        functionRef:
+          refName: "createNotification"
+          arguments:
+            recipients:
+              type: entity
+              entityRef: .recipients
+            payload:
+              title: '"Ticket: " + (.serviceNow.createdChangeRequest.result.number) + " approved, starting APP job " + .aap.jobTemplate'
+              description: '"Ticket: " + (.serviceNow.createdChangeRequest.result.number) + " approve, starting APP job " + .aap.jobTemplate'
+              topic: "Service Now - APP Job run"
+              link: " ($SECRET.sn_url) + \"/nav_to.do?uri=change_request.do?sys_id=\" + (.serviceNow.createdChangeRequest.result.sys_id) "
+      - name: "LogTicketApproved"
+        functionRef:
+          refName: "logInfo"
+          arguments:
+            message: '"Ticket: " + .serviceNow.createdChangeRequest.result.number + " approved, starting APP job " + .aap.jobTemplate + " : " + $SECRET.sn_url + "/nav_to.do?uri=change_request.do?sys_id=" + .serviceNow.createdChangeRequest.result.sys_id'
+      - functionRef:
+          refName: LaunchAAPJob
+          arguments:
+            job_template_id: ($SECRET.aap_template_id | tonumber)
+            limit: (.aap.limit | tonumber)
+            extra_vars:
+              rhel_inventory_group: (.aap.inventoryGroup | tonumber)
+        actionDataFilter:
+          toStateData: .aap.launchedJob
+    stateDataFilter:
+      output: '.aap.launchedJob += { outputUrl: $SECRET.app_url +  "/#/jobs/playbook/" + (.aap.launchedJob.id|tostring) + "/output" }'
+    transition: NotifyAPPJobCreated
+  - name: NotifyAPPJobCreated
+    type: operation
+    actions:
+      - functionRef:
+          refName: createNotification
+          arguments:
+            recipients:
+              type: "entity"
+              entityRef: .recipients
+            payload:
+              title: '"AAP Job " + .aap.jobTemplate + " created." '
+              description: '"AAP Job: " + .aap.jobTemplate + " created."'
+              topic: "Service Now - APP Job run"
+              link: ".aap.launchedJob.outputUrl"
+              severity: "normal"
+      - name: "LogNotifyAPPJobCreated"
+        functionRef:
+          refName: "logInfo"
+          arguments:
+            message: '"AAP Job: " + .aap.jobTemplate + " created"'
+    transition: GetAAPJob
+  - name: GetAAPJob
+    type: operation
+    actions:
+      - functionRef:
+          refName: logInfo
+          arguments:
+            message: '"Sleeping before checking the aap job " + (.aap.launchedJob|tostring)'
+        sleep:
+          after: PT10S
+      - functionRef:
+          refName: GetAAPJob
+          arguments:
+            job_id: .aap.launchedJob.id
+        actionDataFilter:
+          toStateData: .aap.readJob
+    transition: IsAPPJobDone
+  - name: IsAPPJobDone
+    type: switch
+    dataConditions:
+      - condition: (.aap.readJob.status == "successful")
+        name: aap job successfully completed
+        transition:
+          nextState: SendAAPJobCompletedNotification
+      - condition: (.aap.readJob.failed == true)
+        name: aap job failed
+        transition:
+          nextState: SendAAPJobFailureNotification
+    defaultCondition:
+      transition: HasAPPJobStatusChanged
+  - name: HasAPPJobStatusChanged
+    type: switch
+    dataConditions:
+      - condition: (.aap.readJob.previousStatus | not) or (.aap.readJob.status == .aap.readJob.previousStatus)
+        name: not change
+        transition:
+          nextState: UpddateAPPJobPreviousStatus
+    defaultCondition:
+      transition: NotifyAPPJobStatusChangeButNotFinished
+  - name: NotifyAPPJobStatusChangeButNotFinished
+    type: operation
+    actions:
+      - functionRef:
+          refName: createNotification
+          arguments:
+            recipients:
+              type: "entity"
+              entityRef: .recipients
+            payload:
+              title: '"AAP Job " + .aap.jobTemplate + " status update." '
+              description: '"AAP Job: " + .aap.jobTemplate + " status switched from " + .aap.readJob.previousStatus + " to " + .aap.readJob.status'
+              topic: "Service Now - APP Job run"
+              link: ".aap.launchedJob.outputUrl"
+              severity: "normal"
+      - name: "LogAPPJobStatusChangeButNotFinished"
+        functionRef:
+          refName: "logInfo"
+          arguments:
+            message: '"AAP Job: " + .aap.jobTemplate + " status switched from " + .aap.readJob.previousStatus + " to " + .aap.readJob.status'
+    transition: UpddateAPPJobPreviousStatus
+  - name: UpddateAPPJobPreviousStatus
+    type: operation
+    actions:
+      - functionRef:
+          refName: upddateAPPJobPreviousStatus
+    transition: GetAAPJob
+  - name: SendAAPJobFailureNotification
+    type: operation
+    actions:
+      - functionRef:
+          refName: createNotification
+          arguments:
+            recipients:
+              type: "entity"
+              entityRef: .recipients
+            payload:
+              title: '"AAP Job " +  .aap.jobTemplate + " failed." '
+              description: '"AAP job " +  .aap.jobTemplate + " with template id: " + $SECRET.aap_template_id + " failed."'
+              topic: "Service Now - APP Job run"
+              link: ".aap.launchedJob.outputUrl"
+              severity: "high"
+      - name: "LogAAPJobFailureNotification"
+        functionRef:
+          refName: "logInfo"
+          arguments:
+            message: '"AAP job " +  .aap.jobTemplate + " with template id: " + $SECRET.aap_template_id + " failed."'
+    end: true
+  - name: SendAAPJobCompletedNotification
+    type: operation
+    actions:
+      - functionRef:
+          refName: createNotification
+          arguments:
+            recipients:
+              type: "entity"
+              entityRef: .recipients
+            payload:
+              title: '"AAP Job " +  .aap.jobTemplate + " successfully completed." '
+              description: '"AAP job " +  .aap.jobTemplate + " with template id: " + $SECRET.aap_template_id + " successfully completed."'
+              topic: "Service Now - APP Job run"
+              link: ".aap.launchedJob.outputUrl"
+              severity: "normal"
+      - name: "LogAAPJobCompletedNotification"
+        functionRef:
+          refName: "logInfo"
+          arguments:
+            message: '"AAP job " +  .aap.jobTemplate + " with template id: " + $SECRET.aap_template_id + " successfully completed."'
+    end: true

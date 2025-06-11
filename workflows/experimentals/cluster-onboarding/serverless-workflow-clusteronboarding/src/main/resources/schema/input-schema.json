@@ -1,0 +1,16 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "clusterAPIUrl": {
+        "type": "string"
+      },
+      "secretName": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "clusterAPIUrl",
+      "secretName"
+    ]
+  }

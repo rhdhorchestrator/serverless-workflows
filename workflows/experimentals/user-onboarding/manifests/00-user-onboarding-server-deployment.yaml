@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-onboarding-server
+  labels:
+    app: user-onboarding-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-onboarding-server
+  template:
+    metadata:
+      labels:
+        app: user-onboarding-server
+    spec:
+      containers:
+        - name: user-onboarding-server
+          image: quay.io/orchestrator/user-onboarding-server:v1
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
