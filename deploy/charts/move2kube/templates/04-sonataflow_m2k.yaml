@@ -1,0 +1,333 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: Workflow to execute Move2Kube
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: m2k
+    sonataflow.org/workflow-app: m2k
+  name: m2k
+spec:
+  flow:
+    annotations:
+      - workflow-type/infrastructure
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/input.json
+    events:
+      - dataOnly: true
+        kind: consumed
+        name: errorEvent
+        type: error
+      - dataOnly: true
+        kind: consumed
+        name: transformationSavedEvent
+        type: transformation_saved
+      - dataOnly: true
+        kind: produced
+        name: saveTransformationEvent
+        type: save-transformation
+    functions:
+      - name: systemOut
+        operation: sysout
+        type: custom
+      - name: startPlanning
+        operation: specs/move2kube.yaml#start-planning
+        type: rest
+      - name: getPlanning
+        operation: specs/move2kube.yaml#get-plan
+        type: rest
+      - name: startTransformation
+        operation: specs/move2kube.yaml#start-transformation
+        type: rest
+      - name: createNotification
+        operation: notifications#createNotification
+        type: rest
+      - name: increasePlanRetries
+        operation: .planRetries=.planRetries + 1
+        type: expression
+      - name: formatTransformationErrorExitMessage
+        operation: '{ exitMessage: "Error while saving transformation output: " + (if .error == null then "timeout exception was thrown." else .error end) }'
+        type: expression
+      - name: successResult
+        operation: '{ "result": { "message": "Move2Kube workflow  " + $WORKFLOW.instanceId + " on workspace " + .workspaceId + " and project " + .projectId + " was successful; the output is available in the branch " + .targetBranch + " of your git repository "+ .repositoryURL, "outputs": [ { "key":"Git repository", "value": .repositoryURL, "format":"link" }, { "key":"Git branch", "value": .targetBranch } ] } }'
+        type: expression
+      - name: errorResult
+        operation: '{ "result": { "message": "Move2Kube workflow  " + $WORKFLOW.instanceId + " on workspace " + .workspaceId + " and project " + .projectId + " failed ", "outputs":[ { "key":"Exit message", "value": .exitMessage }, { "key":"Plan retries", "value": (.planRetries|tostring), "format":"number" } ] } }'
+        type: expression
+    start:
+      stateName: StartPlanning
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                project-id: .projectId
+                remote-source: '"git+" + (.repositoryURL|sub("http(s)://?";"ssh://")) + "@" + .sourceBranch'
+                workspace-id: .workspaceId
+              invoke: sync
+              refName: startPlanning
+        name: StartPlanning
+        transition:
+          nextState: InitGetPlanningRetry
+        type: operation
+      - data:
+          planRetries: 0
+        name: InitGetPlanningRetry
+        transition:
+          nextState: GetPlanning
+        type: inject
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .
+              useResults: true
+            functionRef:
+              arguments:
+                project-id: .projectId
+                workspace-id: .workspaceId
+              invoke: sync
+              refName: getPlanning
+            sleep:
+              before: PT2S
+        name: GetPlanning
+        transition:
+          nextState: IncreaseGetPlanningRetry
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: increasePlanRetries
+        name: IncreaseGetPlanningRetry
+        transition:
+          nextState: PlanRetrievedCheck
+        type: operation
+      - dataConditions:
+          - condition: (has("plan") and .plan != "")
+            transition:
+              nextState: StartTransformation
+          - condition: (.planRetries >  ($SECRET.move2kube_get_plan_max_retries | tonumber))
+            transition:
+              nextState: GetPlanRetryExceededError
+        defaultCondition:
+          transition:
+            nextState: GetPlanning
+        name: PlanRetrievedCheck
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              results: .id
+              toStateData: .transformId
+              useResults: true
+            functionRef:
+              arguments:
+                plan: .plan
+                project-id: .projectId
+                workspace-id: .workspaceId
+              invoke: sync
+              refName: startTransformation
+        name: StartTransformation
+        transition:
+          nextState: PrintTransformationIdMessage
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                message: '${"m2k workflow: " + $WORKFLOW.instanceId + " transformation ID: " + .transformId }'
+              invoke: sync
+              refName: systemOut
+            name: printSystemOut
+        name: PrintTransformationIdMessage
+        transition:
+          nextState: NotifyTransformationWaiting
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"Please go to your move2kube instance and answer the questions in order to continue the Move2Kube workflow"'
+                  link: '$SECRET.move2kube_url + "/workspaces/"+ .workspaceId + "/projects/" + .projectId + "/outputs/"+ .transformId '
+                  severity: normal
+                  title: ' "Transformation " + .transformationId + " waiting for Q&A" '
+                  topic: Move2Kube Workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: createNotification
+        name: NotifyTransformationWaiting
+        transition:
+          nextState: WaitForSaveTransformationCompletionEvent
+          produceEvents:
+            - data: '{gitRepo:.repositoryURL|sub("http(s)?://";"ssh://"), branch: .targetBranch, workspaceId: .workspaceId, projectId: .projectId, transformId: .transformId, workflowCallerId: $WORKFLOW.instanceId}'
+              eventRef: saveTransformationEvent
+        type: operation
+      - defaultCondition:
+          transition:
+            nextState: TransformationError
+        eventConditions:
+          - eventRef: errorEvent
+            transition:
+              nextState: TransformationError
+          - eventRef: transformationSavedEvent
+            transition:
+              nextState: TransformationSaved
+        name: WaitForSaveTransformationCompletionEvent
+        timeouts:
+          eventTimeout: P90D
+        type: switch
+      - data:
+          exitMessage: Transformation successful.
+        name: TransformationSaved
+        transition:
+          nextState: PrintExitSuccessMessage
+        type: inject
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: formatTransformationErrorExitMessage
+        name: TransformationError
+        transition:
+          nextState: PrintExitErrorMessage
+        type: operation
+      - data:
+          exitMessage: '"Get plan retries exceeded, an error probably occurred, check the move2kube instance logs"'
+        name: GetPlanRetryExceededError
+        transition:
+          nextState: PrintExitErrorMessage
+        type: inject
+      - branches:
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    message: '"m2k workflow: " + $WORKFLOW.instanceId + " has finalized with error. Exit message: " + .exitMessage + " -- Plan retries: " + (.planRetries|tostring)'
+                  invoke: sync
+                  refName: systemOut
+                name: printSystemOut
+            name: printSystemOut
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    payload:
+                      description: '"Move2Kube workflow  " + $WORKFLOW.instanceId + " on workspace " + .workspaceId + " and project " + .projectId + " failed with exit message: "+ .exitMessage + " -- Plan retries: "  + (.planRetries|tostring)'
+                      severity: critical
+                      title: '"Move2Kube workflow " + $WORKFLOW.instanceId + " failed"'
+                      topic: Move2Kube Workflow
+                    recipients:
+                      entityRef: .recipients
+                      type: entity
+                  invoke: sync
+                  refName: createNotification
+                name: createNotification
+            name: createNotification
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  invoke: sync
+                  refName: errorResult
+                name: setOutput
+            name: setOutput
+        completionType: allOf
+        end:
+          terminate: true
+        metadata:
+          errorMessage: '"Move2kube (m2k) workflow: " + $WORKFLOW.instanceId + " has finalized with error. Exit message: " + .exitMessage + " -- Plan retries: " + (.planRetries|tostring)'
+        name: PrintExitErrorMessage
+        numCompleted: 0
+        type: parallel
+      - branches:
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    message: '${"m2k workflow: " + $WORKFLOW.instanceId + " has finalized successfully}"'
+                  invoke: sync
+                  refName: systemOut
+                name: printSystemOut
+            name: printSystemOut
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    payload:
+                      description: '"Move2Kube workflow  " + $WORKFLOW.instanceId + " on workspace " + .workspaceId + " and project " + .projectId + " was successful; the output is available in the branch " + .targetBranch + " of your git repository "+ .repositoryURL'
+                      severity: normal
+                      title: '"Move2Kube workflow " + $WORKFLOW.instanceId + " succeeded"'
+                      topic: Move2Kube Workflow
+                    recipients:
+                      entityRef: .recipients
+                      type: entity
+                  invoke: sync
+                  refName: createNotification
+                name: createNotification
+            name: createNotification
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  invoke: sync
+                  refName: successResult
+                name: setOutput
+            name: setOutput
+        completionType: allOf
+        end:
+          terminate: true
+        name: PrintExitSuccessMessage
+        numCompleted: 0
+        type: parallel
+  podTemplate:
+    container:
+      resources: {}
+      image: quay.io/orchestrator/serverless-workflow-move2kube:7c7b608ad8cde8510b06a171f35746ed0f3f21cd
+      envFrom:
+        - secretRef:
+            name: m2k-creds
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-m2k-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-m2k-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: move2kube
+status:
+  address: {}
+  lastTimeRecoverAttempt: null

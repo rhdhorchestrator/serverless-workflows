@@ -44,8 +44,6 @@ Variables can be used to configure the behavior of the [Makefile](./Makefile):
 | REGISTRY_PASSWORD | Container registry user password | `""`  (e.g., no login attempted) |
 | IMAGE_PREFIX | Automatically added image prefix | `serverless-workflow` |
 | IMAGE_TAG | Automatically added image tag | 8 chars commit hash of the latest commit |
-| DEPLOYMENT_REPO | Git repo of the deployment source code | `rhdhorchestrator/serverless-workflows-config` |
-| DEPLOYMENT_BRANCH | Branch of the deployment git repo | `main` |
 | ENABLE_PERSISTENCE | Enables the addition of persistence to the generated manifests. Useful for local testing | `false` |
 
 Override the default values with:
@@ -65,11 +63,9 @@ make <VAR1>=<VALUE1> ... <VARn>=<VALUEn> <TARGET>
 ### Requirements for Linux UBI image
 See the [setup](./setup/README.md) documentation.
 
-### Requirements for the deployment repo
-The procedure assumes that the folder structure of the target deployment repository reflects the one of the [default repository](https://github.com/rhdhorchestrator/serverless-workflows-config), e.g.:
- * Manifests are stored in the `base` subfolder
- * Image is customized in the `overlays/prod` subfolder
- * `helm` projects are located under the `charts/workflows/charts/WORKFLOW_ID` folder
+### Requirements for the charts
+The procedure assumes that the folder structure of the target chart directory e.g.:
+ * `helm` projects are located under the `charts/WORKFLOW_ID` folder
  * Manifests are copied under the `templates` subfolder with no Helm-specific manipulation
 
 ## Building with make

@@ -60,7 +60,7 @@ For running and testing the workflow refer to [mta testing](https://github.com/r
 
 # Installation
 
-See [official installation guide](https://github.com/rhdhorchestrator/serverless-workflows-config/blob/main/docs/main/mta-v7.x)
+See [official installation guide](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/deploy/docs/main/mta-v7.x)
 
 [1]: https://developers.redhat.com/products/mta/download
 [2]: https://github.com/rhdhorchestrator/serverless-workflows/blob/main/assessment/schema/workflow-options-output-schema.json

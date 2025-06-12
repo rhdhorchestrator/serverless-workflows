@@ -16,7 +16,7 @@ on:
         default: true
 
 env:
-  WF_CONFIG_REPO: rhdhorchestrator/serverless-workflows-config
+  WF_DEPLOY_REPO: rhdhorchestrator/serverless-workflows
   REGISTRY_REPO: orchestrator
   GH_TOKEN: ${{ secrets.HELM_REPO_TOKEN }}
 
@@ -119,7 +119,7 @@ jobs:
           PR_OR_COMMIT_URL="${GITHUB_SHA::7}"
         fi
 
-        gh repo set-default ${{ env.WF_CONFIG_REPO }}
+        gh repo set-default ${{ env.WF_DEPLOY_REPO }}
 
         # Construct the PR body
         PR_BODY="Updating generated manifests"

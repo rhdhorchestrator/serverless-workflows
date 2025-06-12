@@ -29,7 +29,7 @@ for pr in $prs; do
     files=$(gh pr diff "$pr" --name-only --repo "${REPO}") || exit
     
     # Check if Chart.yaml is in the list of changed files
-    if echo "$files" | grep -q "charts/${WORKFLOW_ID}/Chart.yaml"; then
+    if echo "$files" | grep -q "deploy/charts/${WORKFLOW_ID}/Chart.yaml"; then
         echo "Chart.yaml found in PR #${pr}"
         STOP=true
         

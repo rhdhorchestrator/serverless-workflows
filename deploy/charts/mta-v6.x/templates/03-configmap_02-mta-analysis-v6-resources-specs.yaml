@@ -1,0 +1,846 @@
+apiVersion: v1
+data:
+  mta.json: "{\n  \"openapi\": \"3.0.1\",\n  \"info\": {\n    \"title\": \"Konveyor
+    Hub API\",\n    \"contact\": {},\n    \"license\": {\n      \"name\": \"Apache
+    2.0\",\n      \"url\": \"http://www.apache.org/licenses/LICENSE-2.0.html\"\n    },\n
+    \   \"version\": \"0.3.z\"\n  },\n  \"servers\": [\n    {\n      \"url\": \"/\"\n
+    \   }\n  ],\n  \"paths\": {\n    \"/hub/migrationwaves\": {\n      \"get\": {\n
+    \       \"operationId\": \"getMigrationwaves\",\n        \"tags\": [\n          \"migrationwaves\"\n
+    \       ],\n        \"summary\": \"List all migration waves.\",\n        \"description\":
+    \"List all migration waves.\",\n        \"responses\": {\n          \"200\": {\n
+    \           \"description\": \"OK\",\n            \"content\": {\n              \"application/json\":
+    {\n                \"schema\": {\n                  \"type\": \"array\",\n                  \"items\":
+    {\n                    \"$ref\": \"#/components/schemas/api.MigrationWave\"\n
+    \                 }\n                }\n              }\n            }\n          }\n
+    \       },\n        \"security\": [\n          {\n            \"bearerAuth\":
+    []\n          }\n        ]  \n      },\n      \"post\": {\n        \"operationId\":
+    \"createMigrationwave\",\n        \"tags\": [\n          \"migrationwaves\"\n
+    \       ],\n        \"summary\": \"Create a migration wave.\",\n        \"description\":
+    \"Create a migration wave.\",\n        \"requestBody\": {\n          \"description\":
+    \"Migration Wave data\",\n          \"content\": {\n            \"application/json\":
+    {\n              \"schema\": {\n                \"$ref\": \"#/components/schemas/api.MigrationWave\"\n
+    \             }\n            }\n          },\n          \"required\": true\n        },\n
+    \       \"responses\": {\n          \"201\": {\n            \"description\": \"Created\",\n
+    \           \"content\": {\n              \"application/json\": {\n                \"schema\":
+    {\n                  \"$ref\": \"#/components/schemas/api.MigrationWave\"\n                }\n
+    \             }\n            }\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ],\n        \"x-codegen-request-body-name\":
+    \"migrationwave\"\n      }\n    },\n    \"/hub/migrationwaves/{id}\": {\n      \"get\":
+    {\n        \"operationId\": \"getMigrationwave\",\n        \"tags\": [\n          \"migrationwaves\"\n
+    \       ],\n        \"summary\": \"Get a migration wave by ID.\",\n        \"description\":
+    \"Get a migration wave by ID.\",\n        \"parameters\": [\n          {\n            \"name\":
+    \"id\",\n            \"in\": \"path\",\n            \"description\": \"Migration
+    Wave ID\",\n            \"required\": true,\n            \"schema\": {\n              \"type\":
+    \"integer\"\n            }\n          }\n        ],\n        \"responses\": {\n
+    \         \"200\": {\n            \"description\": \"OK\",\n            \"content\":
+    {\n              \"application/json\": {\n                \"schema\": {\n                  \"$ref\":
+    \"#/components/schemas/api.MigrationWave\"\n                }\n              }\n
+    \           }\n          }\n        },\n        \"security\": [\n          {\n
+    \           \"bearerAuth\": []\n          }\n        ]  \n      }\n    },\n    \"/hub/taskgroups/{id}/submit\":
+    {\n      \"put\": {\n        \"operationId\": \"submitTaskgroup\",\n        \"tags\":
+    [\n          \"taskgroups\"\n        ],\n        \"summary\": \"Submit a task
+    group.\",\n        \"description\": \"Submit a task group.\",\n        \"parameters\":
+    [\n          {\n            \"name\": \"id\",\n            \"in\": \"path\",\n
+    \           \"description\": \"TaskGroup ID\",\n            \"required\": true,\n
+    \           \"schema\": {\n              \"type\": \"integer\"\n            }\n
+    \         }\n        ],\n        \"requestBody\": {\n          \"description\":
+    \"TaskGroup data (optional)\",\n          \"content\": {\n            \"application/json\":
+    {\n              \"schema\": {\n                \"$ref\": \"#/components/schemas/api.TaskGroup\"\n
+    \             }\n            }\n          },\n          \"required\": false\n
+    \       },\n        \"responses\": {\n          \"204\": {\n            \"description\":
+    \"No Content\",\n            \"content\": {}\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ],\n        \"x-codegen-request-body-name\":
+    \"taskgroup\"\n      }\n    },\n    \"/hub/trackers\": {\n      \"get\": {\n        \"operationId\":
+    \"getTrackers\",\n        \"tags\": [\n          \"trackers\"\n        ],\n        \"summary\":
+    \"List all trackers.\",\n        \"description\": \"List all trackers.\",\n        \"responses\":
+    {\n          \"200\": {\n            \"description\": \"OK\",\n            \"content\":
+    {\n              \"application/json\": {\n                \"schema\": {\n                  \"type\":
+    \"array\",\n                  \"items\": {\n                    \"$ref\": \"#/components/schemas/api.Tracker\"\n
+    \                 }\n                }\n              }\n            }\n          }\n
+    \       },\n        \"security\": [\n          {\n            \"bearerAuth\":
+    []\n          }\n        ]            \n      }\n    },\n    \"/hub/trackers/{id}\":
+    {\n      \"get\": {\n        \"operationId\": \"getTracker\",\n        \"tags\":
+    [\n          \"trackers\"\n        ],\n        \"summary\": \"Get a tracker by
+    ID.\",\n        \"description\": \"Get a tracker by ID.\",\n        \"parameters\":
+    [\n          {\n            \"name\": \"id\",\n            \"in\": \"path\",\n
+    \           \"description\": \"Tracker ID\",\n            \"required\": true,\n
+    \           \"schema\": {\n              \"type\": \"integer\"\n            }\n
+    \         }\n        ],\n        \"responses\": {\n          \"200\": {\n            \"description\":
+    \"OK\",\n            \"content\": {\n              \"application/json\": {\n                \"schema\":
+    {\n                  \"$ref\": \"#/components/schemas/api.Tracker\"\n                }\n
+    \             }\n            }\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ]\n      }\n
+    \   },\n    \"/hub/applications\": {\n      \"get\": {\n        \"operationId\":
+    \"getApplications\",\n        \"tags\": [\n          \"applications\"\n        ],\n
+    \       \"summary\": \"List all applications.\",\n        \"description\": \"List
+    all applications.\",\n        \"responses\": {\n          \"200\": {\n            \"description\":
+    \"OK\",\n            \"content\": {\n              \"application/json\": {\n                \"schema\":
+    {\n                  \"type\": \"array\",\n                  \"items\": {\n                    \"$ref\":
+    \"#/components/schemas/api.Application\"\n                  }\n                }\n
+    \             }\n            }\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ]\n      },\n
+    \     \"post\": {\n        \"operationId\": \"createApplication\",\n        \"tags\":
+    [\n          \"applications\"\n        ],\n        \"summary\": \"Create an application.\",\n
+    \       \"description\": \"Create an application.\",\n        \"requestBody\":
+    {\n          \"description\": \"Application data\",\n          \"content\": {\n
+    \           \"application/json\": {\n              \"schema\": {\n                \"$ref\":
+    \"#/components/schemas/api.Application\"\n              }\n            }\n          },\n
+    \         \"required\": true\n        },\n        \"responses\": {\n          \"201\":
+    {\n            \"description\": \"Created\",\n            \"content\": {\n              \"application/json\":
+    {\n                \"schema\": {\n                  \"$ref\": \"#/components/schemas/api.Application\"\n
+    \               }\n              }\n            }\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ],\n        \"x-codegen-request-body-name\":
+    \"application\"\n      }\n      \n    },\n    \"/hub/applications/{id}\": {\n
+    \     \"get\": {\n        \"operationId\": \"getApplication\",\n        \"tags\":
+    [\n          \"applications\"\n        ],\n        \"summary\": \"Get an application
+    by ID.\",\n        \"description\": \"Get an application by ID.\",\n        \"parameters\":
+    [\n          {\n            \"name\": \"id\",\n            \"in\": \"path\",\n
+    \           \"description\": \"Application ID\",\n            \"required\": true,\n
+    \           \"schema\": {\n              \"type\": \"integer\"\n            }\n
+    \         }\n        ],\n        \"responses\": {\n          \"200\": {\n            \"description\":
+    \"OK\",\n            \"content\": {\n              \"application/json\": {\n                \"schema\":
+    {\n                  \"$ref\": \"#/components/schemas/api.Application\"\n                }\n
+    \             }\n            }\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ]\n      },\n
+    \     \"put\": {\n        \"operationId\": \"updateApplication\",\n        \"tags\":
+    [\n          \"applications\"\n        ],\n        \"summary\": \"Update an application.\",\n
+    \       \"description\": \"Update an application.\",\n        \"parameters\":
+    [\n          {\n            \"name\": \"id\",\n            \"in\": \"path\",\n
+    \           \"description\": \"Application id\",\n            \"required\": true,\n
+    \           \"schema\": {\n              \"type\": \"integer\"\n            }\n
+    \         }\n        ],\n        \"requestBody\": {\n          \"description\":
+    \"Application data\",\n          \"content\": {\n            \"application/json\":
+    {\n              \"schema\": {\n                \"$ref\": \"#/components/schemas/api.Application\"\n
+    \             }\n            }\n          },\n          \"required\": true\n        },\n
+    \       \"responses\": {\n          \"204\": {\n            \"description\": \"No
+    Content\",\n            \"content\": {}\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ],\n        \"x-codegen-request-body-name\":
+    \"application\"\n      },\n      \"delete\": {\n        \"operationId\": \"deleteApplication\",\n
+    \       \"tags\": [\n          \"applications\"\n        ],\n        \"summary\":
+    \"Delete an application.\",\n        \"description\": \"Delete an application.\",\n
+    \       \"parameters\": [\n          {\n            \"name\": \"id\",\n            \"in\":
+    \"path\",\n            \"description\": \"Application id\",\n            \"required\":
+    true,\n            \"schema\": {\n              \"type\": \"integer\"\n            }\n
+    \         }\n        ],\n        \"responses\": {\n          \"204\": {\n            \"description\":
+    \"No Content\",\n            \"content\": {}\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ]\n      }\n
+    \   },\n\n    \"/hub/taskgroups\": {\n      \"get\": {\n        \"operationId\":
+    \"getTaskgroups\",\n        \"tags\": [\n          \"taskgroups\"\n        ],\n
+    \       \"summary\": \"List all task groups.\",\n        \"description\": \"List
+    all task groups.\",\n        \"responses\": {\n          \"200\": {\n            \"description\":
+    \"OK\",\n            \"content\": {\n              \"application/json\": {\n                \"schema\":
+    {\n                  \"type\": \"array\",\n                  \"items\": {\n                    \"$ref\":
+    \"#/components/schemas/api.TaskGroup\"\n                  }\n                }\n
+    \             }\n            }\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ]\n      },\n
+    \     \"post\": {\n        \"operationId\": \"createTaskgroup\",\n        \"tags\":
+    [\n          \"taskgroups\"\n        ],\n        \"summary\": \"Create a task
+    group.\",\n        \"description\": \"Create a task group.\",\n        \"requestBody\":
+    {\n          \"description\": \"TaskGroup data\",\n          \"content\": {\n
+    \           \"application/json\": {\n              \"schema\": {\n                \"$ref\":
+    \"#/components/schemas/api.TaskGroup\"\n              }\n            }\n          },\n
+    \         \"required\": true\n        },\n        \"responses\": {\n          \"201\":
+    {\n            \"description\": \"Created\",\n            \"content\": {\n              \"application/json\":
+    {\n                \"schema\": {\n                  \"$ref\": \"#/components/schemas/api.TaskGroup\"\n
+    \               }\n              }\n            }\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ],\n        \"x-codegen-request-body-name\":
+    \"taskgroup\"\n      }\n    },\n    \"/hub/taskgroups/{id}\": {\n      \"get\":
+    {\n        \"operationId\": \"getTaskgroup\",\n        \"tags\": [\n          \"taskgroups\"\n
+    \       ],\n        \"summary\": \"Get a task group by ID.\",\n        \"description\":
+    \"Get a task group by ID.\",\n        \"parameters\": [\n          {\n            \"name\":
+    \"id\",\n            \"in\": \"path\",\n            \"description\": \"TaskGroup
+    ID\",\n            \"required\": true,\n            \"schema\": {\n              \"type\":
+    \"integer\"\n            }\n          }\n        ],\n        \"responses\": {\n
+    \         \"200\": {\n            \"description\": \"OK\",\n            \"content\":
+    {\n              \"application/json\": {\n                \"schema\": {\n                  \"$ref\":
+    \"#/components/schemas/api.TaskGroup\"\n                }\n              }\n            }\n
+    \         }\n        },\n        \"security\": [\n          {\n            \"bearerAuth\":
+    []\n          }\n        ]  \n      },\n      \"put\": {\n        \"operationId\":
+    \"updateTaskGroups\",\n        \"tags\": [\n          \"taskgroups\"\n        ],\n
+    \       \"summary\": \"Update a task group.\",\n        \"description\": \"Update
+    a task group.\",\n        \"parameters\": [\n          {\n            \"name\":
+    \"id\",\n            \"in\": \"path\",\n            \"description\": \"Task ID\",\n
+    \           \"required\": true,\n            \"schema\": {\n              \"type\":
+    \"integer\"\n            }\n          }\n        ],\n        \"requestBody\":
+    {\n          \"description\": \"Task data\",\n          \"content\": {\n            \"application/json\":
+    {\n              \"schema\": {\n                \"$ref\": \"#/components/schemas/api.TaskGroup\"\n
+    \             }\n            }\n          },\n          \"required\": true\n        },\n
+    \       \"responses\": {\n          \"204\": {\n            \"description\": \"No
+    Content\",\n            \"content\": {}\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ],\n        \"x-codegen-request-body-name\":
+    \"task\"\n      },\n      \"delete\": {\n        \"operationId\": \"deleteTaskGroup\",\n
+    \       \"tags\": [\n          \"taskgroups\"\n        ],\n        \"summary\":
+    \"Delete a task group.\",\n        \"description\": \"Delete a task group.\",\n
+    \       \"parameters\": [\n          {\n            \"name\": \"id\",\n            \"in\":
+    \"path\",\n            \"description\": \"TaskGroup ID\",\n            \"required\":
+    true,\n            \"schema\": {\n              \"type\": \"integer\"\n            }\n
+    \         }\n        ],\n        \"responses\": {\n          \"204\": {\n            \"description\":
+    \"No Content\",\n            \"content\": {}\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ]\n      }\n
+    \   },\n    \"/hub/tickets\": {\n      \"post\": {\n        \"operationId\": \"createTicket\",\n
+    \       \"tags\": [\n          \"tickets\"\n        ],\n        \"summary\": \"Create
+    a ticket.\",\n        \"description\": \"Create a ticket.\",\n        \"requestBody\":
+    {\n          \"description\": \"Ticket data\",\n          \"content\": {\n            \"application/json\":
+    {\n              \"schema\": {\n                \"$ref\": \"#/components/schemas/api.Ticket\"\n
+    \             }\n            }\n          },\n          \"required\": true\n        },\n
+    \       \"responses\": {\n          \"201\": {\n            \"description\": \"Created\",\n
+    \           \"content\": {\n              \"application/json\": {\n                \"schema\":
+    {\n                  \"$ref\": \"#/components/schemas/api.Ticket\"\n                }\n
+    \             }\n            }\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ],\n        \"x-codegen-request-body-name\":
+    \"ticket\"\n      },\n      \"get\": {\n        \"operationId\": \"getTickets\",\n
+    \       \"tags\": [\n          \"tickets\"\n        ],\n        \"summary\": \"List
+    all tickets.\",\n        \"description\": \"List all tickets.\",\n        \"responses\":
+    {\n          \"200\": {\n            \"description\": \"OK\",\n            \"content\":
+    {\n              \"application/json\": {\n                \"schema\": {\n                  \"type\":
+    \"array\",\n                  \"items\": {\n                    \"$ref\": \"#/components/schemas/api.Ticket\"\n
+    \                 }\n                }\n              }\n            }\n          }\n
+    \       },\n        \"security\": [\n          {\n            \"bearerAuth\":
+    []\n          }\n        ]\n      }\n    },\n    \"/hub/tickets/{id}\": {\n      \"get\":
+    {\n        \"operationId\": \"getTicket\",\n        \"tags\": [\n          \"tickets\"\n
+    \       ],\n        \"summary\": \"Get a ticket by ID.\",\n        \"description\":
+    \"Get a ticket by ID.\",\n        \"parameters\": [\n          {\n            \"name\":
+    \"id\",\n            \"in\": \"path\",\n            \"description\": \"Ticket
+    ID\",\n            \"required\": true,\n            \"schema\": {\n              \"type\":
+    \"integer\"\n            }\n          }\n        ],\n        \"responses\": {\n
+    \         \"200\": {\n            \"description\": \"OK\",\n            \"content\":
+    {\n              \"application/json\": {\n                \"schema\": {\n                  \"$ref\":
+    \"#/components/schemas/api.Ticket\"\n                }\n              }\n            }\n
+    \         }\n        },\n        \"security\": [\n          {\n            \"bearerAuth\":
+    []\n          }\n        ]\n      }\n    },\n    \"/hub/batch/tickets\": {\n      \"post\":
+    {\n        \"operationId\": \"batchCreateTickets\",\n        \"tags\": [\n          \"batch\",\n
+    \         \"tickets\"\n        ],\n        \"summary\": \"Batch-create Tickets.\",\n
+    \       \"description\": \"Batch-create Tickets.\",\n        \"requestBody\":
+    {\n          \"description\": \"Tickets data\",\n          \"content\": {\n            \"application/json\":
+    {\n              \"schema\": {\n                \"type\": \"array\",\n                \"items\":
+    {\n                  \"$ref\": \"#/components/schemas/api.Ticket\"\n                }\n
+    \             }\n            }\n          },\n          \"required\": true\n        },\n
+    \       \"responses\": {\n          \"200\": {\n            \"description\": \"OK\",\n
+    \           \"content\": {\n              \"application/json\": {\n                \"schema\":
+    {\n                  \"type\": \"array\",\n                  \"items\": {\n                    \"$ref\":
+    \"#/components/schemas/api.Ticket\"\n                  }\n                }\n
+    \             }\n            }\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ],\n        \"x-codegen-request-body-name\":
+    \"tickets\"\n      }\n    },\n    \"/hub/trackers/{id}/projects\": {\n      \"get\":
+    {\n        \"operationId\": \"getTrackerProjects\",\n        \"tags\": [\n          \"trackers\"\n
+    \       ],\n        \"summary\": \"List a tracker's projects.\",\n        \"description\":
+    \"List a tracker's projects.\",\n        \"parameters\": [\n          {\n            \"name\":
+    \"id\",\n            \"in\": \"path\",\n            \"description\": \"Tracker
+    ID\",\n            \"required\": true,\n            \"schema\": {\n              \"type\":
+    \"integer\"\n            }\n          }\n        ],\n        \"responses\": {\n
+    \         \"200\": {\n            \"description\": \"OK\",\n            \"content\":
+    {\n              \"application/json\": {\n                \"schema\": {\n                  \"type\":
+    \"array\",\n                  \"items\": {\n                    \"$ref\": \"#/components/schemas/api.Project\"\n
+    \                 }\n                }\n              }\n            }\n          }\n
+    \       },\n        \"security\": [\n          {\n            \"bearerAuth\":
+    []\n          }\n        ]\n      }\n    },\n    \"/hub/trackers/{id}/projects/{id2}\":
+    {\n      \"get\": {\n        \"operationId\": \"getTrackerProject\",\n        \"tags\":
+    [\n          \"trackers\"\n        ],\n        \"summary\": \"Get a tracker project
+    by ID.\",\n        \"description\": \"Get a tracker project by ID.\",\n        \"parameters\":
+    [\n          {\n            \"name\": \"id\",\n            \"in\": \"path\",\n
+    \           \"description\": \"Tracker ID\",\n            \"required\": true,\n
+    \           \"schema\": {\n              \"type\": \"integer\"\n            }\n
+    \         },\n          {\n            \"name\": \"id2\",\n            \"in\":
+    \"path\",\n            \"description\": \"Project ID\",\n            \"required\":
+    true,\n            \"schema\": {\n              \"type\": \"string\"\n            }\n
+    \         }\n        ],\n        \"responses\": {\n          \"200\": {\n            \"description\":
+    \"OK\",\n            \"content\": {\n              \"application/json\": {\n                \"schema\":
+    {\n                  \"$ref\": \"#/components/schemas/api.Project\"\n                }\n
+    \             }\n            }\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ]\n      }\n
+    \   },\n    \"/hub/trackers/{id}/projects/{id2}/issuetypes\": {\n      \"get\":
+    {\n        \"operationId\": \"getTrackerProjectIssueTypes\",\n        \"tags\":
+    [\n          \"trackers\"\n        ],\n        \"summary\": \"List a tracker project's
+    issue types.\",\n        \"description\": \"List a tracker project's issue types.\",\n
+    \       \"parameters\": [\n          {\n            \"name\": \"id\",\n            \"in\":
+    \"path\",\n            \"description\": \"Tracker ID\",\n            \"required\":
+    true,\n            \"schema\": {\n              \"type\": \"integer\"\n            }\n
+    \         },\n          {\n            \"name\": \"id2\",\n            \"in\":
+    \"path\",\n            \"description\": \"Project ID\",\n            \"required\":
+    true,\n            \"schema\": {\n              \"type\": \"string\"\n            }\n
+    \         }\n        ],\n        \"responses\": {\n          \"200\": {\n            \"description\":
+    \"OK\",\n            \"content\": {\n              \"application/json\": {\n                \"schema\":
+    {\n                  \"type\": \"array\",\n                  \"items\": {\n                    \"$ref\":
+    \"#/components/schemas/api.IssueType\"\n                  }\n                }\n
+    \             }\n            }\n          }\n        },\n        \"security\":
+    [\n          {\n            \"bearerAuth\": []\n          }\n        ]\n      }\n
+    \   }\n  },\n\n  \"components\": {\n    \"schemas\": {\n      \"api.Addon\": {\n
+    \       \"type\": \"object\",\n        \"properties\": {\n          \"image\":
+    {\n            \"type\": \"string\"\n          },\n          \"name\": {\n            \"type\":
+    \"string\"\n          }\n        }\n      },\n      \"api.Analysis\": {\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"archived\": {\n            \"type\":
+    \"boolean\"\n          },\n          \"createTime\": {\n            \"type\":
+    \"string\"\n          },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"dependencies\": {\n            \"type\": \"array\",\n
+    \           \"items\": {\n              \"$ref\": \"#/components/schemas/api.TechDependency\"\n
+    \           }\n          },\n          \"effort\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"id\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"issues\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.Issue\"\n            }\n
+    \         },\n          \"summary\": {\n            \"type\": \"object\",\n            \"properties\":
+    {}\n          },\n          \"updateUser\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.Application\": {\n        \"required\":
+    [\n          \"name\"\n        ],\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"archetypes\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n            }\n          },\n
+    \         \"assessed\": {\n            \"type\": \"boolean\"\n          },\n          \"assessments\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"$ref\":
+    \"#/components/schemas/api.Ref\"\n            }\n          },\n          \"binary\":
+    {\n            \"type\": \"string\"\n          },\n          \"bucket\": {\n            \"$ref\":
+    \"#/components/schemas/api.Ref\"\n          },\n          \"businessService\":
+    {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n          },\n          \"comments\":
+    {\n            \"type\": \"string\"\n          },\n          \"confidence\": {\n
+    \           \"type\": \"integer\"\n          },\n          \"contributors\": {\n
+    \           \"type\": \"array\",\n            \"items\": {\n              \"$ref\":
+    \"#/components/schemas/api.Ref\"\n            }\n          },\n          \"createTime\":
+    {\n            \"type\": \"string\"\n          },\n          \"createUser\": {\n
+    \           \"type\": \"string\"\n          },\n          \"description\": {\n
+    \           \"type\": \"string\"\n          },\n          \"effort\": {\n            \"type\":
+    \"integer\"\n          },\n          \"id\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"identities\": {\n            \"type\": \"array\",\n
+    \           \"items\": {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \           }\n          },\n          \"migrationWave\": {\n            \"$ref\":
+    \"#/components/schemas/api.Ref\"\n          },\n          \"name\": {\n            \"type\":
+    \"string\"\n          },\n          \"owner\": {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \         },\n          \"repository\": {\n            \"$ref\": \"#/components/schemas/api.Repository\"\n
+    \         },\n          \"review\": {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \         },\n          \"risk\": {\n            \"type\": \"string\"\n          },\n
+    \         \"tags\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.TagRef\"\n            }\n
+    \         },\n          \"updateUser\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.Archetype\": {\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"applications\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \           }\n          },\n          \"assessed\": {\n            \"type\":
+    \"boolean\"\n          },\n          \"assessments\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \           }\n          },\n          \"comments\": {\n            \"type\":
+    \"string\"\n          },\n          \"confidence\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"createTime\": {\n            \"type\": \"string\"\n
+    \         },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"criteria\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.TagRef\"\n            }\n
+    \         },\n          \"description\": {\n            \"type\": \"string\"\n
+    \         },\n          \"id\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"name\": {\n            \"type\": \"string\"\n          },\n          \"review\":
+    {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n          },\n          \"risk\":
+    {\n            \"type\": \"string\"\n          },\n          \"stakeholderGroups\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"$ref\":
+    \"#/components/schemas/api.Ref\"\n            }\n          },\n          \"stakeholders\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"$ref\":
+    \"#/components/schemas/api.Ref\"\n            }\n          },\n          \"tags\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"$ref\":
+    \"#/components/schemas/api.TagRef\"\n            }\n          },\n          \"updateUser\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.Assessment\":
+    {\n        \"required\": [\n          \"questionnaire\"\n        ],\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"application\": {\n            \"$ref\":
+    \"#/components/schemas/api.Ref\"\n          },\n          \"archetype\": {\n            \"$ref\":
+    \"#/components/schemas/api.Ref\"\n          },\n          \"confidence\": {\n
+    \           \"type\": \"integer\"\n          },\n          \"createTime\": {\n
+    \           \"type\": \"string\"\n          },\n          \"createUser\": {\n
+    \           \"type\": \"string\"\n          },\n          \"id\": {\n            \"type\":
+    \"integer\"\n          },\n          \"questionnaire\": {\n            \"$ref\":
+    \"#/components/schemas/api.Ref\"\n          },\n          \"risk\": {\n            \"type\":
+    \"string\",\n            \"description\": \"read only\"\n          },\n          \"riskMessages\":
+    {\n            \"$ref\": \"#/components/schemas/assessment.RiskMessages\"\n          },\n
+    \         \"sections\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/assessment.Section\"\n            }\n
+    \         },\n          \"stakeholderGroups\": {\n            \"type\": \"array\",\n
+    \           \"items\": {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \           }\n          },\n          \"stakeholders\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \           }\n          },\n          \"status\": {\n            \"type\": \"string\"\n
+    \         },\n          \"thresholds\": {\n            \"$ref\": \"#/components/schemas/assessment.Thresholds\"\n
+    \         },\n          \"updateUser\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.Bucket\": {\n        \"type\": \"object\",\n
+    \       \"properties\": {\n          \"createTime\": {\n            \"type\":
+    \"string\"\n          },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"expiration\": {\n            \"type\": \"string\"\n
+    \         },\n          \"id\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"path\": {\n            \"type\": \"string\"\n          },\n          \"updateUser\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.BusinessService\":
+    {\n        \"required\": [\n          \"name\"\n        ],\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"createTime\": {\n            \"type\":
+    \"string\"\n          },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"description\": {\n            \"type\": \"string\"\n
+    \         },\n          \"id\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"name\": {\n            \"type\": \"string\"\n          },\n          \"owner\":
+    {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n          },\n          \"updateUser\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.Cache\":
+    {\n        \"type\": \"object\",\n        \"properties\": {\n          \"capacity\":
+    {\n            \"type\": \"string\"\n          },\n          \"exists\": {\n            \"type\":
+    \"boolean\"\n          },\n          \"path\": {\n            \"type\": \"string\"\n
+    \         },\n          \"used\": {\n            \"type\": \"string\"\n          }\n
+    \       }\n      },\n      \"api.CopyRequest\": {\n        \"required\": [\n          \"sourceReview\",\n
+    \         \"targetApplications\"\n        ],\n        \"type\": \"object\",\n
+    \       \"properties\": {\n          \"sourceReview\": {\n            \"type\":
+    \"integer\"\n          },\n          \"targetApplications\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"type\": \"integer\"\n            }\n
+    \         }\n        }\n      },\n      \"api.DepAppReport\": {\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"businessService\": {\n            \"type\":
+    \"string\"\n          },\n          \"dependency\": {\n            \"type\": \"object\",\n
+    \           \"properties\": {\n              \"id\": {\n                \"type\":
+    \"integer\"\n              },\n              \"indirect\": {\n                \"type\":
+    \"boolean\"\n              },\n              \"labels\": {\n                \"type\":
+    \"array\",\n                \"items\": {\n                  \"type\": \"string\"\n
+    \               }\n              },\n              \"name\": {\n                \"type\":
+    \"string\"\n              },\n              \"provider\": {\n                \"type\":
+    \"string\"\n              },\n              \"sha\": {\n                \"type\":
+    \"string\"\n              },\n              \"version\": {\n                \"type\":
+    \"string\"\n              }\n            }\n          },\n          \"description\":
+    {\n            \"type\": \"string\"\n          },\n          \"id\": {\n            \"type\":
+    \"integer\"\n          },\n          \"name\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.Dependency\": {\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"createTime\": {\n            \"type\":
+    \"string\"\n          },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"from\": {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \         },\n          \"id\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"to\": {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \         },\n          \"updateUser\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.Fact\": {\n        \"type\": \"object\",\n
+    \       \"properties\": {\n          \"key\": {\n            \"type\": \"string\"\n
+    \         },\n          \"source\": {\n            \"type\": \"string\"\n          },\n
+    \         \"value\": {\n            \"type\": \"object\"\n          }\n        }\n
+    \     },\n      \"api.FactMap\": {\n        \"type\": \"object\",\n        \"additionalProperties\":
+    true\n      },\n      \"api.Fields\": {\n        \"type\": \"object\",\n        \"additionalProperties\":
+    true\n      },\n      \"api.File\": {\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"createTime\": {\n            \"type\": \"string\"\n          },\n
+    \         \"createUser\": {\n            \"type\": \"string\"\n          },\n
+    \         \"expiration\": {\n            \"type\": \"string\"\n          },\n
+    \         \"id\": {\n            \"type\": \"integer\"\n          },\n          \"name\":
+    {\n            \"type\": \"string\"\n          },\n          \"path\": {\n            \"type\":
+    \"string\"\n          },\n          \"updateUser\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.FileReport\": {\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"effort\": {\n            \"type\":
+    \"integer\"\n          },\n          \"file\": {\n            \"type\": \"string\"\n
+    \         },\n          \"incidents\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"issueId\": {\n            \"type\": \"integer\"\n          }\n
+    \       }\n      },\n      \"api.Identity\": {\n        \"required\": [\n          \"kind\",\n
+    \         \"name\"\n        ],\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"createTime\": {\n            \"type\": \"string\"\n          },\n
+    \         \"createUser\": {\n            \"type\": \"string\"\n          },\n
+    \         \"description\": {\n            \"type\": \"string\"\n          },\n
+    \         \"id\": {\n            \"type\": \"integer\"\n          },\n          \"key\":
+    {\n            \"type\": \"string\"\n          },\n          \"kind\": {\n            \"type\":
+    \"string\"\n          },\n          \"name\": {\n            \"type\": \"string\"\n
+    \         },\n          \"password\": {\n            \"type\": \"string\"\n          },\n
+    \         \"settings\": {\n            \"type\": \"string\"\n          },\n          \"updateUser\":
+    {\n            \"type\": \"string\"\n          },\n          \"user\": {\n            \"type\":
+    \"string\"\n          }\n        }\n      },\n      \"api.Import\": {\n        \"type\":
+    \"object\",\n        \"additionalProperties\": true\n      },\n      \"api.ImportSummary\":
+    {\n        \"type\": \"object\",\n        \"properties\": {\n          \"createEntities\":
+    {\n            \"type\": \"boolean\"\n          },\n          \"createTime\":
+    {\n            \"type\": \"string\"\n          },\n          \"createUser\": {\n
+    \           \"type\": \"string\"\n          },\n          \"filename\": {\n            \"type\":
+    \"string\"\n          },\n          \"id\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"importStatus\": {\n            \"type\": \"string\"\n
+    \         },\n          \"importTime\": {\n            \"type\": \"string\"\n
+    \         },\n          \"invalidCount\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"updateUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"validCount\": {\n            \"type\": \"integer\"\n
+    \         }\n        }\n      },\n      \"api.Incident\": {\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"codeSnip\": {\n            \"type\":
+    \"string\"\n          },\n          \"createTime\": {\n            \"type\": \"string\"\n
+    \         },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"facts\": {\n            \"$ref\": \"#/components/schemas/api.FactMap\"\n
+    \         },\n          \"file\": {\n            \"type\": \"string\"\n          },\n
+    \         \"id\": {\n            \"type\": \"integer\"\n          },\n          \"line\":
+    {\n            \"type\": \"integer\"\n          },\n          \"message\": {\n
+    \           \"type\": \"string\"\n          },\n          \"updateUser\": {\n
+    \           \"type\": \"string\"\n          }\n        }\n      },\n      \"api.Issue\":
+    {\n        \"required\": [\n          \"category\",\n          \"name\",\n          \"rule\",\n
+    \         \"ruleset\"\n        ],\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"category\": {\n            \"type\": \"string\"\n          },\n
+    \         \"createTime\": {\n            \"type\": \"string\"\n          },\n
+    \         \"createUser\": {\n            \"type\": \"string\"\n          },\n
+    \         \"description\": {\n            \"type\": \"string\"\n          },\n
+    \         \"effort\": {\n            \"type\": \"integer\"\n          },\n          \"facts\":
+    {\n            \"$ref\": \"#/components/schemas/api.FactMap\"\n          },\n
+    \         \"id\": {\n            \"type\": \"integer\"\n          },\n          \"incidents\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"$ref\":
+    \"#/components/schemas/api.Incident\"\n            }\n          },\n          \"labels\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\":
+    \"string\"\n            }\n          },\n          \"links\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"$ref\": \"#/components/schemas/api.Link\"\n
+    \           }\n          },\n          \"name\": {\n            \"type\": \"string\"\n
+    \         },\n          \"rule\": {\n            \"type\": \"string\"\n          },\n
+    \         \"ruleset\": {\n            \"type\": \"string\"\n          },\n          \"updateUser\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.IssueAppReport\":
+    {\n        \"type\": \"object\",\n        \"properties\": {\n          \"businessService\":
+    {\n            \"type\": \"string\"\n          },\n          \"description\":
+    {\n            \"type\": \"string\"\n          },\n          \"effort\": {\n            \"type\":
+    \"integer\"\n          },\n          \"files\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"id\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"incidents\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"issue\": {\n            \"type\": \"object\",\n            \"properties\":
+    {\n              \"description\": {\n                \"type\": \"string\"\n              },\n
+    \             \"id\": {\n                \"type\": \"integer\"\n              },\n
+    \             \"name\": {\n                \"type\": \"string\"\n              },\n
+    \             \"rule\": {\n                \"type\": \"string\"\n              },\n
+    \             \"ruleset\": {\n                \"type\": \"string\"\n              }\n
+    \           }\n          },\n          \"name\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.IssueReport\": {\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"category\": {\n            \"type\":
+    \"string\"\n          },\n          \"description\": {\n            \"type\":
+    \"string\"\n          },\n          \"effort\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"files\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"id\": {\n            \"type\": \"integer\"\n          },\n          \"labels\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\":
+    \"string\"\n            }\n          },\n          \"links\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"$ref\": \"#/components/schemas/api.Link\"\n
+    \           }\n          },\n          \"name\": {\n            \"type\": \"string\"\n
+    \         },\n          \"rule\": {\n            \"type\": \"string\"\n          },\n
+    \         \"ruleset\": {\n            \"type\": \"string\"\n          }\n        }\n
+    \     },\n      \"api.IssueType\": {\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"id\": {\n            \"type\": \"string\"\n          },\n          \"name\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.JobFunction\":
+    {\n        \"required\": [\n          \"name\"\n        ],\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"createTime\": {\n            \"type\":
+    \"string\"\n          },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"id\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"name\": {\n            \"type\": \"string\"\n          },\n          \"stakeholders\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"$ref\":
+    \"#/components/schemas/api.Ref\"\n            }\n          },\n          \"updateUser\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.Label\":
+    {\n        \"type\": \"object\",\n        \"properties\": {\n          \"label\":
+    {\n            \"type\": \"string\"\n          },\n          \"name\": {\n            \"type\":
+    \"string\"\n          }\n        }\n      },\n      \"api.Link\": {\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"title\": {\n            \"type\":
+    \"string\"\n          },\n          \"url\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.Login\": {\n        \"type\": \"object\",\n
+    \       \"properties\": {\n          \"expiry\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"password\": {\n            \"type\": \"string\"\n          },\n
+    \         \"refresh\": {\n            \"type\": \"string\"\n          },\n          \"token\":
+    {\n            \"type\": \"string\"\n          },\n          \"user\": {\n            \"type\":
+    \"string\"\n          }\n        }\n      },\n      \"api.MigrationWave\": {\n
+    \       \"type\": \"object\",\n        \"properties\": {\n          \"applications\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"$ref\":
+    \"#/components/schemas/api.Ref\"\n            }\n          },\n          \"createTime\":
+    {\n            \"type\": \"string\"\n          },\n          \"createUser\": {\n
+    \           \"type\": \"string\"\n          },\n          \"endDate\": {\n            \"type\":
+    \"string\"\n          },\n          \"id\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"name\": {\n            \"type\": \"string\"\n          },\n
+    \         \"stakeholderGroups\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n            }\n          },\n
+    \         \"stakeholders\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n            }\n          },\n
+    \         \"startDate\": {\n            \"type\": \"string\"\n          },\n          \"updateUser\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.Project\":
+    {\n        \"type\": \"object\",\n        \"properties\": {\n          \"id\":
+    {\n            \"type\": \"string\"\n          },\n          \"name\": {\n            \"type\":
+    \"string\"\n          }\n        }\n      },\n      \"api.Proxy\": {\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"createTime\": {\n            \"type\":
+    \"string\"\n          },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"enabled\": {\n            \"type\": \"boolean\"\n          },\n
+    \         \"excluded\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"type\": \"string\"\n            }\n          },\n          \"host\":
+    {\n            \"type\": \"string\"\n          },\n          \"id\": {\n            \"type\":
+    \"integer\"\n          },\n          \"identity\": {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \         },\n          \"kind\": {\n            \"type\": \"string\",\n            \"enum\":
+    [\n              \"http\",\n              \"https\"\n            ]\n          },\n
+    \         \"port\": {\n            \"type\": \"integer\"\n          },\n          \"updateUser\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.Questionnaire\":
+    {\n        \"required\": [\n          \"name\",\n          \"riskMessages\",\n
+    \         \"sections\",\n          \"thresholds\"\n        ],\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"builtin\": {\n            \"type\":
+    \"boolean\"\n          },\n          \"createTime\": {\n            \"type\":
+    \"string\"\n          },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"description\": {\n            \"type\": \"string\"\n
+    \         },\n          \"id\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"name\": {\n            \"type\": \"string\"\n          },\n          \"required\":
+    {\n            \"type\": \"boolean\"\n          },\n          \"riskMessages\":
+    {\n            \"$ref\": \"#/components/schemas/assessment.RiskMessages\"\n          },\n
+    \         \"sections\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/assessment.Section\"\n            }\n
+    \         },\n          \"thresholds\": {\n            \"$ref\": \"#/components/schemas/assessment.Thresholds\"\n
+    \         },\n          \"updateUser\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.Ref\": {\n        \"required\":
+    [\n          \"id\"\n        ],\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"id\": {\n            \"type\": \"integer\"\n          },\n          \"name\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.Repository\":
+    {\n        \"type\": \"object\",\n        \"properties\": {\n          \"branch\":
+    {\n            \"type\": \"string\"\n          },\n          \"kind\": {\n            \"type\":
+    \"string\"\n          },\n          \"path\": {\n            \"type\": \"string\"\n
+    \         },\n          \"tag\": {\n            \"type\": \"string\"\n          },\n
+    \         \"url\": {\n            \"type\": \"string\"\n          }\n        }\n
+    \     },\n      \"api.Review\": {\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"application\": {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \         },\n          \"archetype\": {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \         },\n          \"businessCriticality\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"comments\": {\n            \"type\": \"string\"\n          },\n
+    \         \"createTime\": {\n            \"type\": \"string\"\n          },\n
+    \         \"createUser\": {\n            \"type\": \"string\"\n          },\n
+    \         \"effortEstimate\": {\n            \"type\": \"string\"\n          },\n
+    \         \"id\": {\n            \"type\": \"integer\"\n          },\n          \"proposedAction\":
+    {\n            \"type\": \"string\"\n          },\n          \"updateUser\": {\n
+    \           \"type\": \"string\"\n          },\n          \"workPriority\": {\n
+    \           \"type\": \"integer\"\n          }\n        }\n      },\n      \"api.Rule\":
+    {\n        \"type\": \"object\",\n        \"properties\": {\n          \"createTime\":
+    {\n            \"type\": \"string\"\n          },\n          \"createUser\": {\n
+    \           \"type\": \"string\"\n          },\n          \"description\": {\n
+    \           \"type\": \"string\"\n          },\n          \"file\": {\n            \"$ref\":
+    \"#/components/schemas/api.Ref\"\n          },\n          \"id\": {\n            \"type\":
+    \"integer\"\n          },\n          \"labels\": {\n            \"type\": \"array\",\n
+    \           \"items\": {\n              \"type\": \"string\"\n            }\n
+    \         },\n          \"name\": {\n            \"type\": \"string\"\n          },\n
+    \         \"updateUser\": {\n            \"type\": \"string\"\n          }\n        }\n
+    \     },\n      \"api.RuleReport\": {\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"applications\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"category\": {\n            \"type\": \"string\"\n          },\n          \"description\":
+    {\n            \"type\": \"string\"\n          },\n          \"effort\": {\n            \"type\":
+    \"integer\"\n          },\n          \"labels\": {\n            \"type\": \"array\",\n
+    \           \"items\": {\n              \"type\": \"string\"\n            }\n
+    \         },\n          \"links\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.Link\"\n            }\n
+    \         },\n          \"name\": {\n            \"type\": \"string\"\n          },\n
+    \         \"rule\": {\n            \"type\": \"string\"\n          },\n          \"ruleset\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.RuleSet\":
+    {\n        \"type\": \"object\",\n        \"properties\": {\n          \"createTime\":
+    {\n            \"type\": \"string\"\n          },\n          \"createUser\": {\n
+    \           \"type\": \"string\"\n          },\n          \"dependsOn\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \           }\n          },\n          \"description\": {\n            \"type\":
+    \"string\"\n          },\n          \"id\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"identity\": {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \         },\n          \"kind\": {\n            \"type\": \"string\"\n          },\n
+    \         \"name\": {\n            \"type\": \"string\"\n          },\n          \"repository\":
+    {\n            \"$ref\": \"#/components/schemas/api.Repository\"\n          },\n
+    \         \"rules\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.Rule\"\n            }\n
+    \         },\n          \"updateUser\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.Schema\": {\n        \"type\": \"object\",\n
+    \       \"properties\": {\n          \"paths\": {\n            \"type\": \"array\",\n
+    \           \"items\": {\n              \"type\": \"string\"\n            }\n
+    \         },\n          \"version\": {\n            \"type\": \"string\"\n          }\n
+    \       }\n      },\n      \"api.Setting\": {\n        \"type\": \"object\",\n
+    \       \"properties\": {\n          \"key\": {\n            \"type\": \"string\"\n
+    \         },\n          \"value\": {\n            \"type\": \"object\"\n          }\n
+    \       }\n      },\n      \"api.Stakeholder\": {\n        \"required\": [\n          \"email\",\n
+    \         \"name\"\n        ],\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"businessServices\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n            }\n          },\n
+    \         \"contributes\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n            }\n          },\n
+    \         \"createTime\": {\n            \"type\": \"string\"\n          },\n
+    \         \"createUser\": {\n            \"type\": \"string\"\n          },\n
+    \         \"email\": {\n            \"type\": \"string\"\n          },\n          \"id\":
+    {\n            \"type\": \"integer\"\n          },\n          \"jobFunction\":
+    {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n          },\n          \"migrationWaves\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"$ref\":
+    \"#/components/schemas/api.Ref\"\n            }\n          },\n          \"name\":
+    {\n            \"type\": \"string\"\n          },\n          \"owns\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \           }\n          },\n          \"stakeholderGroups\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n
+    \           }\n          },\n          \"updateUser\": {\n            \"type\":
+    \"string\"\n          }\n        }\n      },\n      \"api.StakeholderGroup\":
+    {\n        \"required\": [\n          \"name\"\n        ],\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"createTime\": {\n            \"type\":
+    \"string\"\n          },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"description\": {\n            \"type\": \"string\"\n
+    \         },\n          \"id\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"migrationWaves\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n            }\n          },\n
+    \         \"name\": {\n            \"type\": \"string\"\n          },\n          \"stakeholders\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"$ref\":
+    \"#/components/schemas/api.Ref\"\n            }\n          },\n          \"updateUser\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.Stakeholders\":
+    {\n        \"type\": \"object\",\n        \"properties\": {\n          \"contributors\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"$ref\":
+    \"#/components/schemas/api.Ref\"\n            }\n          },\n          \"owner\":
+    {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n          }\n        }\n
+    \     },\n      \"api.TTL\": {\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"created\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"failed\": {\n            \"type\": \"integer\"\n          },\n          \"pending\":
+    {\n            \"type\": \"integer\"\n          },\n          \"postponed\": {\n
+    \           \"type\": \"integer\"\n          },\n          \"running\": {\n            \"type\":
+    \"integer\"\n          },\n          \"succeeded\": {\n            \"type\": \"integer\"\n
+    \         }\n        }\n      },\n      \"api.Tag\": {\n        \"required\":
+    [\n          \"category\",\n          \"name\"\n        ],\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"category\": {\n            \"$ref\":
+    \"#/components/schemas/api.Ref\"\n          },\n          \"createTime\": {\n
+    \           \"type\": \"string\"\n          },\n          \"createUser\": {\n
+    \           \"type\": \"string\"\n          },\n          \"id\": {\n            \"type\":
+    \"integer\"\n          },\n          \"name\": {\n            \"type\": \"string\"\n
+    \         },\n          \"updateUser\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.TagCategory\": {\n        \"required\":
+    [\n          \"name\"\n        ],\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"colour\": {\n            \"type\": \"string\"\n          },\n          \"createTime\":
+    {\n            \"type\": \"string\"\n          },\n          \"createUser\": {\n
+    \           \"type\": \"string\"\n          },\n          \"id\": {\n            \"type\":
+    \"integer\"\n          },\n          \"name\": {\n            \"type\": \"string\"\n
+    \         },\n          \"rank\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"tags\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.Ref\"\n            }\n          },\n
+    \         \"updateUser\": {\n            \"type\": \"string\"\n          },\n
+    \         \"username\": {\n            \"type\": \"string\"\n          }\n        }\n
+    \     },\n      \"api.TagRef\": {\n        \"required\": [\n          \"id\"\n
+    \       ],\n        \"type\": \"object\",\n        \"properties\": {\n          \"id\":
+    {\n            \"type\": \"integer\"\n          },\n          \"name\": {\n            \"type\":
+    \"string\"\n          },\n          \"source\": {\n            \"type\": \"string\"\n
+    \         },\n          \"virtual\": {\n            \"type\": \"boolean\"\n          }\n
+    \       }\n      },\n      \"api.Target\": {\n        \"type\": \"object\",\n
+    \       \"properties\": {\n          \"choice\": {\n            \"type\": \"boolean\"\n
+    \         },\n          \"createTime\": {\n            \"type\": \"string\"\n
+    \         },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"custom\": {\n            \"type\": \"boolean\"\n          },\n
+    \         \"description\": {\n            \"type\": \"string\"\n          },\n
+    \         \"id\": {\n            \"type\": \"integer\"\n          },\n          \"image\":
+    {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n          },\n          \"labels\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"$ref\":
+    \"#/components/schemas/api.Label\"\n            }\n          },\n          \"name\":
+    {\n            \"type\": \"string\"\n          },\n          \"provider\": {\n
+    \           \"type\": \"string\"\n          },\n          \"ruleset\": {\n            \"$ref\":
+    \"#/components/schemas/api.RuleSet\"\n          },\n          \"updateUser\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.Task\":
+    {\n        \"required\": [\n          \"addon\",\n          \"data\"\n        ],\n
+    \       \"type\": \"object\",\n        \"properties\": {\n          \"activity\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\":
+    \"string\"\n            }\n          },\n          \"addon\": {\n            \"type\":
+    \"string\"\n          },\n          \"application\": {\n            \"$ref\":
+    \"#/components/schemas/api.Ref\"\n          },\n          \"bucket\": {\n            \"$ref\":
+    \"#/components/schemas/api.Ref\"\n          },\n          \"canceled\": {\n            \"type\":
+    \"boolean\"\n          },\n          \"createTime\": {\n            \"type\":
+    \"string\"\n          },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"data\": {\n            \"type\": \"object\",\n            \"properties\":
+    {}\n          },\n          \"errors\": {\n            \"type\": \"array\",\n
+    \           \"items\": {\n              \"$ref\": \"#/components/schemas/api.TaskError\"\n
+    \           }\n          },\n          \"id\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"image\": {\n            \"type\": \"string\"\n          },\n
+    \         \"locator\": {\n            \"type\": \"string\"\n          },\n          \"name\":
+    {\n            \"type\": \"string\"\n          },\n          \"pod\": {\n            \"type\":
+    \"string\"\n          },\n          \"policy\": {\n            \"type\": \"string\"\n
+    \         },\n          \"priority\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"purged\": {\n            \"type\": \"boolean\"\n          },\n          \"retries\":
+    {\n            \"type\": \"integer\"\n          },\n          \"started\": {\n
+    \           \"type\": \"string\"\n          },\n          \"state\": {\n            \"type\":
+    \"string\"\n          },\n          \"terminated\": {\n            \"type\": \"string\"\n
+    \         },\n          \"ttl\": {\n            \"$ref\": \"#/components/schemas/api.TTL\"\n
+    \         },\n          \"updateUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"variant\": {\n            \"type\": \"string\"\n          }\n
+    \       }\n      },\n      \"api.TaskError\": {\n        \"type\": \"object\",\n
+    \       \"properties\": {\n          \"description\": {\n            \"type\":
+    \"string\"\n          },\n          \"severity\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.TaskGroup\": {\n        \"required\":
+    [\n          \"data\"\n        ],\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"addon\": {\n            \"type\": \"string\"\n          },\n          \"bucket\":
+    {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n          },\n          \"createTime\":
+    {\n            \"type\": \"string\"\n          },\n          \"createUser\": {\n
+    \           \"type\": \"string\"\n          },\n          \"data\": {\n            \"type\":
+    \"object\",\n            \"properties\": {}\n          },\n          \"id\": {\n
+    \           \"type\": \"integer\"\n          },\n          \"name\": {\n            \"type\":
+    \"string\"\n          },\n          \"state\": {\n            \"type\": \"string\"\n
+    \         },\n          \"tasks\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.Task\"\n            }\n
+    \         },\n          \"updateUser\": {\n            \"type\": \"string\"\n
+    \         }\n        }\n      },\n      \"api.TaskReport\": {\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"activity\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"type\": \"string\"\n            }\n
+    \         },\n          \"completed\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"createTime\": {\n            \"type\": \"string\"\n
+    \         },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"errors\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/api.TaskError\"\n            }\n
+    \         },\n          \"id\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"result\": {\n            \"type\": \"object\",\n            \"properties\":
+    {}\n          },\n          \"status\": {\n            \"type\": \"string\"\n
+    \         },\n          \"task\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"total\": {\n            \"type\": \"integer\"\n          },\n          \"updateUser\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.TechDependency\":
+    {\n        \"required\": [\n          \"name\"\n        ],\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"createTime\": {\n            \"type\":
+    \"string\"\n          },\n          \"createUser\": {\n            \"type\": \"string\"\n
+    \         },\n          \"id\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"indirect\": {\n            \"type\": \"boolean\"\n          },\n          \"labels\":
+    {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\":
+    \"string\"\n            }\n          },\n          \"name\": {\n            \"type\":
+    \"string\"\n          },\n          \"provider\": {\n            \"type\": \"string\"\n
+    \         },\n          \"sha\": {\n            \"type\": \"string\"\n          },\n
+    \         \"updateUser\": {\n            \"type\": \"string\"\n          },\n
+    \         \"version\": {\n            \"type\": \"string\"\n          }\n        }\n
+    \     },\n      \"api.Ticket\": {\n        \"required\": [\n          \"application\",\n
+    \         \"kind\",\n          \"parent\",\n          \"tracker\"\n        ],\n
+    \       \"type\": \"object\",\n        \"properties\": {\n          \"application\":
+    {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n          },\n          \"createTime\":
+    {\n            \"type\": \"string\"\n          },\n          \"createUser\": {\n
+    \           \"type\": \"string\"\n          },\n          \"error\": {\n            \"type\":
+    \"boolean\"\n          },\n          \"fields\": {\n            \"$ref\": \"#/components/schemas/api.Fields\"\n
+    \         },\n          \"id\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"kind\": {\n            \"type\": \"string\"\n          },\n          \"lastUpdated\":
+    {\n            \"type\": \"string\"\n          },\n          \"link\": {\n            \"type\":
+    \"string\"\n          },\n          \"message\": {\n            \"type\": \"string\"\n
+    \         },\n          \"parent\": {\n            \"type\": \"string\"\n          },\n
+    \         \"reference\": {\n            \"type\": \"string\"\n          },\n          \"status\":
+    {\n            \"type\": \"string\"\n          },\n          \"tracker\": {\n
+    \           \"$ref\": \"#/components/schemas/api.Ref\"\n          },\n          \"updateUser\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"api.Tracker\":
+    {\n        \"required\": [\n          \"identity\",\n          \"kind\",\n          \"name\",\n
+    \         \"url\"\n        ],\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"connected\": {\n            \"type\": \"boolean\"\n          },\n
+    \         \"createTime\": {\n            \"type\": \"string\"\n          },\n
+    \         \"createUser\": {\n            \"type\": \"string\"\n          },\n
+    \         \"id\": {\n            \"type\": \"integer\"\n          },\n          \"identity\":
+    {\n            \"$ref\": \"#/components/schemas/api.Ref\"\n          },\n          \"insecure\":
+    {\n            \"type\": \"boolean\"\n          },\n          \"kind\": {\n            \"type\":
+    \"string\",\n            \"enum\": [\n              \"jira-cloud\",\n              \"jira-onprem\"\n
+    \           ]\n          },\n          \"lastUpdated\": {\n            \"type\":
+    \"string\"\n          },\n          \"message\": {\n            \"type\": \"string\"\n
+    \         },\n          \"name\": {\n            \"type\": \"string\"\n          },\n
+    \         \"updateUser\": {\n            \"type\": \"string\"\n          },\n
+    \         \"url\": {\n            \"type\": \"string\"\n          }\n        }\n
+    \     },\n      \"api.Vertex\": {\n        \"type\": \"object\",\n        \"properties\":
+    {\n          \"applicationId\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"applicationName\": {\n            \"type\": \"string\"\n          },\n
+    \         \"decision\": {\n            \"type\": \"string\"\n          },\n          \"effort\":
+    {\n            \"type\": \"integer\"\n          },\n          \"effortEstimate\":
+    {\n            \"type\": \"string\"\n          },\n          \"positionX\": {\n
+    \           \"type\": \"integer\"\n          },\n          \"positionY\": {\n
+    \           \"type\": \"integer\"\n          }\n        }\n      },\n      \"assessment.Answer\":
+    {\n        \"required\": [\n          \"order\"\n        ],\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"applyTags\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"$ref\": \"#/components/schemas/assessment.CategorizedTag\"\n
+    \           }\n          },\n          \"autoAnswerFor\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"$ref\": \"#/components/schemas/assessment.CategorizedTag\"\n
+    \           }\n          },\n          \"autoAnswered\": {\n            \"type\":
+    \"boolean\"\n          },\n          \"mitigation\": {\n            \"type\":
+    \"string\"\n          },\n          \"order\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"rationale\": {\n            \"type\": \"string\"\n          },\n
+    \         \"risk\": {\n            \"type\": \"string\",\n            \"enum\":
+    [\n              \"red\"\n            ]\n          },\n          \"selected\":
+    {\n            \"type\": \"boolean\"\n          },\n          \"text\": {\n            \"type\":
+    \"string\"\n          }\n        }\n      },\n      \"assessment.CategorizedTag\":
+    {\n        \"type\": \"object\",\n        \"properties\": {\n          \"category\":
+    {\n            \"type\": \"string\"\n          },\n          \"tag\": {\n            \"type\":
+    \"string\"\n          }\n        }\n      },\n      \"assessment.Question\": {\n
+    \       \"required\": [\n          \"order\"\n        ],\n        \"type\": \"object\",\n
+    \       \"properties\": {\n          \"answers\": {\n            \"type\": \"array\",\n
+    \           \"items\": {\n              \"$ref\": \"#/components/schemas/assessment.Answer\"\n
+    \           }\n          },\n          \"excludeFor\": {\n            \"type\":
+    \"array\",\n            \"items\": {\n              \"$ref\": \"#/components/schemas/assessment.CategorizedTag\"\n
+    \           }\n          },\n          \"explanation\": {\n            \"type\":
+    \"string\"\n          },\n          \"includeFor\": {\n            \"type\": \"array\",\n
+    \           \"items\": {\n              \"$ref\": \"#/components/schemas/assessment.CategorizedTag\"\n
+    \           }\n          },\n          \"order\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"text\": {\n            \"type\": \"string\"\n          }\n
+    \       }\n      },\n      \"assessment.RiskMessages\": {\n        \"type\": \"object\",\n
+    \       \"properties\": {\n          \"green\": {\n            \"type\": \"string\"\n
+    \         },\n          \"red\": {\n            \"type\": \"string\"\n          },\n
+    \         \"unknown\": {\n            \"type\": \"string\"\n          },\n          \"yellow\":
+    {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"assessment.Section\":
+    {\n        \"required\": [\n          \"order\"\n        ],\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"comment\": {\n            \"type\":
+    \"string\"\n          },\n          \"name\": {\n            \"type\": \"string\"\n
+    \         },\n          \"order\": {\n            \"type\": \"integer\"\n          },\n
+    \         \"questions\": {\n            \"type\": \"array\",\n            \"items\":
+    {\n              \"$ref\": \"#/components/schemas/assessment.Question\"\n            }\n
+    \         }\n        }\n      },\n      \"assessment.Thresholds\": {\n        \"type\":
+    \"object\",\n        \"properties\": {\n          \"red\": {\n            \"type\":
+    \"integer\"\n          },\n          \"unknown\": {\n            \"type\": \"integer\"\n
+    \         },\n          \"yellow\": {\n            \"type\": \"integer\"\n          }\n
+    \       }\n      }\n    }, \n    \"securitySchemes\": {\n      \"bearerAuth\":
+    {\n        \"type\": \"http\",\n        \"scheme\": \"bearer\",\n        \"bearerFormat\":
+    \"JWT\"\n      }\n    }\n  },\n  \"x-original-swagger-version\": \"2.0\"\n}\n"
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 02-mta-analysis-v6-resources-specs

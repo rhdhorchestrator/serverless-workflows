@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "default": {},
+  "title": "Root Schema",
+  "required": [
+      "sshSecretName",
+      "brokerName",
+      "workflow",
+      "kfunction",
+      "instance"
+  ],
+  "properties": {
+      "sshSecretName": {
+          "type": "string",
+          "default": "",
+          "title": "The sshSecretName Schema",
+          "examples": [
+              "sshkeys"
+          ]
+      },
+      "brokerName": {
+          "type": "string",
+          "default": "",
+          "title": "The brokerName Schema",
+          "examples": [
+              "default"
+          ]
+      },
+      "workflow": {
+          "type": "object",
+          "default": {},
+          "title": "The workflow Schema",
+          "required": [
+              "name",
+              "move2kubeURL",
+              "backstageNotificationURL"
+          ],
+          "properties": {
+              "name": {
+                  "type": "string",
+                  "default": "",
+                  "title": "The name Schema",
+                  "examples": [
+                      "serverless-workflow-m2k"
+                  ]
+              },
+              "move2kubeURL": {
+                  "type": "string",
+                  "default": "",
+                  "title": "The move2kubeURL Schema",
+                  "examples": [
+                      "https://move2kube-route-sonataflow-infra.apps.cluster-8xfw.redhatworkshops.io"
+                  ]
+              },
+              "backstageNotificationURL": {
+                  "type": "string",
+                  "default": "",
+                  "title": "The backstageNotificationURL Schema",
+                  "examples": [
+                      "http://orchestrator-backstage.orchestrator/api/notifications/"
+                  ]
+              }
+          },
+          "examples": [{
+              "name": "serverless-workflow-m2k",
+              "move2kubeURL": "https://move2kube-route-sonataflow-infra.apps.cluster-8xfw.redhatworkshops.io",
+              "backstageNotificationURL": "http://orchestrator-backstage.orchestrator/api/notifications/"
+          }]
+      },
+      "kfunction": {
+          "type": "object",
+          "default": {},
+          "title": "The kfunction Schema",
+          "required": [
+              "name",
+              "image"
+          ],
+          "properties": {
+              "name": {
+                  "type": "string",
+                  "default": "",
+                  "title": "The name Schema",
+                  "examples": [
+                      "m2k-save-transformation-func"
+                  ]
+              },
+              "image": {
+                  "type": "string",
+                  "default": "",
+                  "title": "The image Schema",
+                  "examples": [
+                      "quay.io/orchestrator/serverless-workflow-m2k-kfunc:latest"
+                  ]
+              }
+          },
+          "examples": [{
+              "name": "m2k-save-transformation-func",
+              "image": "quay.io/orchestrator/serverless-workflow-m2k-kfunc:latest"
+          }]
+      },
+      "instance": {
+          "type": "object",
+          "default": {},
+          "title": "The instance Schema",
+          "required": [
+              "name",
+              "image"
+          ],
+          "properties": {
+              "name": {
+                  "type": "string",
+                  "default": "",
+                  "title": "The name Schema",
+                  "examples": [
+                      "move2kube"
+                  ]
+              },
+              "image": {
+                  "type": "string",
+                  "default": "",
+                  "title": "The image Schema",
+                  "examples": [
+                      "quay.io/orchestrator/move2kube-ui:latest"
+                  ]
+              }
+          },
+          "examples": [{
+              "name": "move2kube",
+              "image": "quay.io/orchestrator/move2kube-ui:latest"
+          }]
+      }
+  },
+  "examples": [{
+      "sshSecretName": "sshkeys",
+      "brokerName": "default",
+      "namespace": "sonataflow-infra",
+      "workflow": {
+          "name": "serverless-workflow-m2k",
+          "image": "quay.io/orchestrator/serverless-workflow-move2kube:latest",
+          "move2kubeURL": "https://move2kube-route-sonataflow-infra.apps.cluster-8xfw.redhatworkshops.io",
+          "backstageNotificationURL": "http://orchestrator-backstage.orchestrator/api/notifications/"
+      },
+      "kfunction": {
+          "name": "m2k-save-transformation-func",
+          "image": "quay.io/orchestrator/serverless-workflow-m2k-kfunc:latest"
+      },
+      "instance": {
+          "name": "move2kube",
+          "image": "quay.io/orchestrator/move2kube-ui:latest"
+      }
+  }]
+}

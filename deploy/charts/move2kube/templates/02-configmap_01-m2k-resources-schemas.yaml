@@ -1,0 +1,71 @@
+apiVersion: v1
+data:
+  input.json: |
+    {
+      "$id": "classpath:/schema/input.json",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Input",
+      "description": "schema for input description",
+      "type": "object",
+      "properties": {
+          "repositoryURL": {
+              "description": "the git repository URL to be used",
+              "type": "string",
+              "examples": [
+                  "https://bitbucket.org/gfarache31/m2k-test"
+              ]
+          },
+          "sourceBranch": {
+              "description": "the branch to download the zip from",
+              "type": "string"
+          },
+          "targetBranch": {
+              "description": "the branch to create in the repo",
+              "type": "string"
+          },
+          "workspaceId": {
+              "description": "the ID of the Move2Kube workspace",
+              "type": "string"
+          },
+          "projectId": {
+              "description": "the ID of the Move2Kube project",
+              "type": "string"
+          },
+          "recipients": {
+            "title": "Recipients",
+            "type": "array",
+            "description": "A list of recipients for the notification in the format of 'user:<namespace>/<username>' or 'group:<namespace>/<groupname>', i.e. 'user:default/jsmith'",
+            "items": {
+              "title": "Recipient",
+              "type": "string",
+              "pattern": "^(user|group):[a-z0-9]([-a-z0-9]*[a-z0-9])?/([a-z0-9]([-a-z0-9]*[a-z0-9])?)$"
+            },
+            "minItems": 1
+          }
+      },
+      "required": [
+          "repositoryURL",
+          "sourceBranch",
+          "targetBranch",
+          "workspaceId",
+          "projectId",
+          "recipients"
+      ]
+    }
+  workflow-output-schema.json: |-
+    {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "WorkflowResult",
+        "description": "Schema of workflow output",
+        "type": "object",
+        "properties": {
+            "result": {
+                "$ref": "../shared/schemas/workflow-result-schema.json",
+                "type": "object"
+            }
+        }
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 01-m2k-resources-schemas

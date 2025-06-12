@@ -9,4 +9,4 @@ The greeting workflow simply greets the user in the language chosen by the user 
 
 ## Installation
 
-See [official installation guide](https://github.com/rhdhorchestrator/serverless-workflows-config/blob/main/docs/main/greeting)
+See [official installation guide](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/deploy/docs/main/greeting)
