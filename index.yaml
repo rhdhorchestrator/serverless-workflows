@@ -1,0 +1,135 @@
+apiVersion: v1
+entries:
+  create-ocp-project:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-12T12:08:37.288755278Z"
+    description: A Helm chart for the create OCP project serverless workflow
+    digest: dfef358e80739a63e05b32fdc0960a5eb93783dcb1c8f56c713254a372ca6ca6
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: create-ocp-project
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/create-ocp-project-1.6.0-rc0/create-ocp-project-1.6.0-rc0.tgz
+    version: 1.6.0-rc0
+  greeting:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-12T12:08:37.474057912Z"
+    description: A Helm chart for the greeting serverless workflow
+    digest: 0ca9b4262df322b6d527e4582fedd6e401fe970573fe2374ffa05ab77a63ccf6
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: greeting
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/greeting-1.6.0-rc1/greeting-1.6.0-rc1.tgz
+    version: 1.6.0-rc1
+  modify-vm-resources:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-12T12:08:37.670282866Z"
+    description: A Helm chart for the modify VM resources serverless workflow
+    digest: 6dcd207b8e8d3fdbd76558a6464c5aca46bc9d427e11df19c4ec4316966f8b7a
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: modify-vm-resources
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/modify-vm-resources-1.6.0-rc0/modify-vm-resources-1.6.0-rc0.tgz
+    version: 1.6.0-rc0
+  move2kube:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-12T12:08:37.926173289Z"
+    description: 'A Helm chart to deploy the move2kube workflow. '
+    digest: 85627bb7e91251a95bbdef1bd5b46cc66b337f837918e0e81a32acdd3ed97a33
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: move2kube
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/move2kube-1.6.0-rc0/move2kube-1.6.0-rc0.tgz
+    version: 1.6.0-rc0
+  mta:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-12T12:08:38.130312659Z"
+    description: A Helm chart for MTA serverless workflow
+    digest: 8bd30a7b4c21f25dceb4168914f9ba2fb1f67b37ff7a2601f0aa127b9d9a887c
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: mta
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/mta-1.2.0-rc1/mta-1.2.0-rc1.tgz
+    version: 1.2.0-rc1
+  mta-v6:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-12T12:08:38.33681781Z"
+    description: A Helm chart for MTA serverless workflow
+    digest: 13f5e314167b4439d3d106dc5c0f6e4425477be92b6086f3667f2091e26aad7f
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: mta-v6
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/mta-v6-1.2.0/mta-v6-1.2.0.tgz
+    version: 1.2.0
+  mta-v7:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-12T12:08:38.540180597Z"
+    description: A Helm chart for MTA serverless workflow
+    digest: 324f30b223a657efba8f87bacd582ee0629a4e75e73917f2d12316ee1cfc9ea4
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: mta-v7
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/mta-v7-1.6.0-rc1/mta-v7-1.6.0-rc1.tgz
+    version: 1.6.0-rc1
+  mtv-migration:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-12T12:08:38.72600407Z"
+    description: A Helm chart for the MTV Migration serverless workflow
+    digest: acf1a747153b86c305dba6aa647649a55f3146be395c31937ea595798289598e
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: mtv-migration
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/mtv-migration-1.6.0-rc0/mtv-migration-1.6.0-rc0.tgz
+    version: 1.6.0-rc0
+  mtv-plan:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-12T12:08:38.950752982Z"
+    description: A Helm chart for the MTV Plan serverless assessment workflow
+    digest: eebae83aa2b9e15f68b3051f773af3ff1dc97c5586f5ded19c883eb944885bee
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: mtv-plan
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/mtv-plan-1.6.0-rc0/mtv-plan-1.6.0-rc0.tgz
+    version: 1.6.0-rc0
+  request-vm-cnv:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-12T12:08:39.146780748Z"
+    description: A Helm chart for the request VM using CNV serverless workflow
+    digest: 40de527e2daf5aa185ea8f8127dce83513a4b511cec8f4c388490a906b65dd5a
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: request-vm-cnv
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/request-vm-cnv-1.6.0-rc0/request-vm-cnv-1.6.0-rc0.tgz
+    version: 1.6.0-rc0
+  rpj:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-12T12:08:39.351988925Z"
+    description: A Helm chart for the Report Portal to Jira (RPJ) serverless workflow
+    digest: d2e514c58b5b5d2361b098043cc64cb1d284577c8d878cee54708bcaebf33122
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: rpj
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/rpj-1.6.0-rc0/rpj-1.6.0-rc0.tgz
+    version: 1.6.0-rc0
+generated: "2025-06-12T12:08:39.352002731Z"
