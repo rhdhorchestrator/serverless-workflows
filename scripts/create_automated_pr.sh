@@ -5,12 +5,12 @@ WORKDIR=$3
 WORKFLOW_ID=$4
 PR_OR_COMMIT_URL=$5
 GH_TOKEN=$6
-WF_CONFIG_REPO=$7
+WF_DEPLOY_REPO=$7
 
 TIMESTAMP=$(date +%s)
 git config --global user.email "${USER_EMAIL}"
 git config --global user.name "${USER_NAME}"
-gh repo clone "${WF_CONFIG_REPO}" config-repo
+gh repo clone "${WF_DEPLOY_REPO}" config-repo
 cd config-repo || exit
 git switch -c "${WORKFLOW_ID}"-autopr-"${TIMESTAMP}"
 
@@ -21,7 +21,7 @@ git add -A
 
 git commit -m "(${WORKFLOW_ID}) Automated PR"
 echo "Automated PR from $PR_OR_COMMIT_URL" | git commit --amend --file=-
-git remote set-url origin https://"${GH_TOKEN}"@github.com/"${WF_CONFIG_REPO}"
+git remote set-url origin https://"${GH_TOKEN}"@github.com/"${WF_DEPLOY_REPO}"
 git push origin HEAD
 CURRENT_BRANCH=$(git branch --show-current)
 gh pr create -f --head "${CURRENT_BRANCH}" --title "${WORKFLOW_ID}: Automatic manifests generation" \
