@@ -15,7 +15,7 @@
     <kogito.bom.artifact-id>kogito-bom</kogito.bom.artifact-id>
     <kogito.bom.version>2.44.0.Alpha</kogito.bom.version>
     <skipITs>true</skipITs>
-    <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
+    <surefire-plugin.version>3.5.3</surefire-plugin.version>
     <failsafe.useModulePath>false</failsafe.useModulePath>
     <move2kube.version>v2.0.0</move2kube.version>
     <jgit-version>6.7.0.202309050840-r</jgit-version>
