@@ -1,9 +1,0 @@
-kind: Tackle
-apiVersion: tackle.konveyor.io/v1alpha1
-metadata:
-  name: tackle
-  namespace: openshift-mta
-spec:
-  feature_auth_required: false
-  hub_database_volume_size: 1Gi
-  hub_bucket_volume_size: 1Gi
