@@ -31,7 +31,7 @@ Run the [installation script](install_rpj.sh):
 ```console
 RPJ_TARGET_URL=<URL to RPJ or its proxy application> ./install_rpj.sh
 ```
-You can override the helm repo to use by setting `RPJ_HELM_REPO`. By default `orchestrator-workflows/rpj` is used and the helm repository `orchestrator-workflows` is installed from `https://rhdhorchestrator.io/serverless-workflows-config`
+You can override the helm repo to use by setting `RPJ_HELM_REPO`. By default `orchestrator-workflows/rpj` is used and the helm repository `orchestrator-workflows` is installed from `https://rhdhorchestrator.io/serverless-workflows`
 
 To use the local file, set `RPJ_HELM_REPO` to `.`:
 ```console
@@ -47,7 +47,7 @@ TARGET_NS=sonataflow-infra
 ### Installation
 Run 
 ```console
-helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows-config
+helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows
 helm install rpj orchestrator-workflows/rpj -n ${TARGET_NS}
 ```
 

@@ -47,7 +47,7 @@ Run the [installation script](install_m2k.sh):
 ```console
 PRIV_ID_RSA_PATH=${HOME}/.ssh/id_rsa PUB_ID_RSA_PATH=${HOME}/.ssh/id_rsa.pub TARGET_NS=sonataflow-infra ./install_m2k.sh
 ```
-You can override the helm repo to use by setting `M2K_HELM_REPO`. By default `orchestrator-workflows/move2kube` is used and the helm repository `orchestrator-workflows` is installed from `https://rhdhorchestrator.io/serverless-workflows-config`
+You can override the helm repo to use by setting `M2K_HELM_REPO`. By default `orchestrator-workflows/move2kube` is used and the helm repository `orchestrator-workflows` is installed from `https://rhdhorchestrator.io/serverless-workflows`
 
 To use the local file, set `M2K_HELM_REPO` to `.`:
 ```console
@@ -100,7 +100,7 @@ We need to use `initContainers` and `securityContext` in our Knative services to
 
 Run 
 ```console
-helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows-config
+helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows
 helm install move2kube orchestrator-workflows/move2kube -n ${TARGET_NS} --set instance.namespace=${M2K_INSTANCE_NS} --set brokerName=${BROKER_NAME} --set brokerNamespace=${BROKER_NAMESPACE}
 ```
 

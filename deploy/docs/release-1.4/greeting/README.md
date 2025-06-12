@@ -32,7 +32,7 @@ TARGET_NS=sonataflow-infra
 ## Installing helm chart 
 
 ```console
-helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows-config
+helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows
 helm install greeting orchestrator-workflows/greeting -n ${TARGET_NS}
 ```
 
