@@ -18,7 +18,7 @@ on:
         default: false
 
 env:
-  WF_CONFIG_REPO: rhdhorchestrator/serverless-workflows
+  WF_DEPLOY_REPO: rhdhorchestrator/serverless-workflows
   REGISTRY_REPO: orchestrator
   GH_TOKEN: ${{ secrets.HELM_REPO_TOKEN }}
 
@@ -120,7 +120,7 @@ jobs:
             PR_OR_COMMIT_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           fi
 
-          sh scripts/create_or_update_automated_pr.sh $WF_CONFIG_REPO \
+          sh scripts/create_or_update_automated_pr.sh $WF_DEPLOY_REPO \
             ${{ inputs.workflow_id }} \
             ${PR_OR_COMMIT_URL} \
             "" \
