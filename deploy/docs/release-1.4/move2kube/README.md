@@ -33,11 +33,9 @@ If persistence is enabled, you must have a PostgreSQL instance running in the cl
 
 A `secret` containing the instance credentials must exists as well. 
 
-See https://www.rhdhorchestrator.io/orchestrator-helm-operator/postgresql on how to install a PostgreSQL instance. Please follow the section detailing how to install using helm. In this document, a `secret` holding the credentials is created.
-
 ## General pre-requisites
 
-Knative eventing communication must be enabled by setting the `eventing` spec in the SonataFlowPlatform by following https://github.com/rhdhorchestrator/orchestrator-helm-operator/tree/main/docs/release-1.4/eventing-communication.
+Knative eventing communication must be enabled by setting the `eventing` spec in the SonataFlowPlatform by following https://github.com/rhdhorchestrator/orchestrator-go-operator/tree/main/docs/release-1.4/eventing-communication.
 
 > [!NOTE]
 > In this guide a Kafka cluster is installed along with the broker but you could also use a in-memory broker. However, bear in mind that in-memory brokers are not resilient.
