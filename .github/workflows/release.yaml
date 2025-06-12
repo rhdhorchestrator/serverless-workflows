@@ -27,5 +27,6 @@ jobs:
         with:
           skip_existing: true
           pages_index_path: index.yaml
+          charts_dir: deploy/charts
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
