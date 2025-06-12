@@ -33,11 +33,9 @@ If persistence is enabled, you must have a PostgreSQL instance running in the cl
 
 A `secret` containing the instance credentials must exists as well. 
 
-See https://www.rhdhorchestrator.io/orchestrator-helm-operator/postgresql on how to install a PostgreSQL instance. Please follow the section detailing how to install using helm. In this document, a `secret` holding the credentials is created.
-
 ## General pre-requisites
 
-Knative eventing communication must be enabled by setting the `eventing` spec in the SonataFlowPlatform by following https://github.com/rhdhorchestrator/orchestrator-helm-operator/tree/main/docs/release-1.4/eventing-communication.
+Knative eventing communication must be enabled by setting the `eventing` spec in the SonataFlowPlatform by following https://github.com/rhdhorchestrator/orchestrator-go-operator/tree/main/docs/release-1.4/eventing-communication.
 
 > [!NOTE]
 > In this guide a Kafka cluster is installed along with the broker but you could also use a in-memory broker. However, bear in mind that in-memory brokers are not resilient.
@@ -47,7 +45,7 @@ Run the [installation script](install_m2k.sh):
 ```console
 PRIV_ID_RSA_PATH=${HOME}/.ssh/id_rsa PUB_ID_RSA_PATH=${HOME}/.ssh/id_rsa.pub TARGET_NS=sonataflow-infra ./install_m2k.sh
 ```
-You can override the helm repo to use by setting `M2K_HELM_REPO`. By default `orchestrator-workflows/move2kube` is used and the helm repository `orchestrator-workflows` is installed from `https://rhdhorchestrator.io/serverless-workflows-config`
+You can override the helm repo to use by setting `M2K_HELM_REPO`. By default `orchestrator-workflows/move2kube` is used and the helm repository `orchestrator-workflows` is installed from `https://rhdhorchestrator.io/serverless-workflows`
 
 To use the local file, set `M2K_HELM_REPO` to `.`:
 ```console
@@ -100,7 +98,7 @@ We need to use `initContainers` and `securityContext` in our Knative services to
 
 Run 
 ```console
-helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows-config
+helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows
 helm install move2kube orchestrator-workflows/move2kube -n ${TARGET_NS} --set instance.namespace=${M2K_INSTANCE_NS} --set brokerName=${BROKER_NAME} --set brokerNamespace=${BROKER_NAMESPACE}
 ```
 

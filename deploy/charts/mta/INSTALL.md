@@ -6,15 +6,13 @@ MTA
 The MTA workflow has persistence enabled, you must have a PostgreSQL instance running in the cluster, in the same `namespace` as the workflows.
 A `secret` containing the instance credentials must exist as well. 
 
-See [this](https://www.rhdhorchestrator.io/orchestrator-helm-operator/postgresql) on how to install a PostgreSQL instance. Please follow the section detailing how to install using Helm. In this document, a `secret` holding the credentials is created.
-
 ## Installing helm chart 
 From `charts` folder run 
 ```console
 helm install mta workflows/mta -n sonataflow-infra
 ```
 
-The rest of the installation steps can be found [here](https://github.com/rhdhorchestrator/serverless-workflows-config/blob/gh-pages/docs/mta/README.md#configuration)
+The rest of the installation steps can be found [here](../../docs/main/mta-v7.x/README.md)
 
 ### Persistence configuration
 For a different persistence configuration, edit the `sonataflow` resource to set the correct value for the `persistence` `spec`.

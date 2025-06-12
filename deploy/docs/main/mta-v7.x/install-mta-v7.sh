@@ -8,7 +8,7 @@ fi
 if [[ -z "${MTA_HELM_REPO}" ]]; then
   MTA_HELM_REPO=orchestrator-workflows/mta-v7
   echo "MTA_HELM_REPO not set, using default helm mta v7 helm repository ${MTA_HELM_REPO}"
-  helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows-config
+  helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows
 fi
 
 if [[ -z "${TARGET_NS}" ]]; then

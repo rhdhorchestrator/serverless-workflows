@@ -27,15 +27,12 @@ If persistence is enabled, you must have a PostgreSQL instance running in the cl
 
 A `secret` containing the instance credentials must exists as well. 
 
-See https://www.rhdhorchestrator.io/orchestrator-helm-operator/postgresql on how to install a PostgreSQL instance. Please follow the section detailing how to install using helm. In this document, a `secret` holding the credentials is created.
-
-
 ## Automated installation
 Run the [installation script](install-mta-v7.sh):
 ```console
 TARGET_NS=sonataflow-infra ./install-mta-v7.sh
 ```
-You can override the helm repo to use by setting `MTA_HELM_REPO`. By default `orchestrator-workflows/mta-v7` is used and the helm repository `orchestrator-workflows` is installed from `https://rhdhorchestrator.io/serverless-workflows-config`
+You can override the helm repo to use by setting `MTA_HELM_REPO`. By default `orchestrator-workflows/mta-v7` is used and the helm repository `orchestrator-workflows` is installed from `https://rhdhorchestrator.io/serverless-workflows`
 
 To use the local file, set `MTA_HELM_REPO` to `.`:
 ```console
@@ -53,7 +50,7 @@ TARGET_NS=sonataflow-infra
 ### Installation
 - Run 
 ```console
-helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows-config
+helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows
 helm install mta orchestrator-workflows/mta-v7 -n ${TARGET_NS}
 ```
 

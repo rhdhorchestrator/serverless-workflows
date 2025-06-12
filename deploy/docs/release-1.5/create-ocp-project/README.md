@@ -21,8 +21,6 @@ Please refer to [the workflow README](https://github.com/rhdhorchestrator/server
 
 If persistence is enabled, you must have a PostgreSQL instance running in the same `namespace` as the workflows. Typically this is the `sonataflow-infra` namespace.
 
-A Secret containing the PostgreSQL credentials must exist as well. See https://www.rhdhorchestrator.io/orchestrator-helm-operator/postgresql on how to install a PostgreSQL instance. Please follow the section detailing how to install it using Helm - this will create the necessary secret and credentials.
-
 ## Installation Steps
 
 ### Install the Helm Chart 

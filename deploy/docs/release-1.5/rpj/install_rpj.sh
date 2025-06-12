@@ -7,7 +7,7 @@ fi
 if [[ -z "${RPJ_HELM_REPO}" ]]; then
   RPJ_HELM_REPO=orchestrator-workflows/rpj
   echo "M2K_HELM_REPO not set, using default helm rpj helm repository ${RPJ_HELM_REPO}"
-  helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows-config
+  helm repo add orchestrator-workflows https://rhdhorchestrator.io/serverless-workflows
 fi
 
 TARGET_NS=sonataflow-infra
