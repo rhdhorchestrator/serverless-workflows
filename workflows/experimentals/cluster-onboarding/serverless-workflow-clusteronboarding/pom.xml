@@ -10,7 +10,7 @@
     <compiler-plugin.version>3.14.0</compiler-plugin.version>
     <kogito.bom.artifact-id>kogito-bom</kogito.bom.artifact-id>
     <kogito.bom.group-id>org.kie.kogito</kogito.bom.group-id>
-    <kogito.bom.version>2.44.0.Alpha</kogito.bom.version>
+    <kogito.bom.version>10.0.0</kogito.bom.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
