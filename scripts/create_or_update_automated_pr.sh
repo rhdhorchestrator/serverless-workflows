@@ -13,6 +13,15 @@ WORKDIR=$8
 GH_TOKEN=$9
 GITHUB_SHA=${10}
 
+# Ensure GH_TOKEN is available in the environment
+export GH_TOKEN
+
+# Authenticate gh CLI non-interactively using the token
+echo "$GH_TOKEN" | gh auth login --with-token || {
+  echo "❌ GitHub CLI authentication failed"
+  exit 1
+}
+
 # Get all automated PRs opened by orchestrator-ci for the repository
 prs=$(gh pr list --repo "${REPO}" -A orchestrator-ci --json number --jq '.[].number') || exit
 echo "${prs}"
