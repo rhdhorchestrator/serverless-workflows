@@ -81,41 +81,6 @@ entries:
     urls:
     - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/move2kube-1.6.0-rc0/move2kube-1.6.0-rc0.tgz
     version: 1.6.0-rc0
-  mta:
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2025-06-12T12:08:38.130312659Z"
-    description: A Helm chart for MTA serverless workflow
-    digest: 8bd30a7b4c21f25dceb4168914f9ba2fb1f67b37ff7a2601f0aa127b9d9a887c
-    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
-    name: mta
-    type: application
-    urls:
-    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/mta-1.2.0-rc1/mta-1.2.0-rc1.tgz
-    version: 1.2.0-rc1
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2025-06-12T13:19:59.845717801Z"
-    description: A Helm chart for MTA serverless workflow
-    digest: ef53049d506d64b726cb313523f8d0d6120f8ef024ef3e93e6158c2d80ced854
-    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
-    name: mta
-    type: application
-    urls:
-    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/mta-1.2.0-rc1/mta-1.2.0-rc1.tgz
-    version: 1.2.0-rc1
-  mta-v6:
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2025-06-12T12:08:38.33681781Z"
-    description: A Helm chart for MTA serverless workflow
-    digest: 13f5e314167b4439d3d106dc5c0f6e4425477be92b6086f3667f2091e26aad7f
-    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
-    name: mta-v6
-    type: application
-    urls:
-    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/mta-v6-1.2.0/mta-v6-1.2.0.tgz
-    version: 1.2.0
   mta-v7:
   - apiVersion: v2
     appVersion: 1.16.0
