@@ -1,5 +1,5 @@
 
-FROM quay.io/quarkus/quarkus-micro-image:1.0
+FROM quay.io/quarkus/quarkus-micro-image:3.0
 WORKDIR /work/
 RUN chown 1001 /work \
     && chmod "g+rwX" /work \
