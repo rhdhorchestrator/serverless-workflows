@@ -108,7 +108,7 @@ jobs:
             })
           ).data[0];
 
-    - name: Send PRs to config repo
+    - name: Send PRs to deploy repo
       if: ${{ ! inputs.it_mode }}
       run: |
           WORKDIR=${{ runner.temp }}/serverless-workflows
