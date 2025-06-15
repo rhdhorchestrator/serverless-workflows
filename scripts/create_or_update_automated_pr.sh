@@ -17,10 +17,7 @@ GITHUB_SHA=${10}
 export GH_TOKEN
 
 # Authenticate gh CLI non-interactively using the token
-echo "$GH_TOKEN" | gh auth login --with-token || {
-  echo "❌ GitHub CLI authentication failed"
-  exit 1
-}
+gh auth status || echo "❌ gh CLI is not authenticated"
 
 # Get all automated PRs opened by orchestrator-ci for the repository
 prs=$(gh pr list --repo "${REPO}" -A orchestrator-ci --json number --jq '.[].number') || exit
