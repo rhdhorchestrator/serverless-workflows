@@ -1,16 +1,16 @@
 name: Move2kube workflow container image and manifest push
 
-on:
-  workflow_dispatch:
-  push:
-    branches: [ "main" ]
-    paths:
-      - 'workflows/move2kube/**'
-      - 'pipeline/**'
-      - 'e2e/move2kube.sh'
-      - .github/workflows/move2kube-e2e.yaml
-      - .github/workflows/m2k-func.yaml
-      - .github/workflows/main.yml
+# on:
+#   workflow_dispatch:
+#   push:
+#     branches: [ "main" ]
+#     paths:
+#       - 'workflows/move2kube/**'
+#       - 'pipeline/**'
+#       - 'e2e/move2kube.sh'
+#       - .github/workflows/move2kube-e2e.yaml
+#       - .github/workflows/m2k-func.yaml
+#       - .github/workflows/main.yml
 
 jobs:
   call-kfunc-workflow:

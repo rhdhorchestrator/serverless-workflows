@@ -1,12 +1,12 @@
 name: Build and push move2kube Knative function container image
 
-on:
-  workflow_call:
-    inputs:
-      it_mode:
-        required: false
-        type: boolean
-        default: false
+# on:
+#   workflow_call:
+#     inputs:
+#       it_mode:
+#         required: false
+#         type: boolean
+#         default: false
 
 env:
   WORKDIR: workflows/move2kube/m2k-func

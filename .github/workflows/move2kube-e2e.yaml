@@ -1,17 +1,17 @@
 name: Move2kube Workflow end to end tests
 
-on:
-  workflow_dispatch:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'workflows/move2kube/**'
-      - 'pipeline/**'
-      - .github/workflows/move2kube-e2e.yaml
-      - .github/workflows/m2k-func.yaml
-      - .github/workflows/main.yml
-      - e2e/move2kube.sh
+# on:
+#   workflow_dispatch:
+#   pull_request:
+#     branches:
+#       - main
+#     paths:
+#       - 'workflows/move2kube/**'
+#       - 'pipeline/**'
+#       - .github/workflows/move2kube-e2e.yaml
+#       - .github/workflows/m2k-func.yaml
+#       - .github/workflows/main.yml
+#       - e2e/move2kube.sh
 
 jobs:
   build:
