@@ -53,7 +53,7 @@
             <dependency>
                 <groupId>org.kie.kogito</groupId>
                 <artifactId>kogito-bom</artifactId>
-                <version>9.103.0.redhat-00004</version>
+                <version>10.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
