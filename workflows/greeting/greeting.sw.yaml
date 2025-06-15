@@ -18,7 +18,7 @@ functions:
     type: expression
     operation: '{
         "result": {
-          "message": "Greeting workflow completed successfully.",
+          "message": "Greeting workflow completed successfully",
           "outputs":[
             {
                 "key":"Selected language",
