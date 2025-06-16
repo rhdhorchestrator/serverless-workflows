@@ -119,8 +119,11 @@ jobs:
 
     - name: Send PRs to deploy repo
       if: ${{ ! inputs.it_mode }}
+      env:
+        GH_TOKEN: ${{ secrets.HELM_REPO_TOKEN }}
       run: |
-          export GH_TOKEN
+          gh auth status || echo "GH auth failed"
+
           WORKDIR=${{ runner.temp }}/serverless-workflows
 
           # determine pr or commit url
