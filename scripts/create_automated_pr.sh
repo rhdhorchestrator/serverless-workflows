@@ -14,7 +14,7 @@ gh repo clone "${WF_DEPLOY_REPO}" config-repo
 cd config-repo || exit
 git switch -c "${WORKFLOW_ID}"-autopr-"${TIMESTAMP}"
 
-./hack/bump_chart_version.sh "${WORKFLOW_ID}" --bump-tag-version
+./scripts/bump_chart_version.sh "${WORKFLOW_ID}" --bump-tag-version
 mkdir -p deploy/charts/"${WORKFLOW_ID}"/templates
 cp "${WORKDIR}"/workflows/"${WORKFLOW_ID}"/manifests/* deploy/charts/"${WORKFLOW_ID}"/templates
 git add -A
