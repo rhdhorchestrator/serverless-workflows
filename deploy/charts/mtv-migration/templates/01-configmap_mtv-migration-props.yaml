@@ -14,11 +14,15 @@ data:
     # and see https://quarkus.io/guides/logging for documentation
     quarkus.log.category."org.apache.http".level=INFO
     quarkus.log.level=INFO
-    quarkus.flyway.migrate-at-start=true
+    kie.flyway.enabled=true
 kind: ConfigMap
 metadata:
   creationTimestamp: null
   labels:
     app: mtv-migration
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: mtv-migration
     sonataflow.org/workflow-app: mtv-migration
+    sonataflow.org/workflow-namespace: ""
   name: mtv-migration-props
