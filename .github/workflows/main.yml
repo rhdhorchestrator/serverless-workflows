@@ -20,6 +20,10 @@ on:
       HELM_REPO_TOKEN:
         required: true
 
+permissions:
+  contents: write
+  pull-requests: write
+
 env:
   WF_DEPLOY_REPO: rhdhorchestrator/serverless-workflows
   REGISTRY_REPO: orchestrator
