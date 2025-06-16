@@ -48,7 +48,7 @@ jobs:
           REGISTRY_PASSWORD=${{ secrets.NEW_QUAY_PASSWORD }} \
           build-image
 
-    - name: Buildah push to OCI Arcive
+    - name: Buildah push to OCI Archive
       if: ${{ inputs.it_mode }}
       run: |
         buildah push serverless-workflow-${{ inputs.workflow_id }}:${{ github.sha }} \
@@ -77,8 +77,10 @@ jobs:
     needs: build
     runs-on: ubuntu-24.04
     steps:
-    - name: Authenticate gh CLI
-      run: gh auth login --with-token <<< "$GH_TOKEN"
+    - name: Export GH_TOKEN
+      run: | 
+        export GH_TOKEN
+        gh pr list --repo ${{ env.WF_DEPLOY_REPO }}
 
     - uses: actions/checkout@v4
     - name: Generate Manifests
