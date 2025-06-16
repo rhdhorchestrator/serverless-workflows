@@ -163,6 +163,17 @@ entries:
   mtv-plan:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2025-06-16T15:37:01.093813128Z"
+    description: A Helm chart for the MTV Plan serverless assessment workflow
+    digest: 69713f361bee50edc7c902ca58f384d1b391f6937f7ff82f944189ef63b01c26
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: mtv-plan
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/mtv-plan-1.6.0-rc1/mtv-plan-1.6.0-rc1.tgz
+    version: 1.6.0-rc1
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2025-06-12T12:08:38.950752982Z"
     description: A Helm chart for the MTV Plan serverless assessment workflow
     digest: eebae83aa2b9e15f68b3051f773af3ff1dc97c5586f5ded19c883eb944885bee
@@ -196,4 +207,4 @@ entries:
     urls:
     - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/rpj-1.6.0-rc0/rpj-1.6.0-rc0.tgz
     version: 1.6.0-rc0
-generated: "2025-06-16T15:36:36.41377933Z"
+generated: "2025-06-16T15:37:01.093849316Z"
