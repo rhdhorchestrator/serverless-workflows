@@ -126,7 +126,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.HELM_REPO_TOKEN }}
       run: |
-          gh auth status || echo "GH auth failed"
+          gh auth status
 
           WORKDIR=${{ runner.temp }}/serverless-workflows
 

@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 USER_EMAIL=$1
 USER_NAME=$2
 WORKDIR=$3
@@ -6,6 +6,12 @@ WORKFLOW_ID=$4
 PR_OR_COMMIT_URL=$5
 GH_TOKEN=$6
 WF_DEPLOY_REPO=$7
+
+gh auth status
+if [ $? -ne 0 ]; then
+    echo "Authenticating with GitHub CLI..."
+    echo "${GH_TOKEN}" | gh auth login --with-token || exit 1
+fi
 
 TIMESTAMP=$(date +%s)
 git config --global user.email "${USER_EMAIL}"
