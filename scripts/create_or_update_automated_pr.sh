@@ -58,7 +58,7 @@ for pr in $prs; do
             if [ "${APPLICATION_UPDATE_COMMAND}" != "" ]; then
                 eval "${APPLICATION_UPDATE_COMMAND}" || exit 1
             else
-                cp "${WORKDIR}"/workflows/"${WORKFLOW_ID}"/manifests/* charts/"${WORKFLOW_ID}"/templates || exit 1
+                cp "${WORKDIR}"/workflows/"${WORKFLOW_ID}"/manifests/* deploy/charts/"${WORKFLOW_ID}"/templates || exit 1
             fi
             git add -A
 
