@@ -76,9 +76,10 @@ jobs:
   generate-manifests:
     needs: build
     runs-on: ubuntu-24.04
-    env:
-      GH_TOKEN: ${{ secrets.GH_CROSS_REPO_TOKEN }}
     steps:
+    - name: Authenticate gh CLI
+      run: gh auth login --with-token <<< "$GH_TOKEN"
+
     - uses: actions/checkout@v4
     - name: Generate Manifests
       id: generate-manifests
