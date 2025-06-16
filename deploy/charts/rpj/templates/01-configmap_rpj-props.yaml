@@ -15,11 +15,15 @@ data:
     # and see https://quarkus.io/guides/logging for documentation
     quarkus.log.category."org.apache.http".level=INFO
     quarkus.log.level=INFO
-    quarkus.flyway.migrate-at-start=true
+    kie.flyway.enabled=true
 kind: ConfigMap
 metadata:
   creationTimestamp: null
   labels:
     app: rpj
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: rpj
     sonataflow.org/workflow-app: rpj
+    sonataflow.org/workflow-namespace: ""
   name: rpj-props
