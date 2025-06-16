@@ -15,6 +15,17 @@ entries:
   greeting:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2025-06-16T13:16:02.485687332Z"
+    description: A Helm chart for the greeting serverless workflow
+    digest: 71d9ff7d7539c931b541683e022f59d55a11efca5a3ed19e82f406d60ba5ce44
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: greeting
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/greeting-1.6.0-rc2/greeting-1.6.0-rc2.tgz
+    version: 1.6.0-rc2
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2025-06-12T12:08:37.474057912Z"
     description: A Helm chart for the greeting serverless workflow
     digest: 0ca9b4262df322b6d527e4582fedd6e401fe970573fe2374ffa05ab77a63ccf6
@@ -81,6 +92,17 @@ entries:
     urls:
     - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/move2kube-1.6.0-rc0/move2kube-1.6.0-rc0.tgz
     version: 1.6.0-rc0
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-16T13:16:02.726291087Z"
+    description: 'A Helm chart to deploy the move2kube workflow. '
+    digest: a6f9351dd57718c0170a7ba720963c16993b68fbce9b57ee744456ef1c19411a
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: move2kube
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/move2kube-1.6.0-rc0/move2kube-1.6.0-rc0.tgz
+    version: 1.6.0-rc0
   mta-v7:
   - apiVersion: v2
     appVersion: 1.16.0
@@ -141,4 +163,4 @@ entries:
     urls:
     - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/rpj-1.6.0-rc0/rpj-1.6.0-rc0.tgz
     version: 1.6.0-rc0
-generated: "2025-06-12T13:55:09.660674818Z"
+generated: "2025-06-16T13:16:02.726322376Z"
