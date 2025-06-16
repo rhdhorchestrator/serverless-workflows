@@ -77,11 +77,6 @@ jobs:
     needs: build
     runs-on: ubuntu-24.04
     steps:
-    - name: Export GH_TOKEN
-      run: | 
-        export GH_TOKEN
-        gh pr list --repo ${{ env.WF_DEPLOY_REPO }}
-
     - uses: actions/checkout@v4
     - name: Generate Manifests
       id: generate-manifests
@@ -116,7 +111,6 @@ jobs:
     - name: Send PRs to deploy repo
       if: ${{ ! inputs.it_mode }}
       run: |
-          export GH_TOKEN
           WORKDIR=${{ runner.temp }}/serverless-workflows
 
           # determine pr or commit url
