@@ -15,7 +15,7 @@ gh repo clone "${WF_DEPLOY_REPO}" config-repo
 cd config-repo || exit
 git switch -c "${WORKFLOW_ID}"-autopr-"${TIMESTAMP}"
 
-./hack/bump_chart_version.sh "${WORKFLOW_ID}" --bump-tag-version
+./scripts/bump_chart_version.sh "${WORKFLOW_ID}" --bump-tag-version
 mkdir -p deploy/charts/"${WORKFLOW_ID}"/templates
 cp "${WORKDIR}"/workflows/"${WORKFLOW_ID}"/manifests/* deploy/charts/"${WORKFLOW_ID}"/templates
 yq --inplace '.kfunction.image="quay.io/orchestrator/serverless-workflow-m2k-kfunc:'"${GITHUB_SHA}"'"' deploy/charts/move2kube/values.yaml
