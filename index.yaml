@@ -139,6 +139,17 @@ entries:
   mta-v7:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2025-06-16T15:38:17.760405635Z"
+    description: A Helm chart for MTA serverless workflow
+    digest: d34afb4b2722953599f5a113c93740330618adab7c750ebd933239d80cfbae47
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: mta-v7
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/mta-v7-1.6.0-rc2/mta-v7-1.6.0-rc2.tgz
+    version: 1.6.0-rc2
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2025-06-12T12:08:38.540180597Z"
     description: A Helm chart for MTA serverless workflow
     digest: 324f30b223a657efba8f87bacd582ee0629a4e75e73917f2d12316ee1cfc9ea4
@@ -229,4 +240,4 @@ entries:
     urls:
     - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/rpj-1.6.0-rc0/rpj-1.6.0-rc0.tgz
     version: 1.6.0-rc0
-generated: "2025-06-16T15:37:43.571068462Z"
+generated: "2025-06-16T15:38:17.76045623Z"
