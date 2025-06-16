@@ -142,8 +142,8 @@ jobs:
             ${PR_OR_COMMIT_URL} \
             "" \
             scripts/create_automated_pr.sh \
-            ${{ github.event.head_commit.author.email || 'rhdhorchestrator@redhat.com' }} \
-            ${{ github.event.head_commit.author.name || github.triggering_actor }} \
+            'rhdhorchestrator@redhat.com' \
+            'orchestrator-ci' \
             $WORKDIR \
             ${{ env.GH_TOKEN }} \
             ${{ github.sha }}
