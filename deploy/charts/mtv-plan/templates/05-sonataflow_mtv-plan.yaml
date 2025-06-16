@@ -1,0 +1,194 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: assessment creates a plan and waits for it to be ready or failed
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: mtv-plan
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: mtv-plan
+    sonataflow.org/workflow-app: mtv-plan
+    sonataflow.org/workflow-namespace: ""
+  name: mtv-plan
+spec:
+  flow:
+    annotations:
+      - workflow-type/assessment
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/mtv-input.json
+    functions:
+      - name: createNotification
+        operation: notifications#createNotification
+        type: rest
+      - name: createPlan
+        operation: specs/mtv.yaml#createPlan
+        type: rest
+      - name: getPlan
+        operation: specs/mtv.yaml#getPlan
+        type: rest
+      - name: getPlanError
+        operation: .getStatusResult.status.conditions | map(select(.category == "Error" or .category == "Critical"))[0].message
+        type: expression
+    start:
+      stateName: CreatePlan
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                apiVersion: forklift.konveyor.io/v1beta1
+                kind: Plan
+                metadata:
+                  name: .migrationName
+                  namespace: .migrationNamespace
+                namespace: .migrationNamespace
+                spec:
+                  map:
+                    network:
+                      name: .networkMap
+                      namespace: .migrationNamespace
+                    storage:
+                      name: .storageMap
+                      namespace: .migrationNamespace
+                  provider:
+                    destination:
+                      name: .destinationProvider
+                      namespace: .migrationNamespace
+                    source:
+                      name: .sourceProvider
+                      namespace: .migrationNamespace
+                  targetNamespace: .migrationNamespace
+                  vms: .vms
+              invoke: sync
+              refName: createPlan
+        name: CreatePlan
+        transition:
+          nextState: GetPlan
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .getStatusResult
+              useResults: true
+            functionRef:
+              arguments:
+                namespace: .migrationNamespace
+                plan: .migrationName
+              invoke: sync
+              refName: getPlan
+            name: getPlan
+            sleep:
+              before: PT10S
+        name: GetPlan
+        transition:
+          nextState: CheckPlanStatus
+        type: operation
+      - dataConditions:
+          - condition: .getStatusResult.status.conditions | map(select(.category == "Error" or .category == "Critical")) | length > 0
+            name: PlanFailure
+            transition:
+              nextState: PlanFailure
+          - condition: .getStatusResult.status.conditions | map(select(.type == "Ready")) | length > 0
+            name: PlanReady
+            transition:
+              nextState: PlanReady
+        defaultCondition:
+          transition:
+            nextState: GetPlan
+        name: CheckPlanStatus
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .planErrorMessage
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: getPlanError
+            name: setPlanErrorMessage
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"MTV plan " + .migrationName + " is not ready for migration. Error: " + .planErrorMessage'
+                  severity: critical
+                  title: MTV plan is not ready for migration
+                  topic: MTV plan assessment workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: createNotification
+        end:
+          terminate: true
+        metadata:
+          errorMessage: '"MTV plan " + .migrationName + " is not ready for migration"'
+        name: PlanFailure
+        stateDataFilter:
+          output: '{result: {message: .planErrorMessage}}'
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"MTV plan " + .migrationName + " is ready for migration"'
+                  severity: normal
+                  title: MTV plan is ready for migration
+                  topic: MTV plan assessment workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: createNotification
+        end:
+          terminate: true
+        name: PlanReady
+        stateDataFilter:
+          output: '{result: {message: "MTV plan successful", "nextWorkflows": [{id: "mtv-migration", name: "MTV migration workflow"}], "outputs": [] }}'
+        type: operation
+  podTemplate:
+    container:
+      env:
+        - name: NOTIFICATIONS_BEARER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: NOTIFICATIONS_BEARER_TOKEN
+              name: mtv-plan-secrets
+      image: quay.io/orchestrator/serverless-workflow-mtv-plan:d347d903b21feac8e3f692d82382e0e226ed52bc
+      resources: {}
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-mtv-plan-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-mtv-plan-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: mtv-plan
+status:
+  address: {}
+  lastTimeRecoverAttempt: null
