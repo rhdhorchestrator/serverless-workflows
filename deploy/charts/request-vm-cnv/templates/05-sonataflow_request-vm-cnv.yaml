@@ -1,0 +1,456 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: Request VM on CNV
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: request-vm-cnv
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: request-vm-cnv
+    sonataflow.org/workflow-app: request-vm-cnv
+    sonataflow.org/workflow-namespace: ""
+  name: request-vm-cnv
+spec:
+  flow:
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/request-vm-cnv__main-schema.json
+    functions:
+      - name: readNamespacedVirtualMachine
+        operation: specs/kubevirt-openapi.yaml#readNamespacedVirtualMachine
+        type: rest
+      - name: createNamespacedVirtualMachine
+        operation: specs/kubevirt-openapi.yaml#createNamespacedVirtualMachine
+        type: rest
+      - name: jiraCreateIssue
+        operation: specs/jira-openapi.json#createIssue
+        type: rest
+      - name: jiraGetIssue
+        operation: specs/jira-openapi.json#getIssue
+        type: rest
+      - name: createNotification
+        operation: notifications#createNotification
+        type: rest
+      - name: print
+        operation: sysout
+        type: custom
+      - name: increaseVMStatusRunningRetries
+        operation: .vmStatusRunningRetries=.vmStatusRunningRetries + 1
+        type: expression
+      - name: successResult
+        operation: '{ "result": { "message": "VM " + .vm_name + " in namespace "+.vm_namespace + " using image "+ .vm_image +" ready and running.", "outputs":[ { "key":"Console URL", "value": $SECRET.cluster_console_url + "/k8s/ns/" + .vm_namespace + "/kubevirt.io~v1~VirtualMachine/" + .vm_name + "/console/standalone", "format":"link" } ] } }'
+        type: expression
+      - name: errorVMNotRunningResult
+        operation: '{ "result": { "message": "VM " + .vm_name + " in namespace " + .vm_namespace + " using image " + .vm_image +" not ready after " + (.vmStatusRunning|tostring) + " retries: " + (.vm.status|tostring) } }'
+        type: expression
+      - name: errorAuthorizationDeniedResult
+        operation: '{ "result": { "message": "Authorization denied to create VM " + .vm_name + " in namespace "+.vm_namespace + " using image "+ .vm_image, "outputs":[ { "key":"Jira issue", "value": $SECRET.jira_url + "/jira/servicedesk/projects/" + .projectKey + "/issues/" + .jiraCreateIssueResult.key, "format":"link" }] } }'
+        type: expression
+    start:
+      stateName: Open issue on JIRA
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .jiraCreateIssueResult
+              useResults: true
+            functionRef:
+              arguments:
+                fields:
+                  description: '"Authorization request to create VM " + .vm_name + " in namespace "+.vm_namespace + " using image "+ .vm_image'
+                  issuetype:
+                    name: Task
+                  labels:
+                    - backstage-workflow
+                    - '"workflowId=" + $WORKFLOW.instanceId'
+                  project:
+                    key: .projectKey
+                  summary: '"Authorization request to create VM " + .vm_name + " in namespace "+.vm_namespace'
+              invoke: sync
+              refName: jiraCreateIssue
+            name: callbackAction
+        name: Open issue on JIRA
+        transition:
+          nextState: 'Notify Backstage: JIRA ticket created'
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"JIRA ticket created to request authorization to create VM " + .vm_name + " in namespace "+.vm_namespace'
+                  link: $SECRET.jira_url + "/jira/servicedesk/projects/" + .projectKey + "/issues/" + .jiraCreateIssueResult.key
+                  severity: normal
+                  title: '"JIRA ticket created for VM " + .vm_name'
+                  topic: Request VM on CNV workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: 'Create notification: JIRA ticket created'
+        name: 'Notify Backstage: JIRA ticket created'
+        transition:
+          nextState: Poll issue
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .jiraGetIssueResult
+              useResults: true
+            functionRef:
+              arguments:
+                issueIdOrKey: .jiraCreateIssueResult.id
+              invoke: sync
+              refName: jiraGetIssue
+            name: get issue
+            sleep:
+              before: PT10S
+        name: Poll issue
+        transition:
+          nextState: Check issue done
+        type: operation
+      - dataConditions:
+          - condition: .jiraGetIssueResult.fields.status.statusCategory.key == "done" and .jiraGetIssueResult.fields.resolution.name != "Done"
+            name: VM creation denied
+            transition:
+              nextState: Notify VM creation denied
+          - condition: .jiraGetIssueResult.fields.status.statusCategory.key == "done" and .jiraGetIssueResult.fields.resolution.name == "Done"
+            name: VM creation authorized
+            transition:
+              nextState: Notify VM creation authorized
+        defaultCondition:
+          transition:
+            nextState: Poll issue
+        name: Check issue done
+        type: switch
+      - branches:
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    message: '${"VM creation authorized, see Jira issue: " + $SECRET.jira_url + "/jira/servicedesk/projects/" + .projectKey + "/issues/" + .jiraCreateIssueResult.key + " ==> " + .vm_name}'
+                  invoke: sync
+                  refName: print
+                name: printSystemOut
+            name: printSystemOut
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    payload:
+                      description: '"Authorization granted to create VM " + .vm_name + " in namespace "+.vm_namespace + " using image "+ .vm_image +". A notification will be sent once the VM is ready."'
+                      severity: normal
+                      title: '"Authorization granted to create VM " + .vm_name + " in namespace "+.vm_namespace'
+                      topic: Request VM on CNV workflow
+                    recipients:
+                      entityRef: .recipients
+                      type: entity
+                  invoke: sync
+                  refName: createNotification
+                name: 'Create notification: VM creation authorized'
+            name: 'Create notification: VM creation authorized'
+        completionType: allOf
+        name: Notify VM creation authorized
+        numCompleted: 0
+        transition:
+          nextState: Create VM
+        type: parallel
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .createdVM
+              useResults: true
+            functionRef:
+              arguments:
+                apiVersion: kubevirt.io/v1
+                kind: VirtualMachine
+                metadata:
+                  labels:
+                    app: .vm_name
+                  name: .vm_name
+                  namespace: .vm_namespace
+                namespace: .vm_namespace
+                spec:
+                  dataVolumeTemplates:
+                    - apiVersion: cdi.kubevirt.io/v1beta1
+                      kind: DataVolume
+                      metadata:
+                        name: .vm_name
+                      spec:
+                        sourceRef:
+                          kind: DataSource
+                          name: .vm_image
+                          namespace: openshift-virtualization-os-images
+                        storage:
+                          resources:
+                            requests:
+                              storage: 30Gi
+                  running: true
+                  template:
+                    metadata:
+                      labels:
+                        kubevirt.io/domain: .vm_name
+                        kubevirt.io/size: small
+                    spec:
+                      architecture: amd64
+                      domain:
+                        cpu:
+                          cores: 1
+                          sockets: 1
+                          threads: 1
+                        devices:
+                          disks:
+                            - disk:
+                                bus: virtio
+                              name: rootdisk
+                            - disk:
+                                bus: virtio
+                              name: cloudinitdisk
+                          interfaces:
+                            - masquerade: {}
+                              name: default
+                        memory:
+                          guest: 2Gi
+                      networks:
+                        - name: default
+                          pod: {}
+                      volumes:
+                        - dataVolume:
+                            name: .vm_name
+                          name: rootdisk
+                        - cloudInitNoCloud:
+                            userData: |-
+                              #cloud-config
+                              user: cloud-user
+                              password: 0fb2-7rts-vnrb
+                              chpasswd: { expire: False }
+                          name: cloudinitdisk
+              invoke: sync
+              refName: createNamespacedVirtualMachine
+        name: Create VM
+        transition:
+          nextState: InitVMStatusRunningRetry
+        type: operation
+      - data:
+          vmStatusRunningRetries: 0
+        name: InitVMStatusRunningRetry
+        transition:
+          nextState: Poll VM
+        type: inject
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .vm
+              useResults: true
+            functionRef:
+              arguments:
+                name: .vm_name
+                namespace: .vm_namespace
+              invoke: sync
+              refName: readNamespacedVirtualMachine
+            name: get VM
+            sleep:
+              before: PT10S
+        name: Poll VM
+        transition:
+          nextState: IncreaseVMStatusRunningRetriesRetry
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: increaseVMStatusRunningRetries
+        name: IncreaseVMStatusRunningRetriesRetry
+        transition:
+          nextState: Check VM status
+        type: operation
+      - dataConditions:
+          - condition: .vm.status.ready == true
+            name: VM running
+            transition:
+              nextState: Notify VM Created
+          - condition: (.vmStatusRunningRetries >   ($SECRET.vm_check_running_max_retries | tonumber))
+            name: VM not running
+            transition:
+              nextState: Notify VM not running
+        defaultCondition:
+          transition:
+            nextState: Poll VM
+        name: Check VM status
+        type: switch
+      - branches:
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    message: 'VM running: .vm'
+                  invoke: sync
+                  refName: print
+                name: printSystemOut
+            name: printSystemOut
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    payload:
+                      description: '"VM " + .vm_name + " in namespace "+.vm_namespace + " using image "+ .vm_image +" ready and running."'
+                      link: $SECRET.cluster_console_url + "/k8s/ns/" + .vm_namespace + "/kubevirt.io~v1~VirtualMachine/" + .vm_name + "/console/standalone"
+                      severity: normal
+                      title: '"VM " + .vm_name + " in namespace "+.vm_namespace + " ready"'
+                      topic: Request VM on CNV workflow
+                    recipients:
+                      entityRef: .recipients
+                      type: entity
+                  invoke: sync
+                  refName: createNotification
+                name: 'Create notification: VM creation running'
+            name: 'Create notification: VM running'
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  invoke: sync
+                  refName: successResult
+                name: setOutput
+            name: setOutput
+        completionType: allOf
+        end:
+          terminate: true
+        name: Notify VM Created
+        numCompleted: 0
+        type: parallel
+      - branches:
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    message: 'VM not running: .vm'
+                  invoke: sync
+                  refName: print
+                name: printSystemOut
+            name: printSystemOut
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    payload:
+                      description: '"VM " + .vm_name + " in namespace " + .vm_namespace + " using image " + .vm_image +" not ready after " + (.vmStatusRunningRetries|tostring) + " retries: " + (.vm.status|tostring)'
+                      severity: high
+                      title: '"VM " + .vm_name + " in namespace "+.vm_namespace + " not ready"'
+                      topic: Request VM on CNV workflow
+                    recipients:
+                      entityRef: .recipients
+                      type: entity
+                  invoke: sync
+                  refName: createNotification
+                name: 'Create notification: VM not running'
+            name: 'Create notification: VM not running'
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  invoke: sync
+                  refName: errorVMNotRunningResult
+                name: setOutput
+            name: setOutput
+        completionType: allOf
+        end:
+          terminate: true
+        metadata:
+          errorMessage: '"VM " + .vm_name + " in namespace "+.vm_namespace + " not ready"'
+        name: Notify VM not running
+        numCompleted: 0
+        type: parallel
+      - branches:
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    message: '${"VM creation denied, see Jira issue: " + $SECRET.jira_url + "/jira/servicedesk/projects/" + .projectKey + "/issues/" + .jiraCreateIssueResult.key + " ==> " + .vm_name}'
+                  invoke: sync
+                  refName: print
+                name: printSystemOut
+            name: printSystemOut
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  arguments:
+                    payload:
+                      description: '"Authorization denied to create VM " + .vm_name + " in namespace "+.vm_namespace + " using image "+ .vm_image '
+                      link: $SECRET.jira_url + "/jira/servicedesk/projects/" + .projectKey + "/issues/" + .jiraCreateIssueResult.key
+                      severity: high
+                      title: '"Authorization denied to create VM " + .vm_name + " in namespace "+.vm_namespace'
+                      topic: Request VM on CNV workflow
+                    recipients:
+                      entityRef: .recipients
+                      type: entity
+                  invoke: sync
+                  refName: createNotification
+                name: 'Create notification: VM creation denied'
+            name: 'Create notification: VM creation denied'
+          - actions:
+              - actionDataFilter:
+                  useResults: true
+                functionRef:
+                  invoke: sync
+                  refName: errorAuthorizationDeniedResult
+                name: setOutput
+            name: setOutput
+        completionType: allOf
+        end:
+          terminate: true
+        metadata:
+          errorMessage: '"Authorization denied to create VM " + .vm_name + " in namespace "+.vm_namespace'
+        name: Notify VM creation denied
+        numCompleted: 0
+        type: parallel
+  podTemplate:
+    container:
+      env:
+        - name: NOTIFICATIONS_BEARER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: NOTIFICATIONS_BEARER_TOKEN
+              name: request-vm-cnv-secrets
+      image: quay.io/orchestrator/serverless-workflow-request-vm-cnv:d347d903b21feac8e3f692d82382e0e226ed52bc
+      resources: {}
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-request-vm-cnv-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-request-vm-cnv-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: request-vm-cnv
+status:
+  address: {}
+  lastTimeRecoverAttempt: null
