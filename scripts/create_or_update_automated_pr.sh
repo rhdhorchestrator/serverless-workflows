@@ -13,13 +13,6 @@ WORKDIR=$8
 GH_TOKEN=$9
 GITHUB_SHA=${10}
 
-# Authenticate gh CLI non-interactively using the token
-gh auth status
-if [ $? -ne 0 ]; then
-    echo "Authenticating with GitHub CLI..."
-    echo "${GH_TOKEN}" | gh auth login --with-token || exit 1
-fi
-
 # Get all automated PRs opened by orchestrator-ci for the repository
 prs=$(gh pr list --repo "${REPO}" -A orchestrator-ci --json number --jq '.[].number') || exit
 echo "${prs}"
