@@ -1,0 +1,224 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: Print input value
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: gh-pr
+    sonataflow.org/workflow-app: gh-pr
+  name: gh-pr
+spec:
+  flow:
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/basic__main-schema.json
+    functions:
+      - name: createNotification
+        operation: notifications#createNotification
+        type: rest
+      - name: scafolderMock
+        operation: specs/scafolderMock.yaml#mock
+        type: rest
+      - name: getBranchSHA
+        operation: specs/github.yaml#getBranchSHA
+        type: rest
+      - name: pushCommitBranch
+        operation: specs/github.yaml#updateBranchRef
+        type: rest
+      - name: createCommit
+        operation: specs/github.yaml#createCommit
+        type: rest
+      - name: createTree
+        operation: specs/github.yaml#createTree
+        type: rest
+      - name: createBlob
+        operation: specs/github.yaml#createBlob
+        type: rest
+      - name: createBranch
+        operation: specs/github.yaml#createBranch
+        type: rest
+      - name: getCommitDetails
+        operation: specs/github.yaml#getCommitDetails
+        type: rest
+      - name: createPullRequest
+        operation: specs/github.yaml#createPullRequest
+        type: rest
+      - name: print
+        operation: sysout
+        type: custom
+      - name: createNewBlob
+        operation: '{"mode": "100644", "path": "test", "type": "blob", "sha": .createdBlob.sha}'
+        type: expression
+      - name: successResult
+        operation: '{ "result": { "message": "PR created", "outputs":[ { "key": "PR_URL", "value": .prURL.html_url, "format":"link" } ] } }'
+        type: expression
+    start:
+      stateName: CreateBranch
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .latestSHA
+              useResults: true
+            functionRef:
+              arguments:
+                owner: .owner
+                ref: '"heads/" + .baseBranch'
+                repo: .repo
+              invoke: sync
+              refName: getBranchSHA
+            name: GetHeadSha
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                owner: .owner
+                ref: '"refs/heads/" + .targetBranch'
+                repo: .repo
+                sha: .latestSHA.object.sha
+              invoke: sync
+              refName: createBranch
+            name: createBranch
+          - actionDataFilter:
+              toStateData: .commit
+              useResults: true
+            functionRef:
+              arguments:
+                commit_sha: .latestSHA.object.sha
+                owner: .owner
+                repo: .repo
+              invoke: sync
+              refName: getCommitDetails
+            name: getCommitDetails
+        name: CreateBranch
+        transition:
+          nextState: CreateFiles
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .createdBlob
+              useResults: true
+            functionRef:
+              arguments:
+                content: TEST
+                encoding: utf-8
+                owner: .owner
+                repo: .repo
+              invoke: sync
+              refName: createBlob
+            name: createBlob
+          - actionDataFilter:
+              toStateData: .blobs
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: createNewBlob
+            name: createNewBlob
+        name: CreateFiles
+        transition:
+          nextState: CreateNewTree
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .newTree
+              useResults: true
+            functionRef:
+              arguments:
+                base_tree: .commit.tree.sha
+                owner: .owner
+                repo: .repo
+                tree: .blobs
+              invoke: sync
+              refName: createTree
+            name: createTree
+          - actionDataFilter:
+              toStateData: .newCommit
+              useResults: true
+            functionRef:
+              arguments:
+                message: Added/Updated multiple files via API
+                owner: .owner
+                parents:
+                  - .latestSHA.object.sha
+                repo: .repo
+                tree: .newTree.sha
+              invoke: sync
+              refName: createCommit
+            name: createCommit
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                force: false
+                owner: .owner
+                ref: '"heads/" + .targetBranch'
+                repo: .repo
+                sha: .newCommit.sha
+              invoke: sync
+              refName: pushCommitBranch
+            name: push
+        name: CreateNewTree
+        transition:
+          nextState: CreatePR
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .prURL
+              useResults: true
+            functionRef:
+              arguments:
+                base: .baseBranch
+                body: ""
+                head: .targetBranch
+                owner: .owner
+                repo: .repo
+                title: Automated PR
+              invoke: sync
+              refName: createPullRequest
+            name: createPullRequest
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: successResult
+            name: setOutput
+        end:
+          terminate: true
+        name: CreatePR
+        type: operation
+  podTemplate:
+    container:
+      image: quay.io/orchestrator/gh-pr:latest
+      resources: {}
+      envFrom:
+        - secretRef:
+            name: gh-pr-secrets
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-gh-pr-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-gh-pr-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: gh-pr
+status:
+  address: {}
+  lastTimeRecoverAttempt: null

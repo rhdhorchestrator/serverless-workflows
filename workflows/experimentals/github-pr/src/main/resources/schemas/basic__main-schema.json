@@ -1,0 +1,47 @@
+  {
+    "$id": "classpath:/schemas/create-ocp-project-schema.json",
+    "title": "Workflow input data",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "anyFieldName": {
+        "type": "string",
+        "ui:widget": "AuthRequester",
+        "ui:props": {
+          "authTokenDescriptors": [
+            {
+              "provider": "github",
+              "tokenType": "oauth",
+              "scope": "repo"
+            }
+          ]
+        }
+      },
+      "owner": {
+        "title": "owner",
+        "description": "OCP project to create",
+        "type": "string"
+      },
+      "repo": {
+        "title": "repo",
+        "description": "OCP project to create",
+        "type": "string"
+      },
+      "baseBranch": {
+        "title": "baseBranch",
+        "description": "OCP project to create",
+        "type": "string"
+      },
+      "targetBranch": {
+        "title": "targetBranch",
+        "description": "OCP project to create",
+        "type": "string"
+      }
+    },
+    "required": [
+      "owner",
+      "repo",
+      "baseBranch",
+      "targetBranch"
+    ]
+  }

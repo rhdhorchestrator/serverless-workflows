@@ -1,0 +1,138 @@
+apiVersion: v1
+data:
+  basic__main-schema.json: |2-
+      {
+        "$id": "classpath:/schemas/create-ocp-project-schema.json",
+        "title": "Workflow input data",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "anyFieldName": {
+            "type": "string",
+            "ui:widget": "AuthRequester",
+            "ui:props": {
+              "authTokenDescriptors": [
+                {
+                  "provider": "github",
+                  "tokenType": "oauth",
+                  "scope": "repo"
+                }
+              ]
+            }
+          },
+          "owner": {
+            "title": "owner",
+            "description": "OCP project to create",
+            "type": "string"
+          },
+          "repo": {
+            "title": "repo",
+            "description": "OCP project to create",
+            "type": "string"
+          },
+          "baseBranch": {
+            "title": "baseBranch",
+            "description": "OCP project to create",
+            "type": "string"
+          },
+          "targetBranch": {
+            "title": "targetBranch",
+            "description": "OCP project to create",
+            "type": "string"
+          }
+        },
+        "required": [
+          "owner",
+          "repo",
+          "baseBranch",
+          "targetBranch"
+        ]
+      }
+  workflow-output-schema.json: |-
+    {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "WorkflowResult",
+        "description": "Schema of workflow output",
+        "type": "object",
+        "properties": {
+            "result": {
+                "type": "object",
+                "properties": {
+                    "completedWith": {
+                        "description": "The state of workflow completion.",
+                        "type": "string",
+                        "enum": [
+                            "error",
+                            "success",
+                            "warning"
+                        ]
+                    },
+                    "message": {
+                        "description": "High-level summary of the current status, free-form text, human readable.",
+                        "type": "string"
+                    },
+                    "nextWorkflows": {
+                        "description": "List of workflows suggested to run next. Items at lower indexes are of higher priority.",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "description": "Workflow identifier",
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "description": "Human readable title describing the workflow.",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "name"
+                            ]
+                        }
+                    },
+                    "outputs": {
+                        "description": "Additional structured output of workflow processing. This can contain identifiers of created resources, links to resources, logs or other output.",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "key": {
+                                    "description": "Unique identifier of the option. Preferably human-readable.",
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "description": "Free form value of the option.",
+                                    "anyOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "number"
+                                        }
+                                    ]
+                                },
+                                "format": {
+                                    "description": "More detailed type of the 'value' property. Defaults to 'text'.",
+                                    "enum": [
+                                        "text",
+                                        "number",
+                                        "link"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "key",
+                                "value"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 01-gh-pr-resources-schemas
