@@ -1,0 +1,3522 @@
+apiVersion: v1
+data:
+  github.yaml: |-
+    openapi: 3.0.0
+    info:
+      title: GitHub Repository Automation API
+      version: 1.0.0
+      description: API specification for automating GitHub repository tasks using the GitHub REST API v3.
+
+    servers:
+      - url: https://api.github.com
+        description: GitHub API
+    security:
+    - BearerToken: []
+    paths:
+      /repos/{owner}/{repo}/git/ref/{ref}:
+        get:
+          summary: Get the SHA of a ref
+          operationId: getBranchSHA
+          parameters:
+            - name: owner
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: repo
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: ref
+              in: path
+              required: true
+              schema:
+                type: string
+          responses:
+            '200':
+              description: Successfully retrieved branch reference
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      object:
+                        type: object
+                        properties:
+                          sha:
+                            type: string
+            '404':
+              description: Branch not found
+      /repos/{owner}/{repo}/git/refs:
+        post:
+          summary: Create a new branch
+          operationId: createBranch
+          parameters:
+            - name: owner
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: repo
+              in: path
+              required: true
+              schema:
+                type: string
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    ref:
+                      type: string
+                    sha:
+                      type: string
+          responses:
+            '201':
+              description: Branch created successfully
+              content:
+                application/json:
+                  schema:
+                    type: object
+      /repos/{owner}/{repo}/git/refs/{ref}:
+        patch:
+          summary: Update a branch reference
+          operationId: updateBranchRef
+          parameters:
+            - name: owner
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: repo
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: ref
+              in: path
+              required: true
+              schema:
+                type: string
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    sha:
+                      type: string
+                    force:
+                      type: boolean
+          responses:
+            '200':
+              description: Branch updated successfully
+              content:
+                application/json:
+                  schema:
+                    type: object
+      /repos/{owner}/{repo}/git/blobs:
+        post:
+          summary: Create a new blob
+          operationId: createBlob
+          parameters:
+            - name: owner
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: repo
+              in: path
+              required: true
+              schema:
+                type: string
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    content:
+                      type: string
+                    encoding:
+                      type: string
+          responses:
+            '201':
+              description: Blob created successfully
+              content:
+                application/json:
+                  schema:
+                    type: object
+      /repos/{owner}/{repo}/git/trees:
+        post:
+          summary: Create a new tree
+          operationId: createTree
+          parameters:
+            - name: owner
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: repo
+              in: path
+              required: true
+              schema:
+                type: string
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    base_tree:
+                      type: string
+                    tree:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          path:
+                            type: string
+                          mode:
+                            type: string
+                          type:
+                            type: string
+                          sha:
+                            type: string
+          responses:
+            '201':
+              description: Tree created successfully
+              content:
+                application/json:
+                  schema:
+                    type: object
+      /repos/{owner}/{repo}/git/commits:
+        post:
+          summary: Create a new commit
+          operationId: createCommit
+          parameters:
+            - name: owner
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: repo
+              in: path
+              required: true
+              schema:
+                type: string
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                    tree:
+                      type: string
+                    parents:
+                      type: array
+                      items:
+                        type: string
+          responses:
+            '201':
+              description: Commit created successfully
+              content:
+                application/json:
+                  schema:
+                    type: object
+      /repos/{owner}/{repo}/git/commits/{commit_sha}:
+        get:
+          summary: Get details of a commit
+          operationId: getCommitDetails
+          parameters:
+            - name: owner
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: repo
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: commit_sha
+              in: path
+              required: true
+              schema:
+                type: string
+          responses:
+            '200':
+              description: Commit details retrieved successfully
+              content:
+                application/json:
+                  schema:
+                    type: object
+      /repos/{owner}/{repo}/pulls:
+        post:
+          summary: Create a pull request
+          description: Opens a new pull request from a branch to the base branch.
+          operationId: createPullRequest
+          parameters:
+            - name: owner
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: repo
+              in: path
+              required: true
+              schema:
+                type: string
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      example: "New Feature: Added new file"
+                    body:
+                      type: string
+                      example: "This PR adds a new file using the GitHub REST API."
+                    head:
+                      type: string
+                      example: "new-feature-branch"
+                    base:
+                      type: string
+                      example: "main"
+          responses:
+            '201':
+              description: Pull request created successfully.
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      html_url:
+                        type: string
+                        example: "https://github.com/user/repo/pull/42"
+            '422':
+              description: Invalid input or pull request already exists.
+    components:
+      securitySchemes:
+        BearerToken:
+          type: http
+          scheme: bearer
+          description: Bearer Token authentication
+  scafolderMock.yaml: |
+    openapi: 3.1.0
+    info:
+      title: scafolderMock
+      description: |-
+        scafolder Mock
+      version: 1.0.0
+    tags:
+      - name: scafolderMock
+        description: scafolder Mock
+    servers:
+      - url: /
+    security:
+      - BearerToken: []
+    paths:
+      /:
+        get:
+          summary: Get user's notifications
+          description: Get user's notifications
+          operationId: mock
+          responses:
+            "200":
+              content:
+                application/json:
+                  schema:
+                    additionalProperties: false
+                    properties:
+                      files:
+                        description: An array of FileInfo objects
+                        items:
+                          $ref: "#/components/schemas/FileInfo"
+                        maxItems: 1000
+                        type:
+                          - array
+                          - "null"
+                    type: object
+              description: OK
+            "400":
+              content:
+                application/problem+json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorModel"
+              description: Bad Request
+            "401":
+              content:
+                application/problem+json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorModel"
+              description: Unauthorized
+            "403":
+              content:
+                application/problem+json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorModel"
+              description: Forbidden
+            "404":
+              content:
+                application/problem+json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorModel"
+              description: Not Found
+            "406":
+              content:
+                application/problem+json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorModel"
+              description: Not Acceptable
+            "415":
+              content:
+                application/problem+json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorModel"
+              description: Unsupported Media Type
+            "422":
+              content:
+                application/problem+json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorModel"
+              description: Unprocessable Entity
+            "429":
+              content:
+                application/problem+json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorModel"
+              description: Too Many Requests
+            "500":
+              content:
+                application/problem+json:
+                  schema:
+                    $ref: "#/components/schemas/ErrorModel"
+              description: Internal Server Error
+            default:
+              content:
+                application/json:
+                  example:
+                    files:
+                      - algorithm: sha256
+                        checkSum: 5c467cb299d939d28ce7c92b25eca14f4b6e7e1d2c5d67aebd2ce64e6aba3157
+                        content: |-
+                          resource "google_service_account_iam_member" "pd303-wif-binding-iac-team" {
+                            service_account_id = "projects/ford-8edaae30b2e9557b50272c08/serviceAccounts/sa-pipeline@ford-8edaae30b2e9557b50272c08.iam.gserviceaccount.com"
+                            role               = "roles/iam.workloadIdentityUser"
+                            member             = "principal://iam.googleapis.com/projects/448146263476/locations/global/workloadIdentityPools/pd303-5g4zs/subject/system:serviceaccount:iac-team:pipeline"
+                          }
+                        encoding: text
+                        labels:
+                          debugOutput: "wif-terraform - "
+                          fromTemplate: wif-terraform
+                        length: 456
+                        object: resource "google_service_account_iam_member" "pd303-wif-binding-iac-team" { service_account_id = "projects/ford-8edaae30b2e9557b50272c08/serviceAccounts/sa-pipeline@ford-8edaae30b2e9557b50272c08.iam.gserviceaccount.com" role               = "roles/iam.workloadIdentityUser" member             = "principal://iam.googleapis.com/projects/448146263476/locations/global/workloadIdentityPools/pd303-5g4zs/subject/system:serviceaccount:iac-team:pipeline" }
+                        path: .tekton/snippets/google-creds-sandbox.tf
+                      - algorithm: sha256
+                        checkSum: b609fd2847a3ea1fa37e551c03dca6f368ab3cbf1bce3def0444f5732544fdfa
+                        content: |-
+                          # This is a comment.
+                          # Each line is a file pattern followed by one or more owners.
+
+                          # These owners will be the default owners for everything in
+                          # the repo. Unless a later match takes precedence,
+                          # @kcloutie and @abaker9 will be requested for
+                          # review when someone opens a pull request.
+                          *       @abaker9 @kcloutie @jvandal3
+
+                          # Order is important; the last matching pattern takes the most
+                          # precedence. When someone opens a pull request that only
+                          # modifies JS files, only @js-owner and not the global
+                          # owner(s) will be requested for a review.
+                          # *.js    @js-owner
+
+                          # You can also use email addresses if you prefer. They'll be
+                          # used to look up users just like we do for commit author
+                          # emails.
+                          # *.go docs@example.com
+
+                          # In this example, @doctocat owns any files in the build/logs
+                          # directory at the root of the repository and any of its
+                          # subdirectories.
+                          # /build/logs/ @doctocat
+
+                          # The `docs/*` pattern will match files like
+                          # `docs/getting-started.md` but not further nested files like
+                          # `docs/build-app/troubleshooting.md`.
+                          # docs/*  docs@example.com
+
+                          # In this example, @octocat owns any file in an apps directory
+                          # anywhere in your repository.
+                          # apps/ @octocat
+
+                          # In this example, @doctocat owns any file in the `/docs`
+                          # directory in the root of your repository.
+                          # /docs/ @doctocat
+                        encoding: text
+                        labels:
+                          debugOutput: "github - "
+                          fromTemplate: github
+                          skipIfExists: "true"
+                        length: 1287
+                        path: .github/CODEOWNERS
+                      - algorithm: sha256
+                        checkSum: 82f511e46aff1b77fddae8e602aa7958aabd35cb33d4be0134d748ec1347b5b0
+                        content: |
+                          ---
+                          name: Bug report
+                          about: Create a report to help us improve
+                          title: ''
+                          labels: ''
+                          assignees: ''
+
+                          ---
+
+                          **Describe the bug**
+                          A clear and concise description of what the bug is.
+
+                          **To Reproduce**
+                          Steps to reproduce the behavior:
+                          1. Go to '...'
+                          2. Click on '....'
+                          3. Scroll down to '....'
+                          4. See error
+
+                          **Expected behavior**
+                          A clear and concise description of what you expected to happen.
+
+                          **Screenshots**
+                          If applicable, add screenshots to help explain your problem.
+
+                          **Desktop (please complete the following information):**
+                           - OS: [e.g. iOS]
+                           - Browser [e.g. chrome, safari]
+                           - Version [e.g. 22]
+
+                          **Additional context**
+                          Add any other context about the problem here.
+                        encoding: text
+                        labels:
+                          debugOutput: "github - "
+                          fromTemplate: github
+                          skipIfExists: "true"
+                        length: 665
+                        path: .github/ISSUE_TEMPLATE/bug_report.md
+                      - algorithm: sha256
+                        checkSum: 436bb0ecdf0da094cb87f62243a3344a93266effc3c63adfb91d9f107de8ef8e
+                        content: |-
+                          # The following determine where Terraform's state file is stored.
+
+                          #
+                          terraform {
+                            backend "gcs" {
+                              bucket = "bkt-tfstate-iac-team-s" # the backend is stored in a bucket typically in the common project
+                              prefix = "terraform/iac-team/sandbox/go-kcloutie"
+                            }
+                          }
+                          #
+                        encoding: text
+                        labels:
+                          debugOutput: "tfbackend - "
+                          fromTemplate: tfbackend
+                        length: 267
+                        object: terraform { backend "gcs" { bucket = "bkt-tfstate-iac-team-s"
+                        path: envs/sandbox/backend.tf
+                      - algorithm: sha256
+                        checkSum: cb7f854a5192079175cec3a0ba69e9667978d6dd839cbfed07125e26b693dbaa
+                        content: " #"
+                        encoding: text
+                        labels:
+                          debugOutput: "app-config-template - "
+                          fromTemplate: app-config-template
+                        length: 2
+                        path: modules/serverless-api-deploy/applicationConfig.tftpl
+                  schema:
+                    additionalProperties: false
+                    properties:
+                      files:
+                        description: An array of FileInfo objects
+                        items:
+                          $ref: "#/components/schemas/FileInfo"
+                        maxItems: 1000
+                        type:
+                          - array
+                          - "null"
+                    type: object
+              description: OK
+    #          content:
+    #            application/json:
+    #              schema:
+    #                $ref: "#/components/schemas/GetNotifications"
+    #      security:
+    #        - defaultApiKey: []
+    #components:
+    #  securitySchemes:
+    #BearerToken:
+    # type: oauth2
+    # flows:
+    #   clientCredentials:
+    #     tokenUrl: http://localhost:32802/realms/quarkus/protocol/openid-connect/token
+    #     scopes: {}
+    # description: Bearer Token authentication
+    #defaultApiKey:
+    #  description: API key provided in console
+    #  type: apiKey
+    #  name: api-key
+    #  in: header
+    components:
+      schemas:
+        Acknowledgement:
+          additionalProperties: false
+          properties:
+            buttonText:
+              description: The text that will be displayed within the button of the acknowledgement
+              examples:
+                - Acknowledge
+              maxLength: 30
+              minLength: 3
+              pattern: ^(.)+$
+              type: string
+            headerText:
+              description: The header of the acknowledgement
+              examples:
+                - Prerequisites
+              maxLength: 80
+              minLength: 3
+              pattern: ^(.)+$
+              type: string
+            items:
+              description: The lines of the acknowledgement
+              items:
+                type: string
+              maxItems: 100
+              minItems: 1
+              type:
+                - array
+                - "null"
+          required:
+            - headerText
+            - items
+          type: object
+        ApiCall:
+          additionalProperties: false
+          properties:
+            authenticationType:
+              description: The authentication type to use when making the api call
+              enum:
+                - none
+                - azure
+                - github
+              examples:
+                - none
+              maxLength: 6
+              type: string
+            base64RawBody:
+              description: The base64 encoded raw body of the api call
+              examples:
+                - eyJrZXkiOiJ2YWx1ZSJ9
+              maxLength: 1000000
+              type: string
+            bodyRenderTemplateOptions:
+              $ref: "#/components/schemas/RenderTemplateOptions"
+              description: The render go template options for the body of the api call
+            bodySource:
+              $ref: "#/components/schemas/FileInfo"
+              description: A FileInfo object that represents the body of the api call
+            bodySourcePath:
+              description: The path to the file that contains the body of the api call
+              examples:
+                - /path/to/file.txt
+              maxLength: 256
+              type: string
+            clientId:
+              description: The client id of the api call
+              examples:
+                - 9d397f3c-091a-4e96-b721-919d7b230b53
+              maxLength: 36
+              pattern: ^$|^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
+              type: string
+            headers:
+              additionalProperties:
+                maxLength: 100
+                pattern: (.)*
+                type: string
+              description: The headers to use when making the api call
+              type: object
+            headersRenderTemplateOptions:
+              $ref: "#/components/schemas/RenderTemplateOptions"
+              description: The render go template options for the headers of the api call
+            maxRetries:
+              description: The maximum number of retries for the api call
+              examples:
+                - 3
+              format: int64
+              maximum: 10
+              minimum: 0
+              type: integer
+            method:
+              description: The http method of the api call
+              enum:
+                - GET
+                - POST
+                - PUT
+                - DELETE
+                - PATCH
+                - OPTIONS
+                - HEAD
+              examples:
+                - GET
+              maxLength: 6
+              type: string
+            name:
+              description: The name of the api
+              examples:
+                - apiData
+              maxLength: 60
+              minLength: 3
+              type: string
+            rawBody:
+              description: The raw body of the api call
+              examples:
+                - '{"key":"value"}'
+              maxLength: 1000000
+              type: string
+            scope:
+              description: The scope of the api call
+              examples:
+                - https://graph.microsoft.com/.default
+              maxLength: 256
+              type: string
+            successfulResponseCodes:
+              description: A list of response codes that will be considered successful
+              items:
+                format: int64
+                type: integer
+              maxItems: 20
+              type:
+                - array
+                - "null"
+            token:
+              description: The token to use when making the api call
+              examples:
+                - ?????
+              maxLength: 256
+              type: string
+            tokenEnvName:
+              description: The name of the environment variable that contains the token to use when making the api call
+              examples:
+                - TOKEN
+              maxLength: 256
+              type: string
+            uri:
+              description: The uri of the api that will be called
+              examples:
+                - https://golang.org
+              maxLength: 256
+              type: string
+            urlRenderTemplateOptions:
+              $ref: "#/components/schemas/RenderTemplateOptions"
+              description: The render go template options for the url of the api call
+          type: object
+        CelInfo:
+          additionalProperties: false
+          properties:
+            select:
+              description: The cel expression to select/filter the data source data
+              examples:
+                - proxy
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            source:
+              description: "The source of the data. This can be a file (prefix: file://), directory (prefix: dir://), or URL (prefix: http(s)://)"
+              examples:
+                - http://proxy.com/proxy.json
+              maxLength: 256
+              pattern: .*
+              type: string
+          type: object
+        CelResponse:
+          additionalProperties: false
+          properties:
+            result:
+              description: The result of the CEL expression
+          type: object
+        Change:
+          additionalProperties: false
+          properties:
+            description:
+              description: The description of the change
+              examples:
+                - Updated the Golang version to 1.16.3
+              maxLength: 500
+              minLength: 3
+              pattern: ^(.|\n|\r)*
+              type: string
+            kind:
+              description: The kind of change
+              enum:
+                - added
+                - changed
+                - deprecated
+                - removed
+                - fixed
+                - security
+              examples:
+                - changed
+              maxLength: 10
+              minLength: 5
+              type: string
+            links:
+              description: Links to content related to the change
+              items:
+                $ref: "#/components/schemas/Link"
+              maxItems: 10
+              type:
+                - array
+                - "null"
+          type: object
+        ChmodFileDetails:
+          additionalProperties: false
+          properties:
+            fileMode:
+              description: The file mode to set
+              examples:
+                - "0644"
+              maxLength: 4
+              minLength: 3
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            fileName:
+              description: The name of the file to chmod
+              examples:
+                - main.go
+              maxLength: 100
+              minLength: 3
+              pattern: ^(.+)\/*([^\/]*)$
+              type: string
+          type: object
+        ContentMergeAppendOptions:
+          additionalProperties: false
+          properties:
+            separator:
+              description: The separator to use when appending content
+              examples:
+                - "\n"
+              maxLength: 100
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+          type: object
+        ContentMergeStrategy:
+          additionalProperties: false
+          properties:
+            appendOptions:
+              $ref: "#/components/schemas/ContentMergeAppendOptions"
+              description: The append options for the content
+            strategy:
+              description: The merge strategy for the content
+              enum:
+                - overwrite
+                - append
+              type: string
+          type: object
+        DataSource:
+          additionalProperties: false
+          properties:
+            algorithm:
+              description: The algorithm to use when hashing the file(s)
+              enum:
+                - md5
+                - sha1
+                - sha256
+                - sha512
+              maxLength: 6
+              type: string
+            apiToken:
+              description: The API token to use when making the HTTP request
+              examples:
+                - ?????
+              maxLength: 256
+              pattern: .*
+              type: string
+            beta:
+              description: When true, will return beta data sources only
+              type: boolean
+            category:
+              description: The category of the data source
+              examples:
+                - schema
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            cel:
+              $ref: "#/components/schemas/CelInfo"
+              description: The CEL expression to use when processing the data source
+            depth:
+              description: "The depth of the directory to search for files. This is only used with the directory (prefix: dir://) source"
+              examples:
+                - 3
+              format: int64
+              maximum: 10
+              minimum: -1
+              type: integer
+            description:
+              description: The description of the data source
+              examples:
+                - Proxy information for Ford and GCP network
+              maxLength: 5000
+              minLength: 3
+              pattern: ^(.|\n|\r)*
+              type: string
+            encoding:
+              description: The encoding of the file(s)
+              enum:
+                - base64
+                - binary
+                - text
+              maxLength: 6
+              type: string
+            fan:
+              $ref: "#/components/schemas/Fan"
+              description: The fan on object to use when processing the data source
+            httpMaxRetries:
+              description: The maximum number of retries for the HTTP request
+              examples:
+                - 3
+              format: int64
+              maximum: 10
+              minimum: 0
+              type: integer
+            ignoreFailures:
+              description: Ignore failures when processing the data source
+              examples:
+                - true
+              type: boolean
+            matchRegex:
+              description: "The regex pattern to match when collecting files. This is only used with the directory (prefix: dir://) source"
+              examples:
+                - ^proxy.*$
+              format: regex
+              maxLength: 256
+              type: string
+            name:
+              description: The name of the data source
+              examples:
+                - dsProxy
+              maxLength: 30
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            notMatchRegex:
+              description: "The regex pattern to not match when collecting files. This is only used with the directory (prefix: dir://) source"
+              examples:
+                - ^proxy1.*$
+              format: regex
+              maxLength: 256
+              type: string
+            object:
+              description: The raw data source object
+            repoBaseUrl:
+              description: The base URL of the datasource repository
+              examples:
+                - https://storage.googleapis.com/cldctl-datasources
+              format: uri
+              maxLength: 256
+              minLength: 6
+              pattern: ^(http|https):\/\/.+
+              type: string
+            source:
+              description: "The source of the data. This can be a file (prefix: file://), directory (prefix: dir://), or URL (prefix: http(s)://)"
+              examples:
+                - http://proxy.com/proxy.json
+              maxLength: 256
+              pattern: .*
+              type: string
+            sourceName:
+              description: The name of the data source within the repository
+              examples:
+                - proxy
+              maxLength: 30
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            synopsis:
+              description: The synopsis of the data source
+              examples:
+                - Proxy information
+              maxLength: 250
+              minLength: 3
+              pattern: ^(.)*
+              type: string
+            tokenType:
+              description: The type of token to use when making the HTTP request
+              examples:
+                - Bearer
+              maxLength: 10
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            type:
+              description: The type of data source. This can be http, file, dir, hcl, or raw
+              enum:
+                - http
+                - file
+                - dir
+                - hcl
+                - raw
+              maxLength: 6
+              type: string
+            version:
+              description: The version of the data source. This can be a version (1.0.0) or a version constraints (>= 1.0, < 1.4). See https://github.com/hashicorp/go-version for more details
+              examples:
+                - 1.0.0
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\-|\_|\ |\.|\<|\>|=|,|\~|\!)+$
+              type: string
+            when:
+              description: The CEL expression to use when determining if the data source should be executed
+              examples:
+                - _.test
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+          type: object
+        DestinationConfiguration:
+          additionalProperties: false
+          properties:
+            binaryFilesRegex:
+              description: Any File matching the specified regex will be marked as binary. This is primarily used for deploying to github to ensure the files are properly encoded within the github repository.
+              format: regex
+              maxLength: 1024
+              type: string
+            celFileName:
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            celFlowChartFolderPath:
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            celPath:
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            fileNameFormat:
+              maxLength: 256
+              pattern: ^(.+)\/*([^\/]*)$
+              type: string
+            flowChartFolderPath:
+              maxLength: 256
+              pattern: ^(.+)\/*([^\/]*)$
+              type: string
+            path:
+              maxLength: 256
+              pattern: ^(.+)\/*([^\/]*)$
+              type: string
+            terraformModuleFileNamePrefix:
+              maxLength: 256
+              minLength: 0
+              pattern: ^$|(.+)\/*([^\/]*)$
+              type: string
+            terraformTfvarsNamePrefix:
+              maxLength: 256
+              minLength: 0
+              pattern: ^$|(.+)\/*([^\/]*)$
+              type: string
+            terraformVariablesFileNamePrefix:
+              maxLength: 256
+              minLength: 0
+              pattern: ^$|(.+)\/*([^\/]*)$
+              type: string
+          type: object
+        ErrorDetail:
+          additionalProperties: false
+          properties:
+            location:
+              description: Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'
+              type: string
+            message:
+              description: Error message text
+              type: string
+            value:
+              description: The value at the given location
+          type: object
+        ErrorModel:
+          additionalProperties: false
+          properties:
+            $schema:
+              description: A URL to the JSON Schema for this object.
+              examples:
+                - //schemas/ErrorModel.json
+              format: uri
+              readOnly: true
+              type: string
+            detail:
+              description: A human-readable explanation specific to this occurrence of the problem.
+              examples:
+                - Property foo is required but is missing.
+              maxLength: 1024
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            errors:
+              description: Optional list of individual error details
+              items:
+                $ref: "#/components/schemas/ErrorDetail"
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+            instance:
+              description: A URI reference that identifies the specific occurrence of the problem.
+              examples:
+                - https://example.com/error-log/abc123
+              format: uri
+              maxLength: 1024
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            status:
+              description: HTTP status code
+              examples:
+                - 400
+              format: int64
+              type: integer
+            title:
+              description: A short, human-readable summary of the problem type. This value should not change between occurrences of the error.
+              examples:
+                - Bad Request
+              maxLength: 1024
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            type:
+              default: about:blank
+              description: A URI reference to human-readable documentation for the error.
+              examples:
+                - https://example.com/errors/example
+              format: uri
+              maxLength: 1024
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+          type: object
+        Fan:
+          additionalProperties: false
+          properties:
+            cel:
+              description: The cel expression to use when fanning on the data source
+              examples:
+                - _.test
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            keyName:
+              description: The key name to use when fanning on the data source
+              examples:
+                - proxy
+              maxLength: 30
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            objects:
+              description: The objects to use when fanning on the data source
+              items: {}
+              maxItems: 100
+              type:
+                - array
+                - "null"
+          type: object
+        Fanning:
+          additionalProperties: false
+          properties:
+            celFanOn:
+              description: Cel expression that must result in an array of objects to do fanning at the solution level i.e above business code/environment fanning. Mapping values will not be present when executing this cel expression, please use apis to get the data to fan on with
+              examples:
+                - someproperty
+              maxLength: 30
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            disableEnvironmentFanning:
+              description: When true and a business code is supplied, cldctl will NOT fan out on the business code environments
+              examples:
+                - true
+              type: boolean
+            fanOnObjectName:
+              default: solFanOnObject
+              description: The name within mappings that can be used to access the fan on data
+              examples:
+                - solFanOnObject
+              maxLength: 30
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            keyValuePropertyPath:
+              description: The property path to the field used as the key when fanning. This property must be an basic type i.e. string or int, cannot be an complex object or an array
+              examples:
+                - keyValue
+              maxLength: 30
+              pattern: ^[^\s]+(\w|\-|\\|\_|\.)+$
+              type: string
+          type: object
+        FileInfo:
+          additionalProperties: false
+          properties:
+            algorithm:
+              default: sha256
+              description: The algorithm to use when hashing the file
+              enum:
+                - md5
+                - sha1
+                - sha256
+                - sha512
+              maxLength: 6
+              type: string
+            checkSum:
+              description: The checksum of the file
+              examples:
+                - b3b57a02b411c14f34b5becc4c4fbe7c5ee95c3525e37a1ebf3f31e3f3988d5b
+              maxLength: 512
+              pattern: ^$|[a-fA-F0-9]{32,512}
+              type: string
+            chmod:
+              description: The chmod of the file
+              examples:
+                - "0644"
+              maxLength: 4
+              pattern: ^0[0-7]{3}$
+              type: string
+            content:
+              description: The content of the file
+              examples:
+                - RHVkZSEgV2hlcmUncyBteSBjYXI/
+              maxLength: 1000000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            encoding:
+              default: text
+              description: The encoding of the file
+              enum:
+                - base64
+                - binary
+                - text
+              maxLength: 6
+              type: string
+            labels:
+              additionalProperties:
+                type: string
+              description: The labels of the file
+              maxItems: 12
+              type: object
+            length:
+              description: The length of the file in bytes
+              examples:
+                - 21
+              format: int64
+              maximum: 1000000
+              minimum: 0
+              type: integer
+            path:
+              description: The path of the file
+              examples:
+                - /path/to/file.txt
+              maxLength: 256
+              pattern: ^(.+)\/*([^\/]*)$
+              type: string
+          required:
+            - content
+            - path
+          type: object
+        FilesResponse:
+          additionalProperties: false
+          properties:
+            files:
+              description: An array of FileInfo objects
+              items:
+                $ref: "#/components/schemas/FileInfo"
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+          type: object
+        GithubObject:
+          additionalProperties: false
+          properties:
+            sha:
+              description: The SHA of the object
+              examples:
+                - 68c17d54773908e1e1bb45ad1bc0d7d98209ac95
+              pattern: ^[a-fA-F0-9]{40}$
+              type:
+                - string
+                - "null"
+            type:
+              description: The type of object
+              examples:
+                - commit
+              maxLength: 256
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type:
+                - string
+                - "null"
+            url:
+              description: The URL to the object
+              examples:
+                - https://api.github.com/repos/IaC/cldctl/git/commits/68c17d54773908e1e1bb45ad1bc0d7d98209ac95
+              format: uri
+              maxLength: 256
+              minLength: 3
+              pattern: ^(http|https):\/\/.+
+              type:
+                - string
+                - "null"
+          required:
+            - type
+            - sha
+            - url
+          type: object
+        GithubReleaseResponse:
+          additionalProperties: false
+          properties:
+            latest:
+              $ref: "#/components/schemas/RepositoryRelease"
+              description: The latest release
+            latestVersion:
+              maxLength: 30
+              pattern: ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+              type: string
+            releases:
+              description: An array of releases
+              items:
+                $ref: "#/components/schemas/RepositoryRelease"
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+            versions:
+              description: An array of versions
+              items:
+                type: string
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+          type: object
+        GoTemplatingSettings:
+          additionalProperties: false
+          properties:
+            ignoredBlocks:
+              description: A list of blocks that should be ignored.
+              examples:
+                - - '{{ block "blockName" . }}'
+              items:
+                type: string
+              maxItems: 100
+              pattern: (\w|\-|\_|\ )+
+              type:
+                - array
+                - "null"
+            ignoredFilesRegex:
+              description: A regex that is matched with the source path of each template file. If matched, the file will not be processed through go templating.
+              examples:
+                - ^main\.go$
+              format: regex
+              type: string
+          type: object
+        Icon:
+          additionalProperties: false
+          properties:
+            source:
+              $ref: "#/components/schemas/FileInfo"
+              description: FileInfo object of the icon file
+            url:
+              description: The URL of the icon
+              examples:
+                - https://ford.com/icon.png
+              format: uri
+              maxLength: 500
+              minLength: 12
+              pattern: ^(http|https):\/\/.+
+              type: string
+          type: object
+        Link:
+          additionalProperties: false
+          properties:
+            name:
+              description: The name of the link
+              examples:
+                - Ford Cloud Platform
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\-|\_|\ )+$
+              type: string
+            url:
+              description: The URL of the link
+              examples:
+                - https://ford.com
+              format: uri
+              maxLength: 500
+              minLength: 12
+              pattern: ^(http|https):\/\/.+
+              type: string
+          type: object
+        Maintainer:
+          additionalProperties: false
+          properties:
+            email:
+              description: The email of the maintainer
+              examples:
+                - kcloutie@ford.com
+              format: email
+              maxLength: 80
+              minLength: 3
+              pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,3}"
+              type: string
+            name:
+              description: The name of the maintainer
+              examples:
+                - Ken Cloutier
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\-|\_|\ )+$
+              type: string
+          type: object
+        Match:
+          additionalProperties: false
+          properties:
+            indices:
+              items:
+                format: int64
+                type: integer
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+            text:
+              type: string
+          type: object
+        OverrideValues:
+          additionalProperties: false
+          properties:
+            newValue:
+              description: The new value to set
+            propertyPath:
+              description: The property path to override
+              examples:
+                - spec.template.spec.containers[0].image
+              maxLength: 1000
+              pattern: ^(\w|\-|\_|\ |\.|\[|\])+$
+              type: string
+          type: object
+        PipelineFlowChartsResponse:
+          additionalProperties: false
+          properties:
+            flowCharts:
+              description: An array of flow charts
+              items:
+                $ref: "#/components/schemas/FileInfo"
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+          type: object
+        Plan:
+          additionalProperties: false
+          properties:
+            collaborators:
+              format: int64
+              type: integer
+            filled_seats:
+              format: int64
+              type: integer
+            name:
+              type: string
+            private_repos:
+              format: int64
+              type: integer
+            seats:
+              format: int64
+              type: integer
+            space:
+              format: int64
+              type: integer
+          type: object
+        ProjectsResponse:
+          additionalProperties: false
+          properties:
+            name:
+              maxLength: 50
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            projJson:
+              additionalProperties: {}
+              type: object
+            projUrl:
+              description: The URL to the projects
+              format: uri
+              maxLength: 256
+              pattern: ^((http|ftp|https):\/\/)*([\w+?\.\w+])+([a-zA-Z0-9\~\!\@\#\$\%\^\&\*\(\)_\-\=\+\\\/\?\.\:\;\'\,]*)?$
+              type: string
+          type: object
+        ReleaseAsset:
+          additionalProperties: false
+          properties:
+            browser_download_url:
+              type: string
+            content_type:
+              type: string
+            created_at:
+              format: date-time
+              type: string
+            download_count:
+              format: int64
+              type: integer
+            id:
+              format: int64
+              type: integer
+            label:
+              type: string
+            name:
+              type: string
+            node_id:
+              type: string
+            size:
+              format: int64
+              type: integer
+            state:
+              type: string
+            updated_at:
+              format: date-time
+              type: string
+            uploader:
+              $ref: "#/components/schemas/User"
+            url:
+              type: string
+          type: object
+        RemoteSolutionSource:
+          additionalProperties: false
+          properties:
+            beta:
+              description: When true, will return beta solutions only
+              type: boolean
+            category:
+              description: The category of the solution
+              examples:
+                - application
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            name:
+              description: The name of the solution
+              examples:
+                - gcp-basic
+              maxLength: 30
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            repoBaseUrl:
+              description: The base URL of the solution repository
+              examples:
+                - https://storage.googleapis.com/cldctl-solutions
+              format: uri
+              maxLength: 256
+              minLength: 6
+              pattern: ^(http|https):\/\/.+
+              type: string
+            version:
+              description: The version of the solution. This can be a version (1.0.0) or a version constraints (>= 1.0, < 1.4). See https://github.com/hashicorp/go-version for more details
+              examples:
+                - 1.0.0
+              maxLength: 30
+              minLength: 3
+              type: string
+          type: object
+        RemoteTestSource:
+          additionalProperties: false
+          properties:
+            solutionBaseUrl:
+              description: The base URL of the solution
+              maxLength: 1000
+              pattern: ^(http|https):\/\/.+
+              type: string
+            solutionCategory:
+              description: The category of the solution
+              examples:
+                - application
+              maxLength: 30
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            solutionName:
+              description: The name of the solution
+              examples:
+                - solution1
+              maxLength: 30
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            solutionVersion:
+              description: The version of the solution
+              examples:
+                - 1.0.0
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\-|\_|\ |\.|\<|\>|=|,|\~|\!)+$
+              type: string
+            sourcePath:
+              description: The path to the remote test source
+              maxLength: 1000
+              pattern: ^(.+)\/*([^\/]+)$
+              type: string
+            testNames:
+              description: A list of test names to fetch
+              items:
+                type: string
+              maxItems: 100
+              type:
+                - array
+                - "null"
+          type: object
+        RenderTemplateOptions:
+          additionalProperties: false
+          properties:
+            ignoreTemplateErrors:
+              description: Ignore errors when rendering the template
+              examples:
+                - true
+              type: boolean
+            leftDelim:
+              description: The left delimiter for the template
+              examples:
+                - "{{"
+              maxLength: 10
+              pattern: (\w|\-|\_|\ |\W)+
+              type: string
+            rightDelim:
+              description: The right delimiter for the template
+              examples:
+                - "}}"
+              maxLength: 10
+              pattern: (\w|\-|\_|\ |\W)+
+              type: string
+          type: object
+        RenderedSolution:
+          additionalProperties: false
+          properties:
+            banner:
+              $ref: "#/components/schemas/Icon"
+              description: The banner image for the solution
+            bannerURL:
+              description: The direct URL to the banner image
+              examples:
+                - https://www.ford.com/somebanner.svc
+              format: uri
+              maxLength: 256
+              minLength: 15
+              pattern: ^((http|ftp|https):\/\/)*([\w+?\.\w+])+([a-zA-Z0-9\~\!\@\#\$\%\^\&\*\(\)_\-\=\+\\\/\?\.\:\;\'\,]*)?$
+              type: string
+            category:
+              description: The category of the solution
+              examples:
+                - application
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            changes:
+              description: A list of recent changes made to the solution
+              items:
+                $ref: "#/components/schemas/Change"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            description:
+              description: The description of the solution
+              examples:
+                - This solution deploys a simple GCP bucket as a solution
+              maxLength: 5000
+              minLength: 3
+              pattern: ^(.|\n|\r)*
+              type: string
+            disabled:
+              deprecated: true
+              description: If the solution is disabled
+              type: boolean
+            displayName:
+              description: The name of the display name of the solution
+              examples:
+                - Basic GCP Solution
+              maxLength: 80
+              minLength: 3
+              pattern: ^(.)+$
+              type: string
+            form:
+              additionalProperties: {}
+              description: The form configuration for the solution
+              type: object
+            icon:
+              $ref: "#/components/schemas/Icon"
+              description: The icon of the solution
+            iconURL:
+              description: The direct URL to the icon image
+              examples:
+                - https://www.ford.com/someicon.svc
+              format: uri
+              maxLength: 256
+              minLength: 15
+              pattern: ^((http|ftp|https):\/\/)*([\w+?\.\w+])+([a-zA-Z0-9\~\!\@\#\$\%\^\&\*\(\)_\-\=\+\\\/\?\.\:\;\'\,]*)?$
+              type: string
+            labels:
+              additionalProperties:
+                type: string
+              description: The labels of the solution
+              maxItems: 12
+              type: object
+            links:
+              description: Links to content related to the solution
+              items:
+                $ref: "#/components/schemas/Link"
+              maxItems: 10
+              type:
+                - array
+                - "null"
+            maintainers:
+              description: The maintainers of the solution
+              items:
+                $ref: "#/components/schemas/Maintainer"
+              maxItems: 10
+              minItems: 1
+              type:
+                - array
+                - "null"
+            mappings:
+              additionalProperties: {}
+              description: A list of mappings
+              maxItems: 500
+              type: object
+            name:
+              description: The name of the solution
+              examples:
+                - gcp-basic
+              maxLength: 30
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            parameters:
+              description: A list of parameters that are used to scaffold the solution
+              items:
+                $ref: "#/components/schemas/RenderedTemplateParameter"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            provider:
+              description: The provider for this solution
+              examples:
+                - Ford Cloud Platform
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            state:
+              $ref: "#/components/schemas/StateConfiguration"
+              description: The state configuration for the solution
+            status:
+              description: The status of the solution
+              enum:
+                - enabled
+                - disabled
+                - hidden
+              type: string
+            steps:
+              description: The steps of the solution
+              items:
+                $ref: "#/components/schemas/RenderedSolutionStep"
+              maxItems: 100
+              minItems: 1
+              type:
+                - array
+                - "null"
+            synopsis:
+              description: The synopsis of the solution
+              examples:
+                - Everything required to deploy Golang application to GCP
+              maxLength: 250
+              minLength: 3
+              pattern: ^(.)*
+              type: string
+            templates:
+              description: A list of templates
+              items:
+                $ref: "#/components/schemas/RenderedTemplate"
+              maxItems: 100
+              minItems: 1
+              type:
+                - array
+                - "null"
+            type:
+              description: The type of the solution
+              examples:
+                - deployment
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            version:
+              description: The version of the solution
+              examples:
+                - 1.0.0
+              maxLength: 30
+              minLength: 3
+              pattern: ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+              type: string
+          type: object
+        RenderedSolutionStep:
+          additionalProperties: false
+          properties:
+            acknowledgements:
+              description: The acknowledgements of the step
+              items:
+                $ref: "#/components/schemas/Acknowledgement"
+              maxItems: 100
+              minItems: 1
+              type:
+                - array
+                - "null"
+            celValidation:
+              description: The CEL expression to validate the step
+              pattern: ^(.)+$
+              type: string
+            description:
+              description: The description of the step
+              examples:
+                - Select the Application name and GCP Business Code that you would like to associate with your CaaS Namespace. You must Acknowledge the Step Guidelines before proceeding
+              maxLength: 5000
+              minLength: 3
+              pattern: ^(.|\n|\r)*
+              type: string
+            displayName:
+              description: The display name of the step
+              examples:
+                - Get Started
+              maxLength: 80
+              minLength: 3
+              pattern: ^(.)+$
+              type: string
+            lifeCycle:
+              description: The lifecycle of the step
+              items:
+                type: string
+              maxItems: 3
+              type:
+                - array
+                - "null"
+            name:
+              description: The name of the step
+              examples:
+                - getting-started
+              maxLength: 30
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            parameters:
+              description: The parameters of the step
+              items:
+                $ref: "#/components/schemas/RenderedTemplateParameter"
+              maxItems: 100
+              minItems: 1
+              type:
+                - array
+                - "null"
+          required:
+            - name
+          type: object
+        RenderedTemplate:
+          additionalProperties: false
+          properties:
+            conflictsWith:
+              description: A list of template names that this template conflicts with
+              items:
+                maxLength: 30
+                pattern: ^[^\s]+(\w|\-|\_)+$
+                type: string
+              maxItems: 50
+              type:
+                - array
+                - "null"
+            default:
+              description: wether the template is a default template
+              type: boolean
+            description:
+              description: The description of the template
+              examples:
+                - Scaffolds a GoLang application, pipeline run terraform code to build and deploy an api to Cloud Run
+              maxLength: 5000
+              minLength: 3
+              pattern: ^(.|\n|\r)*
+              type: string
+            displayName:
+              description: The name of the display name of the template
+              examples:
+                - Golang api running in Cloud Run
+              maxLength: 80
+              minLength: 3
+              pattern: ^(.)+$
+              type: string
+            immutable:
+              description: wether the template is immutable
+              type: boolean
+            name:
+              description: The name of the template
+              examples:
+                - go-api-cldrun
+              maxLength: 60
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            status:
+              description: The status of the template
+              enum:
+                - immutable
+                - required
+                - default
+                - hidden
+                - optional
+              type: string
+            type:
+              description: The type of the template
+              enum:
+                - general
+                - terraform
+              examples:
+                - general
+              maxLength: 9
+              minLength: 7
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+          type: object
+        RenderedTemplateParameter:
+          additionalProperties: false
+          properties:
+            advanced:
+              description: If the parameter is advanced
+              examples:
+                - false
+              type: boolean
+            description:
+              description: The description of the parameter
+              examples:
+                - This solution deploys a simple GCP bucket as a solution
+              maxLength: 5000
+              minLength: 3
+              pattern: ^(.|\n|\r)*
+              type: string
+            displayName:
+              description: The display name of the parameter
+              examples:
+                - Basic GCP Solution
+              maxLength: 80
+              minLength: 3
+              pattern: ^(.)+$
+              type: string
+            form:
+              additionalProperties: {}
+              description: The form configuration for the parameter
+              type: object
+            immutable:
+              description: If the parameter is immutable
+              examples:
+                - false
+              type: boolean
+            name:
+              description: The name of the parameter
+              examples:
+                - param1
+              maxLength: 60
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            status:
+              description: The status of the parameter
+              enum:
+                - immutable
+                - required
+                - default
+                - hidden
+                - optional
+              type: string
+            templateSourceName:
+              description: The property path to override
+              examples:
+                - solution/template
+              maxLength: 1000
+              pattern: ^(\w|\-|\_|\ |\/)+$
+              type: string
+            validation:
+              $ref: "#/components/schemas/Validation"
+              description: The validation of the parameter
+            value: {}
+          type: object
+        RepositoryRelease:
+          additionalProperties: false
+          properties:
+            assets:
+              items:
+                $ref: "#/components/schemas/ReleaseAsset"
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+            assets_url:
+              maxLength: 1024
+              pattern: ^(http|https):\/\/.+
+              type: string
+            author:
+              $ref: "#/components/schemas/User"
+            body:
+              maxLength: 65536
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            created_at:
+              format: date-time
+              type: string
+            discussion_category_name:
+              maxLength: 1024
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            draft:
+              type: boolean
+            generate_release_notes:
+              type: boolean
+            html_url:
+              maxLength: 1024
+              pattern: ^(http|https):\/\/.+
+              type: string
+            id:
+              format: int64
+              type: integer
+            make_latest:
+              maxLength: 1024
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            name:
+              maxLength: 1024
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            node_id:
+              maxLength: 1024
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            prerelease:
+              type: boolean
+            published_at:
+              format: date-time
+              type: string
+            tag_name:
+              maxLength: 1024
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            tarball_url:
+              maxLength: 1024
+              pattern: ^(http|https):\/\/.+
+              type: string
+            target_commitish:
+              maxLength: 1024
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            upload_url:
+              maxLength: 1024
+              pattern: ^(http|https):\/\/.+
+              type: string
+            url:
+              maxLength: 1024
+              pattern: ^(http|https):\/\/.+
+              type: string
+            zipball_url:
+              maxLength: 1024
+              pattern: ^(http|https):\/\/.+
+              type: string
+          type: object
+        ScaffoldStateFile:
+          additionalProperties: false
+          properties:
+            changedFiles:
+              description: The files that were changed during the last command
+              items:
+                $ref: "#/components/schemas/StateChangedFile"
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+            commandOptions:
+              additionalProperties: {}
+              description: The saved command options that will be used in future commands
+              type: object
+            templatesStateData:
+              additionalProperties:
+                items:
+                  $ref: "#/components/schemas/TemplateStateData"
+                type:
+                  - array
+                  - "null"
+              description: The saved data for each template
+              maxItems: 100
+              type: object
+          required:
+            - commandOptions
+            - templatesStateData
+            - changedFiles
+          type: object
+        Solution:
+          additionalProperties: false
+          properties:
+            apis:
+              description: A list of API calls
+              items:
+                $ref: "#/components/schemas/ApiCall"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            banner:
+              $ref: "#/components/schemas/Icon"
+              description: The banner image for the solution
+            category:
+              description: The category of the solution
+              examples:
+                - application
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            celPinnedEnvironment:
+              description: The pinned environment using cel. This will override the pinned environment of all templates
+              examples:
+                - _.containerRegistryEnvironment
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            changes:
+              description: A list of recent changes made to the solution
+              items:
+                $ref: "#/components/schemas/Change"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            cldctlVersion:
+              description: The minimal cldctl version for this solution. This can be a version (1.0.0) or a version constraints (>= 1.0, < 1.4). See https://github.com/hashicorp/go-version for more details
+              examples:
+                - 1.0.0
+              maxLength: 200
+              minLength: 3
+              pattern: ^(\w|\-|\_|\ |\.|\<|\>|=|,|\~|\!)+$
+              type: string
+            dataSources:
+              description: A list of data sources
+              items:
+                $ref: "#/components/schemas/DataSource"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            description:
+              description: The description of the solution
+              examples:
+                - This solution deploys a simple GCP bucket as a solution
+              maxLength: 5000
+              minLength: 3
+              pattern: ^(.|\n|\r)*
+              type: string
+            disabled:
+              deprecated: true
+              description: If the solution is disabled
+              type: boolean
+            displayName:
+              description: The name of the display name of the solution
+              examples:
+                - Basic GCP Solution
+              maxLength: 80
+              minLength: 3
+              pattern: ^(.)+$
+              type: string
+            fanning:
+              $ref: "#/components/schemas/Fanning"
+              description: The fanning configuration for the solution
+            form:
+              additionalProperties: {}
+              description: The form configuration for the solution
+              type: object
+            icon:
+              $ref: "#/components/schemas/Icon"
+              description: The icon of the solution
+            labels:
+              additionalProperties:
+                type: string
+              description: The labels of the solution
+              maxItems: 12
+              type: object
+            links:
+              description: Links to content related to the solution
+              items:
+                $ref: "#/components/schemas/Link"
+              maxItems: 10
+              type:
+                - array
+                - "null"
+            maintainers:
+              description: The maintainers of the solution
+              items:
+                $ref: "#/components/schemas/Maintainer"
+              maxItems: 10
+              minItems: 1
+              type:
+                - array
+                - "null"
+            mappings:
+              additionalProperties: {}
+              description: A list of mappings
+              maxItems: 500
+              type: object
+            name:
+              description: The name of the solution
+              examples:
+                - gcp-basic
+              maxLength: 30
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            parameterStatus:
+              additionalProperties:
+                type: string
+              description: A map of parameter statuses that will override the status of parameters matching the corresponding key
+              maxItems: 100
+              type: object
+            parameters:
+              description: A list of parameters that are used to scaffold the solution
+              items:
+                $ref: "#/components/schemas/TemplateParameter"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            pinnedEnvironment:
+              description: The pinned environment. This will override the pinned environment of all templates
+              examples:
+                - dev
+              maxLength: 30
+              pattern: ^(\w|\ |\d|-|<first>|<last>|<once>)+$
+              type: string
+            provider:
+              description: The provider for this solution
+              examples:
+                - Ford Cloud Platform
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            remoteSolutionObjects:
+              description: A list of remote solutions that will be fetched and merged into this solution
+              items:
+                $ref: "#/components/schemas/Solution"
+              maxItems: 15
+              type:
+                - array
+                - "null"
+            remoteSolutions:
+              description: A list of remote solutions that will be fetched and merged into this solution
+              items:
+                $ref: "#/components/schemas/RemoteSolutionSource"
+              maxItems: 15
+              type:
+                - array
+                - "null"
+            remoteTests:
+              description: A list of remote tests that will be fetched and merged into this solution
+              items:
+                $ref: "#/components/schemas/RemoteTestSource"
+              maxItems: 30
+              type:
+                - array
+                - "null"
+            solutionPath:
+              description: The path of the solution. This property is used internally and will be ignored if set or changed
+              examples:
+                - /path/to/solution
+              maxLength: 1000
+              pattern: ^(.)*
+              type: string
+            source:
+              $ref: "#/components/schemas/FileInfo"
+              description: FileInfo object of the current solution file
+            state:
+              $ref: "#/components/schemas/StateConfiguration"
+              description: The state configuration for the solution
+            status:
+              description: The status of the solution
+              enum:
+                - enabled
+                - disabled
+                - hidden
+              type: string
+            synopsis:
+              description: The synopsis of the solution
+              examples:
+                - Everything required to deploy Golang application to GCP
+              maxLength: 250
+              minLength: 3
+              pattern: ^(.)*
+              type: string
+            tags:
+              description: A list of tags for the solution
+              items:
+                type: string
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            templateStatus:
+              additionalProperties:
+                type: string
+              description: A map of template statuses that will override the status of templates matching the corresponding key
+              maxItems: 100
+              type: object
+            templateValueOverrides:
+              description: A list of template value overrides
+              items:
+                $ref: "#/components/schemas/TemplateValueOverrides"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            templates:
+              description: A list of templates
+              items:
+                $ref: "#/components/schemas/TemplateDetails"
+              maxItems: 100
+              minItems: 1
+              type:
+                - array
+                - "null"
+            testing:
+              $ref: "#/components/schemas/Testing"
+              description: Testing configuration for the solution
+            tests:
+              description: A list of tests that are used to test the solution
+              items:
+                $ref: "#/components/schemas/TestDetails"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            type:
+              description: The type of the solution
+              examples:
+                - deployment
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            version:
+              description: The version of the solution
+              examples:
+                - 1.0.0
+              maxLength: 30
+              minLength: 3
+              pattern: ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+              type: string
+          type: object
+        SolutionMeta:
+          additionalProperties: false
+          properties:
+            authBucketURL:
+              description: The authenticated bucket URL
+              examples:
+                - https://ford.com/auth
+              format: uri
+              maxLength: 500
+              minLength: 12
+              pattern: ^(http|https):\/\/.+
+              type: string
+            bannerURL:
+              description: The URL of the banner
+              examples:
+                - https://ford.com/banner.png
+              format: uri
+              maxLength: 500
+              minLength: 12
+              pattern: ^(http|https):\/\/.+
+              type: string
+            category:
+              description: The category of the solution
+              examples:
+                - application
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            changes:
+              description: A list of recent changes made to the solution
+              items:
+                $ref: "#/components/schemas/Change"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            commitSha:
+              description: The commit SHA of the solution
+              examples:
+                - a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
+              maxLength: 40
+              minLength: 3
+              pattern: ^[a-fA-F0-9]{40}$
+              type: string
+            created:
+              description: The created date of the index
+              maxLength: 100
+              pattern: (\w|\-|\_|\ |\W)+
+              type: string
+            description:
+              description: The description of the solution
+              examples:
+                - This solution deploys a simple GCP bucket as a solution
+              maxLength: 5000
+              minLength: 3
+              pattern: ^(.|\n|\r)*
+              type: string
+            disabled:
+              deprecated: true
+              description: If the solution is disabled
+              type: boolean
+            displayName:
+              description: The name of the display name of the solution
+              examples:
+                - Basic GCP Solution
+              maxLength: 80
+              minLength: 3
+              pattern: ^(.)+$
+              type: string
+            iconURL:
+              description: The URL of the icon
+              examples:
+                - https://ford.com/icon.png
+              format: uri
+              maxLength: 500
+              minLength: 12
+              pattern: ^(http|https):\/\/.+
+              type: string
+            lastUpdated:
+              deprecated: true
+              description: The last updated date
+              maxLength: 100
+              pattern: (\w|\-|\_|\ |\W)+
+              type: string
+            links:
+              description: Links to content related to the solution
+              items:
+                $ref: "#/components/schemas/Link"
+              maxItems: 10
+              type:
+                - array
+                - "null"
+            maintainers:
+              description: The maintainers of the solution
+              items:
+                $ref: "#/components/schemas/Maintainer"
+              maxItems: 10
+              minItems: 1
+              type:
+                - array
+                - "null"
+            name:
+              description: The name of the solution
+              examples:
+                - gcp-basic
+              maxLength: 30
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            objectPath:
+              description: The object path
+              examples:
+                - path/to/object
+              maxLength: 100
+              minLength: 3
+              pattern: ^(.+)\/([^\/]+)\/*$
+              type: string
+            provider:
+              description: The provider for this solution
+              examples:
+                - Ford Cloud Platform
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            publicBucketURI:
+              description: The public bucket URI
+              examples:
+                - https://ford.com/public
+              format: uri
+              maxLength: 500
+              minLength: 12
+              pattern: ^(http|https):\/\/.+
+              type: string
+            publicBucketURL:
+              description: The public bucket URL
+              examples:
+                - https://ford.com/public
+              format: uri
+              maxLength: 500
+              minLength: 12
+              pattern: ^(http|https):\/\/.+
+              type: string
+            solution:
+              $ref: "#/components/schemas/Solution"
+              description: The solution object
+            solutionURL:
+              description: The URL of the solution
+              examples:
+                - https://ford.com/solution
+              format: uri
+              maxLength: 500
+              minLength: 12
+              pattern: ^(http|https):\/\/.+
+              type: string
+            sourceUrl:
+              description: The URL of the source
+              examples:
+                - https://ford.com/source
+              format: uri
+              maxLength: 500
+              minLength: 12
+              pattern: ^(http|https):\/\/.+
+              type: string
+            status:
+              description: The status of the solution
+              enum:
+                - enabled
+                - disabled
+                - hidden
+              type: string
+            synopsis:
+              description: The synopsis of the solution
+              examples:
+                - Everything required to deploy Golang application to GCP
+              maxLength: 250
+              minLength: 3
+              pattern: ^(.)*
+              type: string
+            tags:
+              description: A list of tags for the solution
+              items:
+                type: string
+              maxItems: 100
+              pattern: ^(\w|\-|\_|\ )+$
+              type:
+                - array
+                - "null"
+            type:
+              description: The type of the solution
+              examples:
+                - deployment
+              maxLength: 30
+              minLength: 3
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            version:
+              description: The version of the solution
+              examples:
+                - 1.0.0
+              maxLength: 30
+              pattern: ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+              type: string
+            versionObj:
+              description: The version object of the solution
+              type: string
+          type: object
+        SourceConfiguration:
+          additionalProperties: false
+          properties:
+            celPath:
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            extensionRegex:
+              description: The regex to match the file extension
+              examples:
+                - ^\.go$
+              format: regex
+              maxLength: 512
+              type: string
+            matchRegex:
+              description: The regex to match the file
+              examples:
+                - ^main\.go$
+              format: regex
+              maxLength: 512
+              type: string
+            notMatchRegex:
+              description: The regex to not match the file
+              examples:
+                - ^main\.go$
+              format: regex
+              maxLength: 512
+              type: string
+            path:
+              description: The path to the source files
+              examples:
+                - /path/to/source
+              maxLength: 256
+              minLength: 3
+              pattern: ^(.+)\/*([^\/]*)$
+              type: string
+            recursiveDepth:
+              description: The depth of the recursive search
+              examples:
+                - 1
+              format: int64
+              maximum: 10
+              minimum: -1
+              type: integer
+          type: object
+        StateChangedFile:
+          additionalProperties: false
+          properties:
+            checkSum:
+              description: The checksum of the file
+              examples:
+                - "1234567890"
+              maxLength: 1000
+              pattern: ^(.+)\/*([^\/]*)$
+              type: string
+            path:
+              description: The path to the file that was changed
+              examples:
+                - /path/to/file
+              maxLength: 1000
+              pattern: ^(.)*
+              type: string
+          required:
+            - path
+            - checkSum
+          type: object
+        StateConfiguration:
+          additionalProperties: false
+          properties:
+            api:
+              $ref: "#/components/schemas/ApiCall"
+              description: The API endpoint to get the state from
+              format: uri
+              maxLength: 256
+              pattern: ^(http|https):\/\/.+
+            celEnabled:
+              description: The cel expression to determine if the state should be enabled
+              examples:
+                - _.action == 'apply'
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            celFileName:
+              description: The cel expression to determine the file name of the state file
+              examples:
+                - state.tfstate
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            celPath:
+              description: The cel expression to determine the path to the state file
+              examples:
+                - _.statePath
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            disableGeneration:
+              description: Disable the generation of the state file
+              examples:
+                - true
+              type: boolean
+            enabled:
+              description: Enable the state file
+              examples:
+                - true
+              type: boolean
+            path:
+              description: The path to the state file
+              examples:
+                - /path/to/state
+              maxLength: 256
+              pattern: ^(.+)\/*([^\/]*)$
+              type: string
+            requiredParameters:
+              description: The required parameters to resolve the state file path
+              items:
+                maxLength: 30
+                pattern: ^[^\s]+(\w|\-|\_)+$
+                type: string
+              maxItems: 50
+              maxLength: 100
+              type:
+                - array
+                - "null"
+          type: object
+        TemplateDetails:
+          additionalProperties: false
+          properties:
+            appendsToTemplate:
+              description: The name of the template that this template appends to. This property is used internally and will be ignored if set or changed
+              examples:
+                - go-api-cldrun
+              maxLength: 100
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            celPinnedEnvironment:
+              description: The pinned environment using cel. This will override the pinned environment of all templates
+              examples:
+                - _.containerRegistryEnvironment
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            celStatus:
+              description: The status of the template using cel. When specified, the results will overwrite the current value of Status
+              examples:
+                - _.containerRegistryEnvironment
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            chmodFiles:
+              description: A list of files that chmod will be executed on
+              items:
+                $ref: "#/components/schemas/ChmodFileDetails"
+              maxItems: 200
+              type:
+                - array
+                - "null"
+            collectTerraformModuleData:
+              description: Whether or not to collect data from the terraform modules
+              examples:
+                - false
+              type: boolean
+            conflictsWith:
+              description: A list of template names that this template conflicts with
+              items:
+                type: string
+              maxItems: 50
+              type:
+                - array
+                - "null"
+            contentMergeStrategy:
+              $ref: "#/components/schemas/ContentMergeStrategy"
+              description: The content merge strategy for the template
+            default:
+              description: If the template is a default template
+              examples:
+                - false
+              type: boolean
+            dependsOn:
+              description: A list of template names that this template depends on
+              items:
+                type: string
+              maxItems: 200
+              type:
+                - array
+                - "null"
+            description:
+              description: The description of the template
+              examples:
+                - Scaffolds a GoLang application, pipeline run terraform code to build and deploy an api to Cloud Run
+              maxLength: 5000
+              minLength: 3
+              pattern: ^(.|\n|\r)*
+              type: string
+            destination:
+              description: The destination path of the template. This property is used internally and will be ignored if set or changed
+              examples:
+                - /path/to/destination
+              maxLength: 1000
+              pattern: ^(.)*
+              type: string
+            destinationConfiguration:
+              $ref: "#/components/schemas/DestinationConfiguration"
+              description: The destination configuration for the template
+            displayName:
+              description: The name of the display name of the template
+              examples:
+                - Golang api running in Cloud Run
+              maxLength: 80
+              minLength: 3
+              pattern: ^(.)+$
+              type: string
+            fanOn:
+              description: The mapping property name used to do fanning
+              examples:
+                - someproperty
+              maxLength: 30
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+            goTemplatingSettings:
+              $ref: "#/components/schemas/GoTemplatingSettings"
+              description: The go templating settings for the template
+            icon:
+              $ref: "#/components/schemas/Icon"
+              description: The icon of the template
+            immutable:
+              description: If the template is immutable
+              examples:
+                - false
+              type: boolean
+            isAppendTemplate:
+              description: If the template is an append template. This property is used internally and will be ignored if set or changed
+              examples:
+                - false
+              type: boolean
+            leftDelim:
+              description: The left delimiter for the template. This property is used internally and will be ignored if set or changed
+              examples:
+                - "{{"
+              maxLength: 100
+              pattern: ^(.)*$
+              type: string
+            name:
+              description: The name of the template
+              examples:
+                - go-api-cldrun
+              maxLength: 30
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            parameters:
+              description: A list of parameters that are used to scaffold the template
+              items:
+                $ref: "#/components/schemas/TemplateParameter"
+              maxItems: 200
+              type:
+                - array
+                - "null"
+            pinnedEnvironment:
+              description: The pinned environment. This will override the pinned environment of all templates
+              examples:
+                - dev
+              maxLength: 30
+              pattern: ^(\w|\ |\d|-|<first>|<last>|<once>)+$
+              type: string
+            remoteConfigSource:
+              description: The path or link to the remote template
+              examples:
+                - /path/to/remote/template or https://ford.com/path/to/remote/template
+              maxLength: 40
+              pattern: .*
+              type: string
+            rightDelim:
+              description: The right delimiter for the template. This property is used internally and will be ignored if set or changed
+              examples:
+                - "}}"
+              maxLength: 100
+              pattern: ^(.)*$
+              type: string
+            skipIfFileExists:
+              description: When writing the template files, the file will be skipped if it already exists
+              examples:
+                - true
+              type: boolean
+            source:
+              description: FileInfo objects of the source files
+              items:
+                $ref: "#/components/schemas/FileInfo"
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+            sourceConfiguration:
+              $ref: "#/components/schemas/SourceConfiguration"
+              description: The source configuration for the template
+            sourceSolutionName:
+              examples:
+                - gcp-basic
+              maxLength: 30
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            status:
+              description: The status of the template
+              enum:
+                - immutable
+                - required
+                - default
+                - hidden
+                - optional
+              type: string
+            terraformRootPath:
+              description: The root path of the terraform module
+              examples:
+                - /path/to/terraform/root
+              maxLength: 1000
+              pattern: ^(.+)\/*([^\/]*)$
+              type: string
+            tfvarsFileOnly:
+              description: Only create the tfvars file
+              examples:
+                - false
+              type: boolean
+            tfvarsHeaderTemplate:
+              description: The header template for the tfvars file
+              examples:
+                - // This is a header comment
+              maxLength: 5000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            type:
+              description: The type of the template
+              enum:
+                - general
+                - terraform
+              examples:
+                - general
+              maxLength: 9
+              minLength: 7
+              pattern: ^(\w|\ |\d|-)+$
+              type: string
+          type: object
+        TemplateParameter:
+          additionalProperties: false
+          properties:
+            advanced:
+              description: If the parameter is advanced
+              examples:
+                - false
+              type: boolean
+            celStatus:
+              description: The status of the template using cel. When specified, the results will overwrite the current value of Status
+              examples:
+                - _.containerRegistryEnvironment
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            description:
+              description: The description of the parameter
+              examples:
+                - This solution deploys a simple GCP bucket as a solution
+              maxLength: 5000
+              minLength: 3
+              pattern: ^(.|\n|\r)*
+              type: string
+            displayName:
+              description: The display name of the parameter
+              examples:
+                - Basic GCP Solution
+              maxLength: 80
+              minLength: 3
+              pattern: ^(.)+$
+              type: string
+            excludeFromState:
+              description: If the parameter should be excluded from the state
+              examples:
+                - false
+              type: boolean
+            form:
+              additionalProperties: {}
+              description: The form information for the parameter
+              type: object
+            immutable:
+              description: If the parameter is immutable
+              examples:
+                - false
+              type: boolean
+            name:
+              description: The name of the parameter
+              examples:
+                - param1
+              maxLength: 60
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            parameterRef:
+              $ref: "#/components/schemas/TemplateParameterRef"
+              description: The reference to the solution level parameter
+              maxLength: 60
+              minLength: 3
+            status:
+              description: The status of the parameter
+              enum:
+                - immutable
+                - required
+                - default
+                - hidden
+                - optional
+              type: string
+            templateSourceName:
+              description: The name of the template that the parameter is sourced from
+              examples:
+                - gcp-basic
+              maxLength: 30
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            validation:
+              $ref: "#/components/schemas/Validation"
+              description: The validation of the parameter
+          type: object
+        TemplateParameterRef:
+          additionalProperties: false
+          properties:
+            name:
+              description: The name of the solution level parameter
+              examples:
+                - businessCode
+              maxLength: 60
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+          type: object
+        TemplateStateData:
+          additionalProperties: false
+          properties:
+            immutable:
+              description: If the template is immutable
+              examples:
+                - false
+              type: boolean
+            params:
+              description: The saved parameters for the template
+              items:
+                $ref: "#/components/schemas/TemplateStateParameters"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            templateName:
+              description: The name of the template
+              examples:
+                - go-api-cldrun
+              maxLength: 30
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+          required:
+            - templateName
+            - immutable
+            - params
+          type: object
+        TemplateStateParameters:
+          additionalProperties: false
+          properties:
+            immutable:
+              description: If the parameter is immutable
+              examples:
+                - false
+              type: boolean
+            name:
+              description: The name of the parameter
+              examples:
+                - name
+              maxLength: 60
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            savedValue:
+              description: The saved value for the parameter
+          required:
+            - name
+            - immutable
+            - savedValue
+          type: object
+        TemplateValueOverrides:
+          additionalProperties: false
+          properties:
+            templateName:
+              description: The name of the template to override
+              examples:
+                - go-api-cldrun
+              maxLength: 30
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            values:
+              description: A list of values to override
+              items:
+                $ref: "#/components/schemas/OverrideValues"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+          type: object
+        TemplatingResponse:
+          additionalProperties: false
+          properties:
+            renderedTemplates:
+              description: An array of rendered templates
+              items:
+                $ref: "#/components/schemas/FileInfo"
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+            warnings:
+              description: An array of warning messages that may have occurred during rendering
+              items:
+                type: string
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+          type: object
+        TestContentCompare:
+          additionalProperties: false
+          properties:
+            content:
+              description: The content comparison of the test execution
+            like:
+              description: The wildcard comparison of the test execution
+            object:
+              $ref: "#/components/schemas/TestObjectComparison"
+              description: The object output comparison of the test
+            regex:
+              description: The regex comparison of the test execution
+            status:
+              description: Passing or failing status of the content comparison
+              enum:
+                - pass
+                - fail
+              maxLength: 4
+              minLength: 4
+              type: string
+            stdout:
+              $ref: "#/components/schemas/TestStandardComparison"
+              description: The standard output comparison of the test
+            types:
+              description: Validation for the type of a test object value
+              items:
+                $ref: "#/components/schemas/TestTypeComparison"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+          type: object
+        TestDetails:
+          additionalProperties: false
+          properties:
+            command:
+              description: A list of commands to run for the test
+              items:
+                type: string
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            initScript:
+              description: The script to run before the test
+              examples:
+                - echo 'hello world'
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            name:
+              description: The name of the test
+              examples:
+                - test1
+              maxLength: 60
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            noMapping:
+              description: If the test should use templates and mappings
+              examples:
+                - false
+              type: boolean
+            parameters:
+              description: A list of parameters to pass to the command for the test
+              items:
+                type: string
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            synopsis:
+              description: The synopsis of the test
+              examples:
+                - Tests for the cldctl scaffolding command
+              maxLength: 250
+              minLength: 3
+              pattern: ^(.)*
+              type: string
+            type:
+              description: The type of the test
+              enum:
+                - standard
+                - object
+              examples:
+                - stdout
+              pattern: ^(standard|object)$
+              type: string
+            unwanted:
+              $ref: "#/components/schemas/TestContentCompare"
+              description: The unwanted output of the test
+            want:
+              $ref: "#/components/schemas/TestContentCompare"
+              description: The wanted output of the test
+          type: object
+        TestFunctional:
+          additionalProperties: false
+          properties:
+            remoteTests:
+              description: A list of remote tests that will be fetched and merged into this solution
+              items:
+                $ref: "#/components/schemas/RemoteTestSource"
+              maxItems: 30
+              type:
+                - array
+                - "null"
+            tests:
+              description: A list of tests that are used to test the solution
+              items:
+                $ref: "#/components/schemas/TestDetails"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+          type: object
+        TestObjectComparison:
+          additionalProperties: false
+          properties:
+            content:
+              description: The direct content comparison of a test object value
+              items:
+                $ref: "#/components/schemas/TestObjectContentComparison"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            like:
+              description: The wildcard comparison of a test object value
+              items:
+                $ref: "#/components/schemas/TestObjectRegexOrLikeComparison"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            regex:
+              description: The regex comparison of a test object value
+              items:
+                $ref: "#/components/schemas/TestObjectRegexOrLikeComparison"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            types:
+              description: Validation for the type of a test object value
+              items:
+                $ref: "#/components/schemas/TestTypeComparison"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+          type: object
+        TestObjectContentComparison:
+          additionalProperties: false
+          properties:
+            key:
+              description: The key to access in the test object
+              examples:
+                - key1
+              maxLength: 100
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            value:
+              description: The value to directly compare with what exists in the test object
+            where:
+              $ref: "#/components/schemas/TestObjectWhere"
+              description: The condition for which value to access for a given key
+          required:
+            - key
+            - value
+          type: object
+        TestObjectRegexOrLikeComparison:
+          additionalProperties: false
+          properties:
+            key:
+              description: The key to access in the test object
+              examples:
+                - key1
+              maxLength: 100
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            value:
+              description: The regex or wildcard value to compare with what exists in the test object
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            where:
+              $ref: "#/components/schemas/TestObjectWhere"
+              description: The condition for which value to access for a given key
+          required:
+            - key
+            - value
+          type: object
+        TestObjectWhere:
+          additionalProperties: false
+          properties:
+            key:
+              description: The key to access in the test object
+              examples:
+                - key1
+              maxLength: 100
+              minLength: 3
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            value:
+              description: The value that matches the desired condition
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+          required:
+            - key
+            - value
+          type: object
+        TestStandardComparison:
+          additionalProperties: false
+          properties:
+            content:
+              description: The direct content comparison of the test execution standard output
+              maxLength: 10000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            like:
+              description: The wildcard comparison of the test execution standard output
+              items:
+                type: string
+              maxItems: 100
+              type:
+                - array
+                - "null"
+            regex:
+              description: The regex comparison of the test execution standard output
+              items:
+                type: string
+              maxItems: 100
+              type:
+                - array
+                - "null"
+          type: object
+        TestTypeComparison:
+          additionalProperties: false
+          properties:
+            key:
+              description: The key to compare
+              examples:
+                - key1
+              maxLength: 30
+              pattern: ^[^\s]+(\w|\-|\_)+$
+              type: string
+            type:
+              description: The type of the value at the given key
+              examples:
+                - string
+              maxLength: 30
+              minLength: 3
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+          type: object
+        Testing:
+          additionalProperties: false
+          properties:
+            functional:
+              $ref: "#/components/schemas/TestFunctional"
+              description: The functional testing configuration for the solution
+          type: object
+        TextMatch:
+          additionalProperties: false
+          properties:
+            fragment:
+              type: string
+            matches:
+              items:
+                $ref: "#/components/schemas/Match"
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+            object_type:
+              type: string
+            object_url:
+              type: string
+            property:
+              type: string
+          type: object
+        User:
+          additionalProperties: false
+          properties:
+            avatar_url:
+              type: string
+            bio:
+              type: string
+            blog:
+              type: string
+            collaborators:
+              format: int64
+              type: integer
+            company:
+              type: string
+            created_at:
+              format: date-time
+              type: string
+            disk_usage:
+              format: int64
+              type: integer
+            email:
+              type: string
+            events_url:
+              type: string
+            followers:
+              format: int64
+              type: integer
+            followers_url:
+              type: string
+            following:
+              format: int64
+              type: integer
+            following_url:
+              type: string
+            gists_url:
+              type: string
+            gravatar_id:
+              type: string
+            hireable:
+              type: boolean
+            html_url:
+              type: string
+            id:
+              format: int64
+              type: integer
+            ldap_dn:
+              type: string
+            location:
+              type: string
+            login:
+              type: string
+            name:
+              type: string
+            node_id:
+              type: string
+            organizations_url:
+              type: string
+            owned_private_repos:
+              format: int64
+              type: integer
+            permissions:
+              additionalProperties:
+                type: boolean
+              type: object
+            plan:
+              $ref: "#/components/schemas/Plan"
+            private_gists:
+              format: int64
+              type: integer
+            public_gists:
+              format: int64
+              type: integer
+            public_repos:
+              format: int64
+              type: integer
+            received_events_url:
+              type: string
+            repos_url:
+              type: string
+            role_name:
+              type: string
+            site_admin:
+              type: boolean
+            starred_url:
+              type: string
+            subscriptions_url:
+              type: string
+            suspended_at:
+              type: string
+            text_matches:
+              items:
+                $ref: "#/components/schemas/TextMatch"
+              maxItems: 1000
+              type:
+                - array
+                - "null"
+            total_private_repos:
+              format: int64
+              type: integer
+            twitter_username:
+              type: string
+            two_factor_authentication:
+              type: boolean
+            type:
+              type: string
+            updated_at:
+              type: string
+            url:
+              type: string
+          type: object
+        Validation:
+          additionalProperties: false
+          properties:
+            allowNullOrEmpty:
+              description: If the parameter can be null or empty
+              examples:
+                - false
+              type: boolean
+            items:
+              description: A list of validation items
+              items:
+                $ref: "#/components/schemas/ValidationItem"
+              maxItems: 100
+              type:
+                - array
+                - "null"
+          type: object
+        ValidationItem:
+          additionalProperties: false
+          properties:
+            cel:
+              description: The cel expression to validate the parameter value
+              examples:
+                - _.parameterName == 'value'
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            celErrorMessage:
+              description: The error message to display if the validation fails. This field supports cel
+              examples:
+                - '''The value "'' + _.param + ''" was invalid'''
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+            errorMessage:
+              description: The error message to display if the validation fails
+              examples:
+                - The value must be alphanumeric
+              maxLength: 1000
+              pattern: ^(.|\n|\r)*
+              type: string
+            regex:
+              description: The regex to validate the parameter value
+              examples:
+                - ^([a-zA-Z0-9]+)$
+              format: regex
+              maxLength: 1000
+              type: string
+            when:
+              description: The cel expression to determine if the validation should be executed. When blank, the validation will always execute
+              examples:
+                - _.parameterName == 'value'
+              maxLength: 1000
+              pattern: (.|\r\n|\r|\n)*
+              type: string
+          type: object
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 02-gh-pr-resources-specs

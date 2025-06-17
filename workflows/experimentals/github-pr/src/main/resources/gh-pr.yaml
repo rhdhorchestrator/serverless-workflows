@@ -1,0 +1,157 @@
+id: gh-pr
+version: "1.0"
+specVersion: "0.8"
+name: "gh-pr"
+description: Print input value
+dataInputSchema: schemas/basic__main-schema.json
+extensions:
+  - extensionid: workflow-output-schema
+    outputSchema: schemas/workflow-output-schema.json
+  - extensionid: workflow-uri-definitions
+    definitions:
+      notifications: "https://raw.githubusercontent.com/rhdhorchestrator/serverless-workflows/main/workflows/shared/specs/notifications-openapi.yaml"
+functions:
+  - name: createNotification
+    operation: notifications#createNotification
+  - name: scafolderMock
+    operation: specs/scafolderMock.yaml#mock
+  - name: getBranchSHA
+    operation: specs/github.yaml#getBranchSHA
+  - name: pushCommitBranch
+    operation: specs/github.yaml#updateBranchRef
+  - name: createCommit
+    operation: specs/github.yaml#createCommit
+  - name: createTree
+    operation: specs/github.yaml#createTree
+  - name: createBlob
+    operation: specs/github.yaml#createBlob
+  - name: createBranch
+    operation: specs/github.yaml#createBranch
+  - name: getCommitDetails
+    operation: specs/github.yaml#getCommitDetails
+  - name: createPullRequest
+    operation: specs/github.yaml#createPullRequest
+  - name: print
+    type: custom
+    operation: sysout
+  - name: createNewBlob
+    type: expression
+    operation: '{"mode": "100644", "path": "test", "type": "blob", "sha": .createdBlob.sha}'
+  - name: successResult
+    type: expression
+    operation: '{
+        "result": {
+          "message": "PR created",
+          "outputs":[
+              {
+                "key": "PR_URL",
+                "value": .prURL.html_url,
+                "format":"link"
+              }
+            ]
+        }
+      }'
+start: "CreateBranch"
+states:
+  - name: CreateBranch
+    type: operation
+    actions:
+      - name: "GetHeadSha"
+        functionRef:
+          refName: getBranchSHA
+          arguments:  
+            owner: .owner
+            repo: .repo
+            ref: '"heads/" + .baseBranch'
+        actionDataFilter:
+          toStateData: .latestSHA
+      - name: "createBranch"
+        functionRef:
+          refName: createBranch
+          arguments:  
+            owner: .owner
+            repo: .repo
+            ref: '"refs/heads/" + .targetBranch'
+            sha: .latestSHA.object.sha
+      - name: "getCommitDetails"
+        functionRef:
+          refName: getCommitDetails
+          arguments:  
+            owner: .owner
+            repo: .repo
+            commit_sha: .latestSHA.object.sha
+        actionDataFilter:
+          toStateData: .commit
+    transition: CreateFiles
+  - name: CreateFiles
+    type: operation
+    actions:
+      - name: "createBlob"
+        functionRef:
+          refName: createBlob
+          arguments:  
+            owner: .owner
+            repo: .repo
+            content: "TEST"
+            encoding: "utf-8"
+        actionDataFilter:
+          toStateData: .createdBlob
+      - name: createNewBlob
+        functionRef:
+          refName: createNewBlob
+        actionDataFilter:
+          toStateData: .blobs
+    transition: CreateNewTree
+  - name: CreateNewTree
+    type: operation
+    actions:
+      - name: "createTree"
+        functionRef:
+          refName: createTree
+          arguments:  
+            owner: .owner
+            repo: .repo
+            base_tree: .commit.tree.sha
+            tree: .blobs
+        actionDataFilter:
+          toStateData: .newTree
+      - name: "createCommit"
+        functionRef:
+          refName: createCommit
+          arguments:  
+            owner: .owner
+            repo: .repo
+            message: "Added/Updated multiple files via API"
+            tree: .newTree.sha
+            parents: [.latestSHA.object.sha]
+        actionDataFilter:
+          toStateData: .newCommit 
+      - name: "push"
+        functionRef:
+          refName: pushCommitBranch
+          arguments:  
+            owner: .owner
+            repo: .repo
+            ref: '"heads/" + .targetBranch'
+            sha: .newCommit.sha 
+            force: false
+    transition: CreatePR
+  - name: CreatePR
+    type: operation
+    actions:
+      - name: "createPullRequest"
+        functionRef:
+          refName: createPullRequest
+          arguments:  
+            owner: .owner
+            repo: .repo
+            title: "Automated PR"
+            body: ""
+            head: .targetBranch
+            base: .baseBranch
+        actionDataFilter:
+          toStateData: .prURL   
+      - name: setOutput
+        functionRef:
+          refName: successResult
+    end: true

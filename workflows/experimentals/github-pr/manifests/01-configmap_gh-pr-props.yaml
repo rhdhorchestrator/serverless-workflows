@@ -1,0 +1,30 @@
+apiVersion: v1
+data:
+  application.properties: |2-
+
+
+    # This property is used to select the log level, which controls the amount
+    # of information logged on HTTP requests based on the severity of the events.
+    # Possible values: OFF, FATAL, ERROR, WARN, INFO, DEBUG, ALL.
+    # and see https://quarkus.io/guides/logging for documentation
+    quarkus.log.category."org.apache.http".level=DEBUG
+    quarkus.log.level=INFO
+    quarkus.rest-client.scafolderMock_yaml.url=http://127.0.0.1:8282
+    quarkus.rest-client.github_yaml.url=https://api.github.com
+    #ghToken=
+    #quarkus.openapi-generator.github_yaml.auth.BearerToken.bearer-token=${ghToken}
+    quarkus.kogito.devservices.enabled=false
+    # Turns Token Propagation for dev.
+    # In PROD, the RHDH Orchestrator backend plugin will set the Authorization header when calling the WF
+    %dev.quarkus.openapi-generator.github_yaml.auth.BearerToken.token-propagation=true
+    # The workflow will take the value from the Header X-GitHub-Authorization and forward as a bearer token to any calls to the GitHub API.
+    # IMPORTANT: security and securitySchemes matches the name `bearer` here in the property key. Can be anything, as long as it matches the openapi spec reference.
+    # Originally, the GH API Spec doesn't include this values, it had to be inserted manually so the codegen would know how to generate the appropriate filters.
+    %dev.quarkus.openapi-generator.github_yaml.auth.BearerToken.header-name=X-GitHub-Authorization
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    app: gh-pr
+    sonataflow.org/workflow-app: gh-pr
+  name: gh-pr-props
