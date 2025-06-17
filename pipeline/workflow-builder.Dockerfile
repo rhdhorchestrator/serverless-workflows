@@ -12,7 +12,7 @@ ARG BUILDER_IMAGE
 #FROM ${BUILDER_IMAGE:-quay.io/kubesmarts/incubator-kie-sonataflow-builder:9.103.x-prod} AS builder
 
 # Image used for disconnected environments, with JDBC and PostgreSQL support included, based on the latest OSL builder image
-FROM ${BUILDER_IMAGE:-quay.io/orchestrator/logic-swf-builder-rhel8:1.36.0-rc1-disconnected} AS builder
+FROM ${BUILDER_IMAGE:-quay.io/orchestrator/logic-swf-builder-rhel8:1.36.0-disconnected} AS builder
 
 #ENV MAVEN_REPO_URL=https://maven.repository.redhat.com/earlyaccess/all
 
