@@ -14,13 +14,8 @@ data:
     #ghToken=
     #quarkus.openapi-generator.github_yaml.auth.BearerToken.bearer-token=${ghToken}
     quarkus.kogito.devservices.enabled=false
-    # Turns Token Propagation for dev.
-    # In PROD, the RHDH Orchestrator backend plugin will set the Authorization header when calling the WF
-    %dev.quarkus.openapi-generator.github_yaml.auth.BearerToken.token-propagation=true
-    # The workflow will take the value from the Header X-GitHub-Authorization and forward as a bearer token to any calls to the GitHub API.
-    # IMPORTANT: security and securitySchemes matches the name `bearer` here in the property key. Can be anything, as long as it matches the openapi spec reference.
-    # Originally, the GH API Spec doesn't include this values, it had to be inserted manually so the codegen would know how to generate the appropriate filters.
-    %dev.quarkus.openapi-generator.github_yaml.auth.BearerToken.header-name=X-GitHub-Authorization
+    quarkus.openapi-generator.github_yaml.auth.BearerToken.token-propagation=true
+    quarkus.openapi-generator.github_yaml.auth.BearerToken.header-name=X-GitHub-Authorization
 kind: ConfigMap
 metadata:
   creationTimestamp: null

@@ -133,7 +133,8 @@ spec:
                 base_tree: .commit.tree.sha
                 owner: .owner
                 repo: .repo
-                tree: .blobs
+                tree:
+                  - .blobs
               invoke: sync
               refName: createTree
             name: createTree

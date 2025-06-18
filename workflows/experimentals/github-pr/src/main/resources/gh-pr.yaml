@@ -112,7 +112,7 @@ states:
             owner: .owner
             repo: .repo
             base_tree: .commit.tree.sha
-            tree: .blobs
+            tree: [.blobs]
         actionDataFilter:
           toStateData: .newTree
       - name: "createCommit"
