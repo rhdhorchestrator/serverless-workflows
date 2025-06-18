@@ -36,13 +36,20 @@ orchestrator-workflows/workflows	0.2.24       	1.16.0     	A Helm chart for serv
 You can [install the workflows following their respective README](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/docs/main/)
 
 ## Installing workflows in additional namespaces
-When deploying a workflow in a namespace different from where Sonataflow services are running (e.g. sonataflow-infra), there are essential steps to follow. For detailed instructions, see the [Additional Workflow Namespaces section](https://github.com/rhdhorchestrator/orchestrator-go-operator/tree/main/docs/release-1.5?tab=readme-ov-file#additional-workflow-namespaces).
+When deploying a workflow in a namespace different from where Sonataflow services are running (e.g. sonataflow-infra), there are essential steps to follow. For detailed instructions, see the [Additional Workflow Namespaces section](https://github.com/rhdhorchestrator/orchestrator-go-operator/tree/main/docs/main?tab=readme-ov-file#additional-workflow-namespaces).
 
 ## Version Compatibility
 The workflows rely on components included in the [Orchestrator Operator](https://www.rhdhorchestrator.io/orchestrator-go-operator/). Therefore, it is crucial to match the workflow version with the corresponding Orchestrator version that supports it. 
 The list below outlines the compatibility between the workflows and Orchestrator versions:
 | Workflows          | Chart Version | Orchestrator Operator Version |
 |--------------------|---------------|----------------------|
+| move2kube          | 1.6.x         | 1.6.x                |
+| create-ocp-project | 1.6.x         | 1.6.x                |
+| request-vm-cnv     | 1.6.x         | 1.6.x                |
+| modify-vm-resources| 1.6.x         | 1.6.x                |
+| mta-v7             | 1.6.x         | 1.6.x                |
+| mtv-migration      | 1.6.x         | 1.6.x                |
+| mtv-plan           | 1.6.x         | 1.6.x                |
 | move2kube          | 1.5.x         | 1.5.x                |
 | create-ocp-project | 1.5.x         | 1.5.x                |
 | request-vm-cnv     | 1.5.x         | 1.5.x                |
@@ -50,7 +57,6 @@ The list below outlines the compatibility between the workflows and Orchestrator
 | mta-v7             | 1.5.x         | 1.5.x                |
 | mtv-migration      | 1.5.x         | 1.5.x                |
 | mtv-plan           | 1.5.x         | 1.5.x                |
-
 
 ## Helm index
 [https://www.rhdhorchestrator.io/serverless-workflows/index.yaml](https://www.rhdhorchestrator.io/serverless-workflows/index.yaml)
