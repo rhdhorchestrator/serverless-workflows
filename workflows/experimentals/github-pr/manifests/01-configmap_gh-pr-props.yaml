@@ -15,7 +15,7 @@ data:
     #quarkus.openapi-generator.github_yaml.auth.BearerToken.bearer-token=${ghToken}
     quarkus.kogito.devservices.enabled=false
     quarkus.openapi-generator.github_yaml.auth.BearerToken.token-propagation=true
-    quarkus.openapi-generator.github_yaml.auth.BearerToken.header-name=X-GitHub-Authorization
+    quarkus.openapi-generator.github_yaml.auth.BearerToken.header-name=X-Authorization-Github
 kind: ConfigMap
 metadata:
   creationTimestamp: null
