@@ -26,24 +26,175 @@ spec:
       - name: createNotification
         operation: notifications#createNotification
         type: rest
+      - name: createPlan
+        operation: specs/mtv.yaml#createPlan
+        type: rest
+      - name: getPlan
+        operation: specs/mtv.yaml#getPlan
+        type: rest
       - name: createMigration
         operation: specs/mtv.yaml#createMigration
         type: rest
       - name: getMigration
         operation: specs/mtv.yaml#getMigration
         type: rest
+      - name: getPlanError
+        operation: .getStatusResult.status.conditions | map(select(.category == "Error" or .category == "Critical"))[0].message
+        type: expression
       - name: getMigrationError
         operation: .getStatusResult.status.conditions | map(select(.category == "Error" or .category == "Critical" or .type == "Failed"))[0].message
         type: expression
-      - name: successResult
+      - name: successMigrate
         operation: '{ "result": { "message": "MTV migration " + .migrationName + " succeeded", "outputs":[] } }'
         type: expression
-      - name: errorResult
+      - name: errorMigrate
         operation: '{ "result": { "message": "MTV migration " + .migrationName + " failed.", "outputs":[ { "key":"Error", "value": .migrationErrorMessage } ] } }'
         type: expression
     start:
-      stateName: CreateMigration
+      stateName: SelectOperation
     states:
+      - dataConditions:
+          - condition: .operation == "MIGRATE"
+            name: JustMigrate
+            transition:
+              nextState: CreateMigration
+        defaultCondition:
+          transition:
+            nextState: CreatePlan
+        name: SelectOperation
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                apiVersion: forklift.konveyor.io/v1beta1
+                kind: Plan
+                metadata:
+                  name: .migrationName
+                  namespace: .migrationNamespace
+                namespace: .migrationNamespace
+                spec:
+                  map:
+                    network:
+                      name: .networkMap
+                      namespace: .migrationNamespace
+                    storage:
+                      name: .storageMap
+                      namespace: .migrationNamespace
+                  provider:
+                    destination:
+                      name: .destinationProvider
+                      namespace: .migrationNamespace
+                    source:
+                      name: .sourceProvider
+                      namespace: .migrationNamespace
+                  targetNamespace: .migrationNamespace
+                  vms: .vms
+              invoke: sync
+              refName: createPlan
+        name: CreatePlan
+        transition:
+          nextState: GetPlan
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .getStatusResult
+              useResults: true
+            functionRef:
+              arguments:
+                namespace: .migrationNamespace
+                plan: .migrationName
+              invoke: sync
+              refName: getPlan
+            name: getPlan
+            sleep:
+              before: PT10S
+        name: GetPlan
+        transition:
+          nextState: CheckPlanStatus
+        type: operation
+      - dataConditions:
+          - condition: .getStatusResult.status.conditions | map(select(.category == "Error" or .category == "Critical")) | length > 0
+            name: PlanFailure
+            transition:
+              nextState: PlanFailure
+          - condition: .getStatusResult.status.conditions | map(select(.type == "Ready")) | length > 0
+            name: PlanReady
+            transition:
+              nextState: NextOperation
+        defaultCondition:
+          transition:
+            nextState: GetPlan
+        name: CheckPlanStatus
+        type: switch
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .planErrorMessage
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: getPlanError
+            name: setPlanErrorMessage
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"MTV plan " + .migrationName + " is not ready for migration. Error: " + .planErrorMessage'
+                  severity: critical
+                  title: MTV plan is not ready for migration
+                  topic: MTV plan assessment workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: createNotification
+        end:
+          terminate: true
+        metadata:
+          errorMessage: '"MTV plan " + .migrationName + " is not ready for migration"'
+        name: PlanFailure
+        stateDataFilter:
+          output: '{result: {message: .planErrorMessage}}'
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                payload:
+                  description: '"MTV plan " + .migrationName + " is ready for migration"'
+                  severity: normal
+                  title: MTV plan is ready for migration
+                  topic: MTV plan assessment workflow
+                recipients:
+                  entityRef: .recipients
+                  type: entity
+              invoke: sync
+              refName: createNotification
+            name: createNotification
+        end:
+          terminate: true
+        name: PlanReady
+        stateDataFilter:
+          output: '{result: {message: "MTV plan successful", "outputs": [] }}'
+        type: operation
+      - dataConditions:
+          - condition: .operation == "PLAN_AND_MIGRATE"
+            name: Migrate
+            transition:
+              nextState: CreateMigration
+        defaultCondition:
+          transition:
+            nextState: PlanReady
+        name: NextOperation
+        type: switch
       - actionMode: sequential
         actions:
           - actionDataFilter:
@@ -126,7 +277,7 @@ spec:
               useResults: true
             functionRef:
               invoke: sync
-              refName: errorResult
+              refName: errorMigrate
             name: setOutput
         end:
           terminate: true
@@ -155,7 +306,7 @@ spec:
               useResults: true
             functionRef:
               invoke: sync
-              refName: successResult
+              refName: successMigrate
             name: setOutput
         end:
           terminate: true
@@ -169,7 +320,7 @@ spec:
             secretKeyRef:
               key: NOTIFICATIONS_BEARER_TOKEN
               name: mtv-migration-secrets
-      image: quay.io/orchestrator/serverless-workflow-mtv-migration:d347d903b21feac8e3f692d82382e0e226ed52bc
+      image: quay.io/orchestrator/serverless-workflow-mtv-migration:0873acbf209521840071aa8afc7cc1aca26e4dec
       resources: {}
   resources:
     configMaps:
