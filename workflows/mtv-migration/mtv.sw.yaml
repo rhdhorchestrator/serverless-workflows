@@ -1,6 +1,6 @@
 specVersion: "0.8"
 id: mtv-migration
-version: '1.0'
+version: "1.0"
 name: MTV migration workflow
 description: workflow executes a plan by creating a migration and waiting for it to be successful or failed
 annotations:
@@ -12,41 +12,165 @@ extensions:
   - extensionid: workflow-uri-definitions
     definitions:
       notifications: "https://raw.githubusercontent.com/rhdhorchestrator/serverless-workflows/main/workflows/shared/specs/notifications-openapi.yaml"
-start: CreateMigration
+start: SelectOperation
 functions:
   - name: createNotification
     operation: notifications#createNotification
+  - name: createPlan
+    type: rest
+    operation: "specs/mtv.yaml#createPlan"
+  - name: getPlan
+    type: rest
+    operation: "specs/mtv.yaml#getPlan"
   - name: createMigration
     type: rest
-    operation: 'specs/mtv.yaml#createMigration'
+    operation: "specs/mtv.yaml#createMigration"
   - name: getMigration
     type: rest
-    operation: 'specs/mtv.yaml#getMigration'
+    operation: "specs/mtv.yaml#getMigration"
+  - name: getPlanError
+    type: expression
+    operation: .getStatusResult.status.conditions | map(select(.category == "Error" or .category == "Critical"))[0].message
   - name: getMigrationError
     type: expression
     operation: .getStatusResult.status.conditions | map(select(.category == "Error" or .category == "Critical" or .type == "Failed"))[0].message
-  - name: successResult
+  - name: successMigrate
     type: expression
     operation: '{
-        "result": {
-          "message": "MTV migration " + .migrationName + " succeeded",
-          "outputs":[]
-        }
+      "result": {
+      "message": "MTV migration " + .migrationName + " succeeded",
+      "outputs":[]
+      }
       }'
-  - name: errorResult
+  - name: errorMigrate
     type: expression
     operation: '{
-        "result": {
-          "message": "MTV migration " + .migrationName + " failed.",
-          "outputs":[
-            {
-                "key":"Error",
-                "value": .migrationErrorMessage
-            }
-          ]
-        }
+      "result": {
+      "message": "MTV migration " + .migrationName + " failed.",
+      "outputs":[
+      {
+      "key":"Error",
+      "value": .migrationErrorMessage
+      }
+      ]
+      }
       }'
 states:
+  - name: SelectOperation
+    type: switch
+    dataConditions:
+      - name: JustMigrate
+        condition: .operation == "MIGRATE"
+        transition: CreateMigration
+    defaultCondition:
+      transition: CreatePlan
+  - name: CreatePlan
+    type: operation
+    actions:
+      - functionRef:
+          refName: createPlan
+          arguments:
+            namespace: .migrationNamespace
+            apiVersion: "forklift.konveyor.io/v1beta1"
+            kind: Plan
+            metadata:
+              name: .migrationName
+              namespace: .migrationNamespace
+            spec:
+              map:
+                network:
+                  name: .networkMap
+                  namespace: .migrationNamespace
+                storage:
+                  name: .storageMap
+                  namespace: .migrationNamespace
+              provider:
+                destination:
+                  name: .destinationProvider
+                  namespace: .migrationNamespace
+                source:
+                  name: .sourceProvider
+                  namespace: .migrationNamespace
+              targetNamespace: .migrationNamespace
+              vms: .vms
+    transition: GetPlan
+  - name: GetPlan
+    type: operation
+    actions:
+      - name: getPlan
+        actionDataFilter:
+          toStateData: .getStatusResult
+        functionRef:
+          refName: getPlan
+          arguments:
+            namespace: .migrationNamespace
+            plan: .migrationName
+        sleep:
+          before: PT10S
+    transition: CheckPlanStatus
+  - name: CheckPlanStatus
+    type: switch
+    dataConditions:
+      - name: PlanFailure
+        condition: .getStatusResult.status.conditions | map(select(.category == "Error" or .category == "Critical")) | length > 0
+        transition: PlanFailure
+      - name: PlanReady
+        condition: .getStatusResult.status.conditions | map(select(.type == "Ready")) | length > 0
+        transition: NextOperation
+    defaultCondition:
+      transition:
+        nextState: GetPlan
+  - name: PlanFailure
+    type: operation
+    metadata:
+      errorMessage: '"MTV plan " + .migrationName + " is not ready for migration"'
+    actions:
+      - name: setPlanErrorMessage
+        actionDataFilter:
+          toStateData: .planErrorMessage
+        functionRef:
+          refName: getPlanError
+      - name: createNotification
+        functionRef:
+          refName: createNotification
+          arguments:
+            recipients:
+              type: "entity"
+              entityRef: .recipients
+            payload:
+              title: "MTV plan is not ready for migration"
+              description: '"MTV plan " + .migrationName + " is not ready for migration. Error: " + .planErrorMessage'
+              topic: "MTV plan assessment workflow"
+              severity: "critical"
+    stateDataFilter:
+      output: "{result: {message: .planErrorMessage}}"
+    end: true
+  - name: PlanReady
+    type: operation
+    actions:
+      - name: createNotification
+        functionRef:
+          refName: createNotification
+          arguments:
+            recipients:
+              type: "entity"
+              entityRef: .recipients
+            payload:
+              title: "MTV plan is ready for migration"
+              description: '"MTV plan " + .migrationName + " is ready for migration"'
+              topic: "MTV plan assessment workflow"
+              severity: "normal"
+    stateDataFilter:
+      output: '{result: {message: "MTV plan successful", "outputs": [] }}'
+    end: true
+  - name: NextOperation
+    type: switch
+    dataConditions:
+      - name: Migrate
+        condition: .operation == "PLAN_AND_MIGRATE"
+        transition: CreateMigration
+    defaultCondition:
+      transition: PlanReady
   - name: CreateMigration
     type: operation
     actions:
@@ -93,7 +217,7 @@ states:
   - name: MigrationFailure
     type: operation
     metadata:
-      errorMessage:  '"MTV migration " + .migrationName + " failed"'
+      errorMessage: '"MTV migration " + .migrationName + " failed"'
     actions:
       - name: setMigrationErrorMessage
         actionDataFilter:
@@ -114,7 +238,7 @@ states:
               severity: "critical"
       - name: setOutput
         functionRef:
-          refName: errorResult
+          refName: errorMigrate
     end: true
   - name: MigrationSuccessful
     type: operation
@@ -133,5 +257,5 @@ states:
               severity: "normal"
       - name: setOutput
         functionRef:
-          refName: successResult
+          refName: successMigrate
     end: true

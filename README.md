@@ -11,7 +11,6 @@ This repository contains multiple workflows. Each workflow is represented by a d
 | `move2kube`                      | Workflow for Move2Kube tasks and transformation.  |
 | `mta-v7.x`                       | Migration toolkit for applications, version 7.x.  |
 | `mtv-migration`                  | Migration tasks using Migration Toolkit for Virtualization (MTV). |
-| `mtv-plan`                       | Planning workflows for Migration Toolkit for Virtualization. |
 | `request-vm-cnv`                 | Requests and provisions VMs using Container Native Virtualization (CNV). |
 
 Each workflow is organized in its own directory, containing the following components:

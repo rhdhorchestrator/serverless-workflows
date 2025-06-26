@@ -10,6 +10,48 @@
       "type": "string",
       "pattern": "[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
     },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "PLAN,MIGRATE,PLAN_AND_MIGRATE"
+      ],
+      "description": "create a plan and then migrate or perform just one of the two stages"
+    },
+    "sourceProvider": {
+      "type": "string",
+      "pattern": "[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+    },
+    "destinationProvider": {
+      "type": "string",
+      "pattern": "[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+    },
+    "storageMap": {
+      "type": "string",
+      "pattern": "[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+    },
+    "networkMap": {
+      "type": "string",
+      "pattern": "[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+    },
+    "vms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "id"
+        ]
+      },
+      "minItems": 1
+    },
     "recipients": {
       "type": "array",
       "items": {
