@@ -1,0 +1,42 @@
+id: backstage-token
+version: "1.0"
+specVersion: "0.8"
+name: "Backstage Token"
+description: Testing Backstage Token propagation to Catalog API
+dataInputSchema: schemas/backstage-token-input-schema.json
+extensions:
+  - extensionid: workflow-uri-definitions
+    definitions:
+      catalog: "https://raw.githubusercontent.com/backstage/backstage/refs/heads/master/plugins/catalog-backend/src/schema/openapi.yaml"
+functions:
+  - name: getEntities
+    operation: catalog#GetEntityByName
+  - name: print
+    type: custom
+    operation: sysout
+start: ValidateTokenPropagation
+states:
+  - name: ValidateTokenPropagation
+    type: operation
+    actions:
+      - name: getEntities
+        functionRef:
+          refName: getEntities
+          arguments:
+            kind: .kind
+            namespace: .namespace
+            name: .name
+      actionDataFilter:
+          results: .entity
+          toStateData: .fetchedEntity
+    transition: PrintEntity
+
+  - name: PrintEntity
+    type: operation
+    actions:
+      - name: printEntity
+        functionRef:
+          refName: print
+          arguments:
+            message: .fetchedEntity
+    end: true
