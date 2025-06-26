@@ -272,6 +272,17 @@ entries:
     version: 1.6.0-rc1
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2025-06-26T07:49:40.233651592Z"
+    description: A Helm chart for the MTV Migration serverless workflow
+    digest: e5f69a20ebc26f79ae94baf9620528a6f215a0f7db700f7aa219e43a03a79dea
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: mtv-migration
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/mtv-migration-1.6.0-rc1/mtv-migration-1.6.0-rc1.tgz
+    version: 1.6.0-rc1
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2025-06-12T12:08:38.72600407Z"
     description: A Helm chart for the MTV Migration serverless workflow
     digest: acf1a747153b86c305dba6aa647649a55f3146be395c31937ea595798289598e
@@ -383,4 +394,4 @@ entries:
     urls:
     - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/rpj-1.6.0-rc0/rpj-1.6.0-rc0.tgz
     version: 1.6.0-rc0
-generated: "2025-06-26T07:30:41.338555111Z"
+generated: "2025-06-26T07:49:40.23372536Z"
