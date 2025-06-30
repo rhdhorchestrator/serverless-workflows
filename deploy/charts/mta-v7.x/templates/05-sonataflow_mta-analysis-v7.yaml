@@ -17,8 +17,6 @@ metadata:
   name: mta-analysis-v7
 spec:
   flow:
-    annotations:
-      - workflow-type/assessment
     dataInputSchema:
       failOnValidationErrors: false
       schema: schemas/mta-input.json
@@ -114,10 +112,10 @@ spec:
         operation: '{ exitMessage: "There are no trackerProjectIssueTypes in the trackerProject with the id " + (.trackerProject.id|tostring) + " of the tracker with the id "+ (.tracker.id|tostring) +", cannot export to the issue manager" }'
         type: expression
       - name: successResult
-        operation: '{ result: { message: "MTA v7.x analysis completed for " + .repositoryURL, outputs:[ { key:"MTA Analysis Result URL", value: $SECRET.mta.url + "/hub/applications/" + (.application.id|tostring) + "/analysis/report", format:"link" }, { key:"Migration Wave Ticket URL", value: (if .migrationWaveJiraTicket != null then .migrationWaveJiraTicket.link else "" end), format:"link" } ], nextWorkflows:[ { id:"m2k", name:"Move2Kube workflow" } ] } }'
+        operation: '{ result: { message: "MTA v7.x analysis completed for " + .repositoryURL, outputs:[ { key:"MTA Analysis Result URL", value: $SECRET.mta.url + "/hub/applications/" + (.application.id|tostring) + "/analysis/report", format:"link" }, { key:"Migration Wave Ticket URL", value: (if .migrationWaveJiraTicket != null then .migrationWaveJiraTicket.link else "" end), format:"link" } ] } }'
         type: expression
       - name: mandatoriesIncidentsResult
-        operation: '{ result: { message: "MTA analysis for " + .application.repository.url + " completed with " + (.application.mandatoriesIncidents|tostring) + " incidents in mandatory issues that need to be fixed before being able to provide any next possible workflow. Check the analysis report." + (if .migrationWaveJiraTicket != null then " Application was exported to issue manager." else "" end), outputs: [ { key:"MTA Analysis Result URL", value: ($SECRET.mta.url + "/hub/applications/" + (.application.id|tostring) + "/analysis/report"), format: "link" }, { key:"Migration Wave Ticket URL", value: (if .migrationWaveJiraTicket != null then .migrationWaveJiraTicket.link else "" end), format: "link" } ] } }'
+        operation: '{ result: { message: "MTA analysis for " + .application.repository.url + " completed with " + (.application.mandatoriesIncidents|tostring) + " incidents in mandatory issues that need to be fixed. Check the analysis report." + (if .migrationWaveJiraTicket != null then " Application was exported to issue manager." else "" end), outputs: [ { key:"MTA Analysis Result URL", value: ($SECRET.mta.url + "/hub/applications/" + (.application.id|tostring) + "/analysis/report"), format: "link" }, { key:"Migration Wave Ticket URL", value: (if .migrationWaveJiraTicket != null then .migrationWaveJiraTicket.link else "" end), format: "link" } ] } }'
         type: expression
       - name: errorResult
         operation: '{ result: { message: "MTA analysis for " + .application.repository.url + " failed: " + .exitMessage + ". Check logs of task pod: " + .taskgroup.tasks[0].pod } }'
@@ -687,7 +685,7 @@ spec:
             secretKeyRef:
               key: NOTIFICATIONS_BEARER_TOKEN
               name: mta-analysis-v7-secrets
-      image: quay.io/orchestrator/serverless-workflow-mta-v7.x:d347d903b21feac8e3f692d82382e0e226ed52bc
+      image: quay.io/orchestrator/serverless-workflow-mta-v7.x:9e82c0d444e94834347018fcd7ebb9aff7f305c7
       resources: {}
   resources:
     configMaps:
