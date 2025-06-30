@@ -2,8 +2,6 @@ specVersion: "0.8"
 id: mta-analysis-v7
 name: MTA v7.x Analysis
 description: Workflow to execute MTA Analysis
-annotations:
-  - "workflow-type/assessment"
 version: "1.0"
 timeouts:
   workflowExecTimeout:
@@ -74,91 +72,85 @@ functions:
   - name: TaskFailedErrorExitMessage
     type: expression
     operation: '{
-        exitMessage: "The 1st task of the taskGroup " + (.taskgroup.id|tostring) + " is in failed state"
+      exitMessage: "The 1st task of the taskGroup " + (.taskgroup.id|tostring) + " is in failed state"
       }'
   - name: TrackersDoesNotExistErrorExitMessage
     type: expression
     operation: '{
-        exitMessage: "There are no trackers configured in MTA, cannot export to the issue manager"
+      exitMessage: "There are no trackers configured in MTA, cannot export to the issue manager"
       }'
   - name: TrackerDoesNotExistErrorExitMessage
     type: expression
     operation: '{
-        exitMessage: "The tracker with the id " + (.trackers[0].id|tostring) + " does not exist, cannot export to the issue manager"
+      exitMessage: "The tracker with the id " + (.trackers[0].id|tostring) + " does not exist, cannot export to the issue manager"
       }'
   - name: TrackerProjectsDoesNotExistErrorExitMessage
     type: expression
     operation: '{
-        exitMessage: "There are no trackerProjects associated with the tracker with the id " + (.tracker.id|tostring) + ", cannot export to the issue manager"
+      exitMessage: "There are no trackerProjects associated with the tracker with the id " + (.tracker.id|tostring) + ", cannot export to the issue manager"
       }'
   - name: TrackerProjectDoesNotExistErrorExitMessage
     type: expression
     operation: '{
-        exitMessage: "The trackerProject with the id " + (.trackerProjects[0].id|tostring) + " of the tracker with the id " + (.tracker.id|tostring) + " does not exist, cannot export to the issue manager"
+      exitMessage: "The trackerProject with the id " + (.trackerProjects[0].id|tostring) + " of the tracker with the id " + (.tracker.id|tostring) + " does not exist, cannot export to the issue manager"
       }'
   - name: TrackerProjectIssueTypesDoesNotExistErrorExitMessage
     type: expression
     operation: '{
-        exitMessage: "There are no trackerProjectIssueTypes in the trackerProject with the id " + (.trackerProject.id|tostring) + " of the tracker with the id "+ (.tracker.id|tostring) +", cannot export to the issue manager"
+      exitMessage: "There are no trackerProjectIssueTypes in the trackerProject with the id " + (.trackerProject.id|tostring) + " of the tracker with the id "+ (.tracker.id|tostring) +", cannot export to the issue manager"
       }'
   - name: successResult
     type: expression
     operation: '{
-        result: {
-          message: "MTA v7.x analysis completed for " + .repositoryURL,
-          outputs:[
-            {
-                key:"MTA Analysis Result URL",
-                value: $SECRET.mta.url + "/hub/applications/" + (.application.id|tostring) + "/analysis/report",
-                format:"link"
-            },
-            {
-                key:"Migration Wave Ticket URL",
-                value: (if .migrationWaveJiraTicket != null then .migrationWaveJiraTicket.link else "" end),
-                format:"link"
-            }
-          ],
-          nextWorkflows:[
-            {
-                id:"m2k",
-                name:"Move2Kube workflow"
-            }
-          ]
-        }
+      result: {
+      message: "MTA v7.x analysis completed for " + .repositoryURL,
+      outputs:[
+      {
+      key:"MTA Analysis Result URL",
+      value: $SECRET.mta.url + "/hub/applications/" + (.application.id|tostring) + "/analysis/report",
+      format:"link"
+      },
+      {
+      key:"Migration Wave Ticket URL",
+      value: (if .migrationWaveJiraTicket != null then .migrationWaveJiraTicket.link else "" end),
+      format:"link"
+      }
+      ]
+      }
       }'
   - name: mandatoriesIncidentsResult
     type: expression
     operation: '{
-        result: {
-          message: "MTA analysis for " + .application.repository.url + " completed with " + (.application.mandatoriesIncidents|tostring) + " incidents in mandatory issues that need to be fixed before being able to provide any next possible workflow. Check the analysis report." + (if .migrationWaveJiraTicket != null then " Application was exported to issue manager." else "" end),
-          outputs: [
-            {
-                key:"MTA Analysis Result URL",
-              value: ($SECRET.mta.url + "/hub/applications/" + (.application.id|tostring) + "/analysis/report"),
-              format: "link"
-            },
-            {
-                key:"Migration Wave Ticket URL",
-              value: (if .migrationWaveJiraTicket != null then .migrationWaveJiraTicket.link else "" end),
-              format: "link"
-            }
-          ]
-        }
+      result: {
+      message: "MTA analysis for " + .application.repository.url + " completed with " + (.application.mandatoriesIncidents|tostring) + " incidents in mandatory issues that need to be fixed. Check the analysis report." + (if .migrationWaveJiraTicket != null then " Application was exported to issue manager." else "" end),
+      outputs: [
+      {
+      key:"MTA Analysis Result URL",
+      value: ($SECRET.mta.url + "/hub/applications/" + (.application.id|tostring) + "/analysis/report"),
+      format: "link"
+      },
+      {
+      key:"Migration Wave Ticket URL",
+      value: (if .migrationWaveJiraTicket != null then .migrationWaveJiraTicket.link else "" end),
+      format: "link"
+      }
+      ]
+      }
       }'
   - name: errorResult
     type: expression
     operation: '{
-        result: {
-          message: "MTA analysis for " + .application.repository.url + " failed: " + .exitMessage + ". Check logs of task pod: " + .taskgroup.tasks[0].pod
-        }
+      result: {
+      message: "MTA analysis for " + .application.repository.url + " failed: " + .exitMessage + ". Check logs of task pod: " + .taskgroup.tasks[0].pod
+      }
       }'
 
   - name: abortResult
     type: expression
     operation: '{
-        result: {
-          message: "MTA analysis for " + .application.repository.url + " aborted, all in progress tasks were cancelled."
-        }
+      result: {
+      message: "MTA analysis for " + .application.repository.url + " aborted, all in progress tasks were cancelled."
+      }
       }'
 
 states:
