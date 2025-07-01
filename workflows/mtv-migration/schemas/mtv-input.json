@@ -13,7 +13,9 @@
     "operation": {
       "type": "string",
       "enum": [
-        "PLAN,MIGRATE,PLAN_AND_MIGRATE"
+        "PLAN",
+        "MIGRATE",
+        "PLAN_AND_MIGRATE"
       ],
       "description": "create a plan and then migrate or perform just one of the two stages"
     },
