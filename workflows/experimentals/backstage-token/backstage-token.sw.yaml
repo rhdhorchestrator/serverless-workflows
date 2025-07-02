@@ -4,13 +4,9 @@ specVersion: "0.8"
 name: "Backstage Token"
 description: Testing Backstage Token propagation to Catalog API
 dataInputSchema: schemas/backstage-token-input-schema.json
-extensions:
-  - extensionid: workflow-uri-definitions
-    definitions:
-      catalog: "https://raw.githubusercontent.com/backstage/backstage/refs/heads/master/plugins/catalog-backend/src/schema/openapi.yaml"
 functions:
   - name: getEntities
-    operation: catalog#GetEntityByName
+    operation: 'specs/backstage-api.yaml#GetEntityByName'
   - name: print
     type: custom
     operation: sysout
@@ -26,7 +22,7 @@ states:
             kind: .kind
             namespace: .namespace
             name: .name
-      actionDataFilter:
+        actionDataFilter:
           results: .entity
           toStateData: .fetchedEntity
     transition: PrintEntity
@@ -34,7 +30,7 @@ states:
   - name: PrintEntity
     type: operation
     actions:
-      - name: printEntity
+      - name: print
         functionRef:
           refName: print
           arguments:
