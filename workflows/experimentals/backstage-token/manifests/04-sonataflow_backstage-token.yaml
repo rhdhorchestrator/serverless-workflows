@@ -1,0 +1,85 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: Testing Backstage Token propagation to Catalog API
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: backstage-token
+    sonataflow.org/workflow-app: backstage-token
+  name: backstage-token
+spec:
+  flow:
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/backstage-token-input-schema.json
+    functions:
+      - name: getEntities
+        operation: specs/backstage-api.yaml#GetEntityByName
+        type: rest
+      - name: print
+        operation: sysout
+        type: custom
+    start:
+      stateName: ValidateTokenPropagation
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              results: .entity
+              toStateData: .fetchedEntity
+              useResults: true
+            functionRef:
+              arguments:
+                kind: .kind
+                name: .name
+                namespace: .namespace
+              invoke: sync
+              refName: getEntities
+            name: getEntities
+        name: ValidateTokenPropagation
+        transition:
+          nextState: PrintEntity
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                message: .fetchedEntity
+              invoke: sync
+              refName: print
+            name: print
+        end:
+          terminate: true
+        name: PrintEntity
+        type: operation
+  podTemplate:
+    container:
+      image: quay.io/orchestrator/serverless-workflow-backstage-token:latest
+      resources: {}
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-backstage-token-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-backstage-token-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: rhdh-postgresql-svcbind-postgres
+        userKey: username
+        passwordKey: password
+      serviceRef:
+        name: rhdh-postgresql
+        port: 5432
+        databaseName: sonataflow
+status:
+  address: {}
+  lastTimeRecoverAttempt: null

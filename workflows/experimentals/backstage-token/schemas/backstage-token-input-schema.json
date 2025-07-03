@@ -1,0 +1,25 @@
+{
+  "$id": "classpath:/schemas/backstage-token-input-schema.json",
+  "title": "Backstage Token: Input Section",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "description": "Name of the requested entity's kind"
+    },
+    "namespace": {
+      "type": "string",
+      "description": "Name of the requested entity's namespace"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the requested entity"
+    }
+  },
+  "required": [
+    "kind",
+    "namespace",
+    "name"
+  ]
+}

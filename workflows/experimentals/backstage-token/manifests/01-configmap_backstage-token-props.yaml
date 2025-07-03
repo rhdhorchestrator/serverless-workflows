@@ -1,0 +1,17 @@
+apiVersion: v1
+data:
+  application.properties: |
+    quarkus.rest-client.backstage_api_yaml.url=${BACKSTAGE_ROUTE:http://backstage-backstage.rhdh.svc.cluster.local}
+    quarkus.openapi-generator.backstage_api_yaml.auth.JWT.token-propagation=true
+    quarkus.openapi-generator.backstage_api_yaml.auth.JWT.header-name=X-Authorization-Backstage
+
+    # quarkus.log.category."org.apache.http".level=DEBUG
+    # quarkus.log.level=DEBUG
+    kie.flyway.enabled=true
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    app: backstage-token
+    sonataflow.org/workflow-app: backstage-token
+  name: backstage-token-props

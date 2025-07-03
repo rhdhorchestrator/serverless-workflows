@@ -1,0 +1,38 @@
+id: backstage-token
+version: "1.0"
+specVersion: "0.8"
+name: "Backstage Token"
+description: Testing Backstage Token propagation to Catalog API
+dataInputSchema: schemas/backstage-token-input-schema.json
+functions:
+  - name: getEntities
+    operation: 'specs/backstage-api.yaml#GetEntityByName'
+  - name: print
+    type: custom
+    operation: sysout
+start: ValidateTokenPropagation
+states:
+  - name: ValidateTokenPropagation
+    type: operation
+    actions:
+      - name: getEntities
+        functionRef:
+          refName: getEntities
+          arguments:
+            kind: .kind
+            namespace: .namespace
+            name: .name
+        actionDataFilter:
+          results: .entity
+          toStateData: .fetchedEntity
+    transition: PrintEntity
+
+  - name: PrintEntity
+    type: operation
+    actions:
+      - name: print
+        functionRef:
+          refName: print
+          arguments:
+            message: .fetchedEntity
+    end: true
