@@ -1,0 +1,41 @@
+{
+  "$id": "classpath:/schemas/gitlab-pr-schema.json",
+  "title": "Workflow input data",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "anyFieldName": {
+      "type": "string",
+      "ui:widget": "AuthRequester",
+      "ui:props": {
+        "authTokenDescriptors": [
+          {
+            "provider": "gitlab",
+            "tokenType": "oauth",
+            "scope": "api"
+          }
+        ]
+      }
+    },
+    "project_id": {
+      "title": "project_id",
+      "description": "GitLab project ID",
+      "type": "string"
+    },
+    "baseBranch": {
+      "title": "baseBranch",
+      "description": "Base branch for the merge request",
+      "type": "string"
+    },
+    "targetBranch": {
+      "title": "targetBranch",
+      "description": "Target branch for the merge request",
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "baseBranch",
+    "targetBranch"
+  ]
+} 

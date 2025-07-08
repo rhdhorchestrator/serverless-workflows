@@ -1,0 +1,61 @@
+apiVersion: v1
+data:
+  basic__main-schema.json: "{\n  \"$id\": \"classpath:/schemas/gitlab-pr-schema.json\",\n
+    \ \"title\": \"Workflow input data\",\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n
+    \ \"type\": \"object\",\n  \"properties\": {\n    \"anyFieldName\": {\n      \"type\":
+    \"string\",\n      \"ui:widget\": \"AuthRequester\",\n      \"ui:props\": {\n
+    \       \"authTokenDescriptors\": [\n          {\n            \"provider\": \"gitlab\",\n
+    \           \"tokenType\": \"oauth\",\n            \"scope\": \"api\"\n          }\n
+    \       ]\n      }\n    },\n    \"project_id\": {\n      \"title\": \"project_id\",\n
+    \     \"description\": \"GitLab project ID\",\n      \"type\": \"string\"\n    },\n
+    \   \"baseBranch\": {\n      \"title\": \"baseBranch\",\n      \"description\":
+    \"Base branch for the merge request\",\n      \"type\": \"string\"\n    },\n    \"targetBranch\":
+    {\n      \"title\": \"targetBranch\",\n      \"description\": \"Target branch
+    for the merge request\",\n      \"type\": \"string\"\n    }\n  },\n  \"required\":
+    [\n    \"project_id\",\n    \"baseBranch\",\n    \"targetBranch\"\n  ]\n} \n"
+  workflow-output-schema.json: "{\n    \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n
+    \   \"title\": \"WorkflowResult\",\n    \"description\": \"Schema of workflow
+    output\",\n    \"type\": \"object\",\n    \"properties\": {\n        \"anyFieldName\":
+    {\n            \"type\": \"string\",\n            \"ui:widget\": \"AuthRequester\",\n
+    \           \"ui:props\": {\n                \"authTokenDescriptors\": [\n                    {\n
+    \                       \"provider\": \"gitlab\",\n                        \"tokenType\":
+    \"oauth\",\n                        \"scope\": \"api\"\n                    }\n
+    \               ]\n            }\n        }\n    },\n    \"result\": {\n        \"type\":
+    \"object\",\n        \"properties\": {\n            \"completedWith\": {\n                \"description\":
+    \"The state of workflow completion.\",\n                \"type\": \"string\",\n
+    \               \"enum\": [\n                    \"error\",\n                    \"success\",\n
+    \                   \"warning\"\n                ]\n            },\n            \"message\":
+    {\n                \"description\": \"High-level summary of the current status,
+    free-form text, human readable.\",\n                \"type\": \"string\"\n            },\n
+    \           \"nextWorkflows\": {\n                \"description\": \"List of workflows
+    suggested to run next. Items at lower indexes are of higher priority.\",\n                \"type\":
+    \"array\",\n                \"items\": {\n                    \"type\": \"object\",\n
+    \                   \"properties\": {\n                        \"id\": {\n                            \"description\":
+    \"Workflow identifier\",\n                            \"type\": \"string\"\n                        },\n
+    \                       \"name\": {\n                            \"description\":
+    \"Human readable title describing the workflow.\",\n                            \"type\":
+    \"string\"\n                        }\n                    },\n                    \"required\":
+    [\n                        \"id\",\n                        \"name\"\n                    ]\n
+    \               }\n            },\n            \"outputs\": {\n                \"description\":
+    \"Additional structured output of workflow processing. This can contain identifiers
+    of created resources, links to resources, logs or other output.\",\n                \"type\":
+    \"array\",\n                \"items\": {\n                    \"type\": \"object\",\n
+    \                   \"properties\": {\n                        \"key\": {\n                            \"description\":
+    \"Unique identifier of the option. Preferably human-readable.\",\n                            \"type\":
+    \"string\"\n                        },\n                        \"value\": {\n
+    \                           \"description\": \"Free form value of the option.\",\n
+    \                           \"anyOf\": [\n                                {\n
+    \                                   \"type\": \"string\"\n                                },\n
+    \                               {\n                                    \"type\":
+    \"number\"\n                                }\n                            ]\n
+    \                       },\n                        \"format\": {\n                            \"description\":
+    \"More detailed type of the 'value' property. Defaults to 'text'.\",\n                            \"enum\":
+    [\n                                \"text\",\n                                \"number\",\n
+    \                               \"link\"\n                            ]\n                        }\n
+    \                   },\n                    \"required\": [\n                        \"key\",\n
+    \                       \"value\"\n                    ]\n                }\n
+    \           }\n        }\n    }\n} \n"
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 01-gl-pr-resources-schemas

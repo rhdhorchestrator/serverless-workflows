@@ -1,0 +1,302 @@
+openapi: 3.0.0
+info:
+  title: GitLab Repository Automation API
+  version: 1.0.0
+  description: API specification for automating GitLab repository tasks using the GitLab REST API v4.
+security:
+  - BearerToken: []
+paths:
+  /api/v4/projects/{project_id}/repository/branches/{branch}:
+    get:
+      summary: Get branch information
+      operationId: getBranchSHA
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: branch
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved branch information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  commit:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+        '404':
+          description: Branch not found
+      security:
+        - BearerToken: []
+  /api/v4/projects/{project_id}/repository/branches:
+    post:
+      summary: Create a new branch
+      operationId: createBranch
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                branch:
+                  type: string
+                ref:
+                  type: string
+      responses:
+        '201':
+          description: Branch created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerToken: []
+  /api/v4/projects/{project_id}/repository/files/{file_path}:
+    post:
+      summary: Create a new file
+      operationId: createBlob
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: file_path
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                branch:
+                  type: string
+                content:
+                  type: string
+                commit_message:
+                  type: string
+                encoding:
+                  type: string
+      responses:
+        '201':
+          description: File created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerToken: []
+  /api/v4/projects/{project_id}/repository/commits:
+    post:
+      summary: Create a new commit
+      operationId: createCommit
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                branch:
+                  type: string
+                commit_message:
+                  type: string
+                actions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      action:
+                        type: string
+                      file_path:
+                        type: string
+                      content:
+                        type: string
+      responses:
+        '201':
+          description: Commit created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerToken: []
+  /api/v4/projects/{project_id}/repository/commits/{sha}:
+    get:
+      summary: Get details of a commit
+      operationId: getCommitDetails
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sha
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Commit details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerToken: []
+  /api/v4/projects/{project_id}/merge_requests:
+    post:
+      summary: Create a merge request
+      description: Opens a new merge request from a branch to the base branch.
+      operationId: createMergeRequest
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "New Feature: Added new file"
+                description:
+                  type: string
+                  example: "This MR adds a new file using the GitLab REST API."
+                source_branch:
+                  type: string
+                  example: "new-feature-branch"
+                target_branch:
+                  type: string
+                  example: "main"
+      responses:
+        '201':
+          description: Merge request created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  web_url:
+                    type: string
+                    example: "https://gitlab.com/group/project/-/merge_requests/42"
+        '422':
+          description: Invalid input or merge request already exists.
+      security:
+        - BearerToken: []
+  /api/v4/projects/{project_id}/repository/branches/{branch}/push:
+    post:
+      summary: Push to branch (placeholder for push operation)
+      operationId: updateBranchRef
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: branch
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sha:
+                  type: string
+                force:
+                  type: boolean
+      responses:
+        '200':
+          description: Branch updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerToken: []
+  /api/v4/projects/{project_id}/repository/tree:
+    post:
+      summary: Create a new tree (placeholder for tree operation)
+      operationId: createTree
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                base_tree:
+                  type: string
+                tree:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      path:
+                        type: string
+                      mode:
+                        type: string
+                      type:
+                        type: string
+                      sha:
+                        type: string
+      responses:
+        '201':
+          description: Tree created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerToken: []
+
+components:
+  securitySchemes:
+    BearerToken:
+      type: http
+      scheme: bearer
+      description: Bearer Token authentication 

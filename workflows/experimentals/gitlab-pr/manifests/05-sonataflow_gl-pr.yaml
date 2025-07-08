@@ -1,0 +1,181 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: Create GitLab merge request
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: gl-pr
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: gl-pr
+    sonataflow.org/workflow-app: gl-pr
+    sonataflow.org/workflow-namespace: ""
+  name: gl-pr
+spec:
+  flow:
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/basic__main-schema.json
+    functions:
+      - name: getBranchSHA
+        operation: specs/gitlab.yaml#getBranchSHA
+        type: rest
+      - name: createCommit
+        operation: specs/gitlab.yaml#createCommit
+        type: rest
+      - name: createBlob
+        operation: specs/gitlab.yaml#createBlob
+        type: rest
+      - name: createBranch
+        operation: specs/gitlab.yaml#createBranch
+        type: rest
+      - name: getCommitDetails
+        operation: specs/gitlab.yaml#getCommitDetails
+        type: rest
+      - name: createMergeRequest
+        operation: specs/gitlab.yaml#createMergeRequest
+        type: rest
+      - name: print
+        operation: sysout
+        type: custom
+      - name: createNewBlob
+        operation: '{"action": "create", "file_path": "test.txt", "content": "TEST"}'
+        type: expression
+      - name: successResult
+        operation: '{ "result": { "message": "MR created", "outputs":[ { "key": "MR_URL", "value": .mrURL.web_url, "format":"link" } ] } }'
+        type: expression
+    start:
+      stateName: CreateBranch
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .latestSHA
+              useResults: true
+            functionRef:
+              arguments:
+                branch: .baseBranch
+                project_id: .project_id
+              invoke: sync
+              refName: getBranchSHA
+            name: GetHeadSha
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                branch: .targetBranch
+                project_id: .project_id
+                ref: .baseBranch
+              invoke: sync
+              refName: createBranch
+            name: createBranch
+          - actionDataFilter:
+              toStateData: .commit
+              useResults: true
+            functionRef:
+              arguments:
+                project_id: .project_id
+                sha: .latestSHA.commit.id
+              invoke: sync
+              refName: getCommitDetails
+            name: getCommitDetails
+        name: CreateBranch
+        transition:
+          nextState: CreateFiles
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .blobs
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: createNewBlob
+            name: createNewBlob
+        name: CreateFiles
+        transition:
+          nextState: CreateCommit
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .newCommit
+              useResults: true
+            functionRef:
+              arguments:
+                actions:
+                  - .blobs
+                branch: .targetBranch
+                commit_message: Added/Updated multiple files via API
+                project_id: .project_id
+              invoke: sync
+              refName: createCommit
+            name: createCommit
+        name: CreateCommit
+        transition:
+          nextState: CreateMR
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              toStateData: .mrURL
+              useResults: true
+            functionRef:
+              arguments:
+                description: ""
+                project_id: .project_id
+                source_branch: .targetBranch
+                target_branch: .baseBranch
+                title: Automated MR
+              invoke: sync
+              refName: createMergeRequest
+            name: createMergeRequest
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: successResult
+            name: setOutput
+        end:
+          terminate: true
+        name: CreateMR
+        type: operation
+  podTemplate:
+    container:
+      env:
+        - name: NOTIFICATIONS_BEARER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: NOTIFICATIONS_BEARER_TOKEN
+              name: gl-pr-secrets
+      image: quay.io/orchestrator/gl-pr
+      resources: {}
+      envFrom:
+        - secretRef:
+            name: gl-pr-secrets
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-gl-pr-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-gl-pr-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: gl-pr
+status:
+  address: {}
+  lastTimeRecoverAttempt: null
