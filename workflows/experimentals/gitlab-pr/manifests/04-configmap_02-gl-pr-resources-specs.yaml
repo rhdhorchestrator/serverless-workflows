@@ -1,0 +1,103 @@
+apiVersion: v1
+data:
+  gitlab.yaml: "openapi: 3.0.0\ninfo:\n  title: GitLab Repository Automation API\n
+    \ version: 1.0.0\n  description: API specification for automating GitLab repository
+    tasks using the GitLab REST API v4.\nsecurity:\n  - BearerToken: []\npaths:\n
+    \ /api/v4/projects/{project_id}/repository/branches/{branch}:\n    get:\n      summary:
+    Get branch information\n      operationId: getBranchSHA\n      parameters:\n        -
+    name: project_id\n          in: path\n          required: true\n          schema:\n
+    \           type: string\n        - name: branch\n          in: path\n          required:
+    true\n          schema:\n            type: string\n      responses:\n        '200':\n
+    \         description: Successfully retrieved branch information\n          content:\n
+    \           application/json:\n              schema:\n                type: object\n
+    \               properties:\n                  commit:\n                    type:
+    object\n                    properties:\n                      id:\n                        type:
+    string\n        '404':\n          description: Branch not found\n      security:\n
+    \       - BearerToken: []\n  /api/v4/projects/{project_id}/repository/branches:\n
+    \   post:\n      summary: Create a new branch\n      operationId: createBranch\n
+    \     parameters:\n        - name: project_id\n          in: path\n          required:
+    true\n          schema:\n            type: string\n      requestBody:\n        required:
+    true\n        content:\n          application/json:\n            schema:\n              type:
+    object\n              properties:\n                branch:\n                  type:
+    string\n                ref:\n                  type: string\n      responses:\n
+    \       '201':\n          description: Branch created successfully\n          content:\n
+    \           application/json:\n              schema:\n                type: object\n
+    \     security:\n        - BearerToken: []\n  /api/v4/projects/{project_id}/repository/files/{file_path}:\n
+    \   post:\n      summary: Create a new file\n      operationId: createBlob\n      parameters:\n
+    \       - name: project_id\n          in: path\n          required: true\n          schema:\n
+    \           type: string\n        - name: file_path\n          in: path\n          required:
+    true\n          schema:\n            type: string\n      requestBody:\n        required:
+    true\n        content:\n          application/json:\n            schema:\n              type:
+    object\n              properties:\n                branch:\n                  type:
+    string\n                content:\n                  type: string\n                commit_message:\n
+    \                 type: string\n                encoding:\n                  type:
+    string\n      responses:\n        '201':\n          description: File created
+    successfully\n          content:\n            application/json:\n              schema:\n
+    \               type: object\n      security:\n        - BearerToken: []\n  /api/v4/projects/{project_id}/repository/commits:\n
+    \   post:\n      summary: Create a new commit\n      operationId: createCommit\n
+    \     parameters:\n        - name: project_id\n          in: path\n          required:
+    true\n          schema:\n            type: string\n      requestBody:\n        required:
+    true\n        content:\n          application/json:\n            schema:\n              type:
+    object\n              properties:\n                branch:\n                  type:
+    string\n                commit_message:\n                  type: string\n                actions:\n
+    \                 type: array\n                  items:\n                    type:
+    object\n                    properties:\n                      action:\n                        type:
+    string\n                      file_path:\n                        type: string\n
+    \                     content:\n                        type: string\n      responses:\n
+    \       '201':\n          description: Commit created successfully\n          content:\n
+    \           application/json:\n              schema:\n                type: object\n
+    \     security:\n        - BearerToken: []\n  /api/v4/projects/{project_id}/repository/commits/{sha}:\n
+    \   get:\n      summary: Get details of a commit\n      operationId: getCommitDetails\n
+    \     parameters:\n        - name: project_id\n          in: path\n          required:
+    true\n          schema:\n            type: string\n        - name: sha\n          in:
+    path\n          required: true\n          schema:\n            type: string\n
+    \     responses:\n        '200':\n          description: Commit details retrieved
+    successfully\n          content:\n            application/json:\n              schema:\n
+    \               type: object\n      security:\n        - BearerToken: []\n  /api/v4/projects/{project_id}/merge_requests:\n
+    \   post:\n      summary: Create a merge request\n      description: Opens a new
+    merge request from a branch to the base branch.\n      operationId: createMergeRequest\n
+    \     parameters:\n        - name: project_id\n          in: path\n          required:
+    true\n          schema:\n            type: string\n      requestBody:\n        required:
+    true\n        content:\n          application/json:\n            schema:\n              type:
+    object\n              properties:\n                title:\n                  type:
+    string\n                  example: \"New Feature: Added new file\"\n                description:\n
+    \                 type: string\n                  example: \"This MR adds a new
+    file using the GitLab REST API.\"\n                source_branch:\n                  type:
+    string\n                  example: \"new-feature-branch\"\n                target_branch:\n
+    \                 type: string\n                  example: \"main\"\n      responses:\n
+    \       '201':\n          description: Merge request created successfully.\n          content:\n
+    \           application/json:\n              schema:\n                type: object\n
+    \               properties:\n                  web_url:\n                    type:
+    string\n                    example: \"https://gitlab.com/group/project/-/merge_requests/42\"\n
+    \       '422':\n          description: Invalid input or merge request already
+    exists.\n      security:\n        - BearerToken: []\n  /api/v4/projects/{project_id}/repository/branches/{branch}/push:\n
+    \   post:\n      summary: Push to branch (placeholder for push operation)\n      operationId:
+    updateBranchRef\n      parameters:\n        - name: project_id\n          in:
+    path\n          required: true\n          schema:\n            type: string\n
+    \       - name: branch\n          in: path\n          required: true\n          schema:\n
+    \           type: string\n      requestBody:\n        required: true\n        content:\n
+    \         application/json:\n            schema:\n              type: object\n
+    \             properties:\n                sha:\n                  type: string\n
+    \               force:\n                  type: boolean\n      responses:\n        '200':\n
+    \         description: Branch updated successfully\n          content:\n            application/json:\n
+    \             schema:\n                type: object\n      security:\n        -
+    BearerToken: []\n  /api/v4/projects/{project_id}/repository/tree:\n    post:\n
+    \     summary: Create a new tree (placeholder for tree operation)\n      operationId:
+    createTree\n      parameters:\n        - name: project_id\n          in: path\n
+    \         required: true\n          schema:\n            type: string\n      requestBody:\n
+    \       required: true\n        content:\n          application/json:\n            schema:\n
+    \             type: object\n              properties:\n                base_tree:\n
+    \                 type: string\n                tree:\n                  type:
+    array\n                  items:\n                    type: object\n                    properties:\n
+    \                     path:\n                        type: string\n                      mode:\n
+    \                       type: string\n                      type:\n                        type:
+    string\n                      sha:\n                        type: string\n      responses:\n
+    \       '201':\n          description: Tree created successfully\n          content:\n
+    \           application/json:\n              schema:\n                type: object\n
+    \     security:\n        - BearerToken: []\n\ncomponents:\n  securitySchemes:\n
+    \   BearerToken:\n      type: http\n      scheme: bearer\n      description: Bearer
+    Token authentication "
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 02-gl-pr-resources-specs

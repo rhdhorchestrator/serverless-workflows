@@ -1,0 +1,112 @@
+id: gl-pr
+version: "1.0"
+specVersion: "0.8"
+name: "gl-pr"
+description: Create GitLab merge request
+dataInputSchema: schemas/basic__main-schema.json
+extensions:
+  - extensionid: workflow-output-schema
+    outputSchema: schemas/workflow-output-schema.json
+functions:
+  - name: getBranchSHA
+    operation: specs/gitlab.yaml#getBranchSHA
+  - name: createCommit
+    operation: specs/gitlab.yaml#createCommit
+  - name: createBlob
+    operation: specs/gitlab.yaml#createBlob
+  - name: createBranch
+    operation: specs/gitlab.yaml#createBranch
+  - name: getCommitDetails
+    operation: specs/gitlab.yaml#getCommitDetails
+  - name: createMergeRequest
+    operation: specs/gitlab.yaml#createMergeRequest
+  - name: print
+    type: custom
+    operation: sysout
+  - name: createNewBlob
+    type: expression
+    operation: '{"action": "create", "file_path": "test.txt", "content": "TEST"}'
+  - name: successResult
+    type: expression
+    operation: '{
+        "result": {
+          "message": "MR created",
+          "outputs":[
+              {
+                "key": "MR_URL",
+                "value": .mrURL.web_url,
+                "format":"link"
+              }
+            ]
+        }
+      }'
+start: "CreateBranch"
+states:
+  - name: CreateBranch
+    type: operation
+    actions:
+      - name: "GetHeadSha"
+        functionRef:
+          refName: getBranchSHA
+          arguments:  
+            project_id: .project_id
+            branch: .baseBranch
+        actionDataFilter:
+          toStateData: .latestSHA
+      - name: "createBranch"
+        functionRef:
+          refName: createBranch
+          arguments:  
+            project_id: .project_id
+            branch: .targetBranch
+            ref: .baseBranch
+      - name: "getCommitDetails"
+        functionRef:
+          refName: getCommitDetails
+          arguments:  
+            project_id: .project_id
+            sha: .latestSHA.commit.id
+        actionDataFilter:
+          toStateData: .commit
+    transition: CreateFiles
+  - name: CreateFiles
+    type: operation
+    actions:
+      - name: createNewBlob
+        functionRef:
+          refName: createNewBlob
+        actionDataFilter:
+          toStateData: .blobs
+    transition: CreateCommit
+  - name: CreateCommit
+    type: operation
+    actions:
+      - name: "createCommit"
+        functionRef:
+          refName: createCommit
+          arguments:  
+            project_id: .project_id
+            commit_message: "Added/Updated multiple files via API"
+            branch: .targetBranch
+            actions: [.blobs]
+        actionDataFilter:
+          toStateData: .newCommit 
+    transition: CreateMR
+  - name: CreateMR
+    type: operation
+    actions:
+      - name: "createMergeRequest"
+        functionRef:
+          refName: createMergeRequest
+          arguments:  
+            project_id: .project_id
+            title: "Automated MR"
+            description: ""
+            source_branch: .targetBranch
+            target_branch: .baseBranch
+        actionDataFilter:
+          toStateData: .mrURL   
+      - name: setOutput
+        functionRef:
+          refName: successResult
+    end: true 
