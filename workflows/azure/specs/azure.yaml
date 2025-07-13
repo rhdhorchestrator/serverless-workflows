@@ -1,0 +1,32 @@
+openapi: 3.0.0
+info:
+  title: Azure API
+  version: v1beta1
+paths:
+  /subscriptions:
+    get:
+      description: list subscriptions
+      operationId: listSubscriptions
+      parameters:
+        - in: query
+          name: api-version
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        "401":
+          description: Unauthorized
+      security:
+        - BearerToken: []
+components:
+  securitySchemes:
+    BearerToken:
+      type: http
+      scheme: bearer
+      description: Bearer Token authentication
