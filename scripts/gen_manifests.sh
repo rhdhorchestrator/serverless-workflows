@@ -38,7 +38,7 @@ if [ -z "$workflow_file" ]; then
 fi
 
 # Extract the 'id' property from the YAML file and convert to lowercase
-workflow_id=$(grep '^id:' "$workflow_file" | awk '{print $2}' | tr '[:upper:]' '[:lower:]')
+workflow_id=$(grep '^id:' "$workflow_file" | awk '{print $2}' | tr -d "\"'" | tr '[:upper:]' '[:lower:]')
 
 # Check if the 'id' property was found
 if [ -z "$workflow_id" ]; then
