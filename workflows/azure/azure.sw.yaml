@@ -1,0 +1,24 @@
+id: azure
+version: "0.1"
+specVersion: "0.8"
+name: "Azure list subscriptions"
+description: "List Azure subscriptions. Use token propagation for authenticating Azure account"
+start: listSubscriptions
+dataInputSchema: schemas/azure.json
+extensions:
+  - extensionid: workflow-output-schema
+    outputSchema: schemas/workflow-output-schema.json
+functions:
+  - name: "listSubscriptions"
+    operation: "specs/azure.yaml#listSubscriptions"
+    type: rest
+states:
+  - name: listSubscriptions
+    type: operation
+    actions:
+      - name: listSubscriptions
+        functionRef:
+          refName: listSubscriptions
+          arguments:
+            api-version: "2022-12-01"
+    end: true
