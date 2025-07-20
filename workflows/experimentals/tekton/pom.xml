@@ -20,7 +20,7 @@
     <kogito.bom.version>10.1.0</kogito.bom.version>
     <skipITs>true</skipITs>
     <surefire-plugin.version>3.5.3</surefire-plugin.version>
-    <version.io.quarkiverse.embedded.postgresql>0.7.1</version.io.quarkiverse.embedded.postgresql>
+    <version.io.quarkiverse.embedded.postgresql>0.7.2</version.io.quarkiverse.embedded.postgresql>
   </properties>
   <dependencyManagement>
     <dependencies>
