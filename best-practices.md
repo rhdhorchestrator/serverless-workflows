@@ -1,7 +1,3 @@
-> **🚨 Deprecation Notice: 🚨**  
-> From Orchestrator release version 1.7, Workflow Types will be retired. All workflows will act as infrastructure workflows, and no workflow will act as an assesment workflow. <br>
-> Any reference to assessment workflows in this document will be obsolete.
-
 # Best practices when creating a workflow
 A workflow should be developed in accordance with the guidelines outlined in the [Serverless Workflow definitions][1] documentation.
 

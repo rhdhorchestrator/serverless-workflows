@@ -4,10 +4,6 @@ Mta
 
 A Helm chart for MTA serverless workflow
 
-> **🚨 Deprecation Notice: 🚨**  
-> From Orchestrator release version 1.7, Workflow Types will be retired. All workflows will act as infrastructure workflows, and no workflow will act as an assesment workflow. <br>
-> Any reference to assessment workflows will be obsolete.
-
 Migration Toolkit for Application Analysis (MTA) v7.x workflow evaluates applications to determine potential risks and the associated costs of containerizing the applications. It uses the [MTA v7.x Operator](https://docs.redhat.com/en/documentation/migration_toolkit_for_applications/7.0/html/introduction_to_the_migration_toolkit_for_applications/index) to perform the analysis.
 At the end of a successful assessment workflow, a link to the report will be available in Backstage, under the notifications plugin.
 

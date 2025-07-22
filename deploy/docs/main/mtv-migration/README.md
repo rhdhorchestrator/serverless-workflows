@@ -4,10 +4,6 @@ MTV Migration
 
 A Helm chart for the MTV Migration serverless workflow
 
-> **🚨 Deprecation Notice: 🚨**  
-> From Orchestrator release version 1.7, Workflow Types will be retired. All workflows will act as infrastructure workflows, and no workflow will act as an assesment workflow. <br>
-> Any reference to assessment workflows will be obsolete.
-
 # Helm chart Configuration
 
 The following table lists the configurable parameters of the MTV Migration chart and their default values.

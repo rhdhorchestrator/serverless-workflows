@@ -1,7 +1,3 @@
-> **🚨 Deprecation Notice: 🚨**  
-> From Orchestrator release version 1.7, Workflow Types will be retired. All workflows will act as infrastructure workflows, and no workflow will act as an assesment workflow. <br>
-> This workflow is a continuation of an assessment workflow. Therfore, that workflow will be obsolete and won't server as a perliminary to this one. See [examples](#how-to-run).
-
 # Azure list subscriptions workflow
 The workflow logs in to Azure and lists the subscriptions. It uses token propagation. Therefore, it is meant to be used via RHDH UI and not via API.
 
