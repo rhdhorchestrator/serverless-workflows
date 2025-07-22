@@ -1,0 +1,29 @@
+id: select-user
+version: "0.1"
+specVersion: "0.8"
+name: "select-user"
+description: "select-user"
+start: Start
+dataInputSchema: schemas/select-user.json
+extensions:
+  - extensionid: workflow-output-schema
+    outputSchema: schemas/workflow-output-schema.json
+functions:
+  - name: successResult
+    type: expression
+    operation: '{
+      "result": {
+      "message": "Selected user is: " + .selectUser,
+      "outputs":[],
+      "nextWorkflows":[
+      ]
+      }
+      }'
+states:
+  - name: Start
+    type: operation
+    actions:
+      - name: successResult
+        functionRef:
+          refName: successResult
+    end: true

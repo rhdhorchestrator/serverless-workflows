@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "selectUser": {
+      "type": "string",
+      "title": "Please select a user name from the list",
+      "ui:widget": "ActiveDropdown",
+      "ui:props": {
+        "fetch:url": "$${{backend.baseUrl}}/api/catalog/entities?fields=metadata.name,metadata.namespace,kind&filter=kind=user",
+        "fetch:response:value": "[$map($,function($v){$lowercase( $v.kind ) & ':' & $v.metadata.namespace & '/' & $v.metadata.name})]",
+        "fetch:response:label": "[$map($,function($v){$lowercase( $v.kind ) & ':' & $v.metadata.namespace & '/' & $v.metadata.name})]",
+        "fetch:method": "GET",
+        "fetch:headers": {
+          "Authorization": "Bearer $${{identityApi.token}}"
+        }
+      }
+    }
+  }
+}
