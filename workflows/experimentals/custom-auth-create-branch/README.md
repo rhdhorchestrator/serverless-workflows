@@ -1,6 +1,6 @@
 # Custom Auth Create Branch Workflow
 
-This workflow demonstrates creating a GitHub branch using a custom authentication provider. It's designed to test the custom authentication provider functionality in Red Hat Developer Hub (RHDH). The custom auth provider provides the same functionality as the built in github auth provider, but has a different id and is deployed as a dynamic plugin.
+This workflow demonstrates creating a GitHub branch using a custom authentication provider. It's designed to test the custom authentication provider functionality in Red Hat Developer Hub (RHDH). The custom auth provider provides the same functionality as the one built in github auth provider, but has a different id and is deployed as a dynamic plugin.
 
 
 ## Overview
@@ -59,7 +59,6 @@ kubectl patch backstage my-rhdh -n rhdh --type='merge' -p='{
 }'
 ```
 
-
 > **⚠️ Important**: This setting breaks the built in auth providers, but is necessary to enable any custom provider.
 
 ### 3. GitHub OAuth Application Setup
@@ -70,8 +69,8 @@ Create a GitHub OAuth application with the following configuration:
 2. **Create a new OAuth App** (or edit existing one)
 3. **Set the following values:**
    - **Application name**: `RHDH GitHub Two Auth` (or any descriptive name)
-   - **Homepage URL**: console URL
-   - **Authorization callback URL**: `<console URL>/api/auth/github-two/handler/frame`
+   - **Homepage URL**: OCP route URL
+   - **Authorization callback URL**: `<OCP route URL>/api/auth/github-two/handler/frame`
 
 ### 4. Update Authentication Secret
 
