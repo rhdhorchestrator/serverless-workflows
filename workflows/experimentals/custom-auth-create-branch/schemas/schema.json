@@ -1,0 +1,44 @@
+{
+  "$id": "classpath:/schemas/create-ocp-project-schema.json",
+  "title": "Workflow input data",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "owner": {
+      "title": "owner",
+      "type": "string",
+      "description": "The owner of the repository"
+    },
+    "repo": {
+      "title": "repo",
+      "type": "string",
+      "description": "The repository name"
+    },
+    "baseBranch": {
+      "title": "baseBranch",
+      "type": "string",
+      "default": "main",
+      "description": "The base branch to create the new branch from, default is main"
+    },
+    "targetBranch": {
+      "title": "targetBranch",
+      "type": "string",      
+      "description": "The branch name to create"
+    },
+    "auth": {
+      "title": "auth",
+      "type": "string",
+      "ui:widget": "AuthRequester",
+      "ui:props": {
+        "authTokenDescriptors": [
+          {
+            "provider": "github-two",
+            "scope": "repo",
+            "customProviderApiId": "core.auth.github-two"
+          }
+        ]
+      }
+    }
+  },
+  "required": ["owner", "repo", "baseBranch", "targetBranch"]
+}

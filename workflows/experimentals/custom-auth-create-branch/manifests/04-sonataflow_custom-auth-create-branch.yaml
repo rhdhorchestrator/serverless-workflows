@@ -1,0 +1,119 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: This workflow creates a github branch using the github two auth provider, it is meant for testing the custom auth provider
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: custom-auth-create-branch
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: custom-auth-create-branch
+    sonataflow.org/workflow-app: custom-auth-create-branch
+    sonataflow.org/workflow-namespace: ""
+  name: custom-auth-create-branch
+spec:
+  flow:
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/schema.json
+    functions:
+      - name: getBranchSHA
+        operation: specs/github.yaml#getBranchSHA
+        type: rest
+      - name: createBranch
+        operation: specs/github.yaml#createBranch
+        type: rest
+      - name: getCommitDetails
+        operation: specs/github.yaml#getCommitDetails
+        type: rest
+      - name: sysLog
+        operation: sysout:INFO
+        type: custom
+      - name: successResult
+        operation: '{ "result": { "message": "Branch created successfully", "outputs":[ { "key": "BRANCH_URL", "value": ("https://github.com/" + .owner + "/" + .repo + "/tree/" + .targetBranch), "format":"link" } ] } }'
+        type: expression
+    start:
+      stateName: CreateBranch
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                message: ${ "headers " + ($WORKFLOW.headers | tostring) }
+              invoke: sync
+              refName: sysLog
+          - actionDataFilter:
+              toStateData: .latestSHA
+              useResults: true
+            functionRef:
+              arguments:
+                owner: .owner
+                ref: '"heads/" + .baseBranch'
+                repo: .repo
+              invoke: sync
+              refName: getBranchSHA
+            name: GetHeadSha
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                owner: .owner
+                ref: '"refs/heads/" + .targetBranch'
+                repo: .repo
+                sha: .latestSHA.object.sha
+              invoke: sync
+              refName: createBranch
+            name: createBranch
+          - actionDataFilter:
+              toStateData: .commit
+              useResults: true
+            functionRef:
+              arguments:
+                commit_sha: .latestSHA.object.sha
+                owner: .owner
+                repo: .repo
+              invoke: sync
+              refName: getCommitDetails
+            name: getCommitDetails
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: successResult
+            name: setOutput
+        end:
+          terminate: true
+        name: CreateBranch
+        type: operation
+  podTemplate:
+    container:
+      image: quay.io/brotman/custom-auth-create-branch:latest
+      resources: {}
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-custom-auth-create-branch-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-custom-auth-create-branch-resources-specs
+        workflowPath: specs
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: custom-auth-create-branch
+status:
+  address: {}
+  lastTimeRecoverAttempt: null

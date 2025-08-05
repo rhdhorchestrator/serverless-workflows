@@ -1,0 +1,23 @@
+apiVersion: v1
+data:
+  application.properties: |2-
+
+    quarkus.log.category."org.apache.http".level=DEBUG
+    quarkus.log.level=INFO
+
+    quarkus.rest-client.github_yaml.url=https://api.github.com
+
+    quarkus.openapi-generator.github_yaml.auth.BearerToken.token-propagation=true
+    quarkus.openapi-generator.github_yaml.auth.BearerToken.header-name=X-Authorization-Github-two
+    kie.flyway.enabled=true
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    app: custom-auth-create-branch
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: custom-auth-create-branch
+    sonataflow.org/workflow-app: custom-auth-create-branch
+    sonataflow.org/workflow-namespace: ""
+  name: custom-auth-create-branch-props

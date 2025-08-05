@@ -1,0 +1,119 @@
+apiVersion: v1
+data:
+  schema.json: "{\n  \"$id\": \"classpath:/schemas/create-ocp-project-schema.json\",\n
+    \ \"title\": \"Workflow input data\",\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n
+    \ \"type\": \"object\",\n  \"properties\": {\n    \"owner\": {\n      \"title\":
+    \"owner\",\n      \"type\": \"string\",\n      \"description\": \"The owner of
+    the repository\"\n    },\n    \"repo\": {\n      \"title\": \"repo\",\n      \"type\":
+    \"string\",\n      \"description\": \"The repository name\"\n    },\n    \"baseBranch\":
+    {\n      \"title\": \"baseBranch\",\n      \"type\": \"string\",\n      \"default\":
+    \"main\",\n      \"description\": \"The base branch to create the new branch from,
+    default is main\"\n    },\n    \"targetBranch\": {\n      \"title\": \"targetBranch\",\n
+    \     \"type\": \"string\",      \n      \"description\": \"The branch name to
+    create\"\n    },\n    \"auth\": {\n      \"title\": \"auth\",\n      \"type\":
+    \"string\",\n      \"ui:widget\": \"AuthRequester\",\n      \"ui:props\": {\n
+    \       \"authTokenDescriptors\": [\n          {\n            \"provider\": \"github-two\",\n
+    \           \"scope\": \"repo\",\n            \"customProviderApiId\": \"core.auth.github-two\"\n
+    \         }\n        ]\n      }\n    }\n  },\n  \"required\": [\"owner\", \"repo\",
+    \"baseBranch\", \"targetBranch\"]\n}\n"
+  workflow-output-schema.json: |
+    {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "WorkflowResult",
+        "description": "Schema of workflow output",
+        "type": "object",
+        "properties": {
+            "anyFieldName": {
+                "type": "string",
+                "ui:widget": "AuthRequester",
+                "ui:props": {
+                    "authTokenDescriptors": [
+                        {
+                            "provider": "github",
+                            "tokenType": "oauth",
+                            "scope": "repo"
+                        }
+                    ]
+                }
+            }
+        },
+        "result": {
+            "type": "object",
+            "properties": {
+                "completedWith": {
+                    "description": "The state of workflow completion.",
+                    "type": "string",
+                    "enum": [
+                        "error",
+                        "success",
+                        "warning"
+                    ]
+                },
+                "message": {
+                    "description": "High-level summary of the current status, free-form text, human readable.",
+                    "type": "string"
+                },
+                "nextWorkflows": {
+                    "description": "List of workflows suggested to run next. Items at lower indexes are of higher priority.",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "Workflow identifier",
+                                "type": "string"
+                            },
+                            "name": {
+                                "description": "Human readable title describing the workflow.",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "name"
+                        ]
+                    }
+                },
+                "outputs": {
+                    "description": "Additional structured output of workflow processing. This can contain identifiers of created resources, links to resources, logs or other output.",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "key": {
+                                "description": "Unique identifier of the option. Preferably human-readable.",
+                                "type": "string"
+                            },
+                            "value": {
+                                "description": "Free form value of the option.",
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "number"
+                                    }
+                                ]
+                            },
+                            "format": {
+                                "description": "More detailed type of the 'value' property. Defaults to 'text'.",
+                                "enum": [
+                                    "text",
+                                    "number",
+                                    "link"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "key",
+                            "value"
+                        ]
+                    }
+                }
+            }
+        }
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 01-custom-auth-create-branch-resources-schemas
