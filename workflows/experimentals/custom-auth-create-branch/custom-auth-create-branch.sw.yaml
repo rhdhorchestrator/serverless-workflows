@@ -1,0 +1,74 @@
+id: custom-auth-create-branch
+version: "1.0"
+specVersion: "0.8"
+name: "Create github branch workflow"
+description: "This workflow creates a github branch using the github two auth provider, it is meant for testing the custom auth provider"
+dataInputSchema: schemas/schema.json
+extensions:
+  - extensionid: workflow-output-schema
+    outputSchema: schemas/workflow-output-schema.json
+functions:
+  - name: getBranchSHA
+    operation: specs/github.yaml#getBranchSHA
+  - name: createBranch
+    operation: specs/github.yaml#createBranch
+  - name: getCommitDetails
+    operation: specs/github.yaml#getCommitDetails
+  - name: sysLog
+    type: custom
+    operation: sysout:INFO
+  - name: successResult
+    type: expression
+    operation: '{
+        "result": {
+          "message": "Branch created successfully",
+          "outputs":[
+              {
+                "key": "BRANCH_URL",
+                "value": ("https://github.com/" + .owner + "/" + .repo + "/tree/" + .targetBranch),
+                "format":"link"
+              }
+            ]
+        }
+      }'
+start: "CreateBranch"
+states:
+  - name: CreateBranch
+    type: operation
+    actions:
+      - functionRef:
+          refName: sysLog
+          arguments:
+            message: ${ "headers " + ($WORKFLOW.headers | tostring) }
+      - name: "GetHeadSha"
+        functionRef:
+          refName: getBranchSHA
+          arguments:  
+            owner: .owner
+            repo: .repo
+            ref: '"heads/" + .baseBranch'
+        actionDataFilter:
+          toStateData: .latestSHA
+      - name: "createBranch"
+        functionRef:
+          refName: createBranch
+          arguments:  
+            owner: .owner
+            repo: .repo
+            ref: '"refs/heads/" + .targetBranch'
+            sha: .latestSHA.object.sha
+      - name: "getCommitDetails"
+        functionRef:
+          refName: getCommitDetails
+          arguments:  
+            owner: .owner
+            repo: .repo
+            commit_sha: .latestSHA.object.sha
+        actionDataFilter:
+          toStateData: .commit
+      - name: "setOutput"
+        functionRef:
+          refName: successResult
+    end: true
+  
+  
