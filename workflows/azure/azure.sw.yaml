@@ -1,24 +1,26 @@
 id: azure
 version: "0.1"
 specVersion: "0.8"
-name: "Azure list subscriptions"
-description: "List Azure subscriptions. Use token propagation for authenticating Azure account"
-start: listSubscriptions
+name: "Azure get display name"
+description: "Get Azure user display name. Use token propagation for authenticating Azure account"
+start: getDisplayName
 dataInputSchema: schemas/azure.json
 extensions:
   - extensionid: workflow-output-schema
     outputSchema: schemas/workflow-output-schema.json
 functions:
-  - name: "listSubscriptions"
-    operation: "specs/azure.yaml#listSubscriptions"
+  - name: "getDisplayName"
+    operation: "specs/azure.yaml#getProfile"
     type: rest
 states:
-  - name: listSubscriptions
+  - name: getDisplayName
     type: operation
     actions:
-      - name: listSubscriptions
+      - name: getDisplayName
         functionRef:
-          refName: listSubscriptions
-          arguments:
-            api-version: "2022-12-01"
+          refName: getDisplayName
+        actionDataFilter:
+          toStateData: .azureProfile
+    stateDataFilter:
+      output: "{result: {message: .azureProfile.displayName}}"
     end: true

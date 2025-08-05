@@ -3,16 +3,10 @@ info:
   title: Azure API
   version: v1beta1
 paths:
-  /subscriptions:
+  /v1.0/me:
     get:
-      description: list subscriptions
-      operationId: listSubscriptions
-      parameters:
-        - in: query
-          name: api-version
-          required: true
-          schema:
-            type: string
+      description: get profile
+      operationId: getProfile
       responses:
         "200":
           description: OK
