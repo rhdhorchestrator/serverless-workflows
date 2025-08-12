@@ -22,6 +22,8 @@ FROM ${BUILDER_IMAGE:-quay.io/orchestrator/logic-swf-builder-rhel8:1.36.0-discon
 # ARG QUARKUS_EXTENSIONS=org.kie:kogito-addons-quarkus-jobs-knative-eventing:999-SNAPSHOT,org.kie:kie-addons-quarkus-persistence-jdbc:999-SNAPSHOT,io.quarkus:quarkus-jdbc-postgresql:3.8.4,io.quarkus:quarkus-agroal:3.8.4,org.kie:kie-addons-quarkus-monitoring-prometheus:999-SNAPSHOT,org.kie:kie-addons-quarkus-monitoring-sonataflow:999-SNAPSHOT
 # When using prod:
 ARG QUARKUS_EXTENSIONS=io.quarkiverse.openapi.generator:quarkus-openapi-generator:2.9.1-lts,org.kie:kie-addons-quarkus-monitoring-sonataflow,org.kie:kogito-addons-quarkus-jobs-knative-eventing,org.kie:kie-addons-quarkus-persistence-jdbc,io.quarkus:quarkus-jdbc-postgresql:3.15.4.redhat-00001,io.quarkus:quarkus-agroal:3.15.4.redhat-00001
+ARG WORKFLOW_ID
+ENV WORKFLOW_ID=${WORKFLOW_ID}
 
 # Args to pass to the Quarkus CLI
 # add extension command
@@ -43,13 +45,42 @@ RUN ls -la ./resources
 ENV swf_home_dir=/home/kogito/serverless-workflow-project
 RUN if [[ -d "./resources/src" ]]; then cp -r ./resources/src/* ./src/; fi
 
-RUN /home/kogito/launch/build-app.sh ./resources
+RUN if [ "$WORKFLOW_ID" = "python" ]; then \
+    QUARKUS_EXTENSIONS="${QUARKUS_EXTENSIONS},org.apache.kie.sonataflow:sonataflow-addons-quarkus-python:10.1.0"; \
+    fi && \
+    echo "Final QUARKUS_EXTENSIONS=$QUARKUS_EXTENSIONS" && \
+    /home/kogito/launch/build-app.sh ./resources
 
 #=============================
 # Runtime Run
 #=============================
 FROM registry.access.redhat.com/ubi9/openjdk-17:1.21-2
 
+# Conditional JEP installation based on WORKFLOW_ID
+ARG WORKFLOW_ID
+ENV WORKFLOW_ID=${WORKFLOW_ID}
+USER root
+RUN if [ "$WORKFLOW_ID" = "python" ]; then \
+    echo "Installing JEP because WORKFLOW_ID=$WORKFLOW_ID"; \
+    microdnf install -y \
+    python3 \
+    python3-devel \
+    gcc \
+    gcc-c++ \
+    make \
+    libffi-devel \
+    && microdnf clean all \
+    && pip3 install --no-cache-dir jep \
+    && PY_VER=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")') \
+    && cp /usr/local/lib64/python${PY_VER}/site-packages/jep/libjep.so /usr/lib64 \
+    && echo "JEP installation complete"; \
+    else \
+    echo "Skipping JEP installation"; \
+    fi
+USER 185
+
+# Necessary command for python workflow. Copy command can not be conditional
+COPY --chown=185:185 workflows/python/my_scripts /usr/local/lib64/python3.9/site-packages/my_scripts
 
 ARG FLOW_NAME
 ARG FLOW_SUMMARY
