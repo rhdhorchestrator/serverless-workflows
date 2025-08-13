@@ -55,7 +55,8 @@
                         "enum": [
                             "text",
                             "number",
-                            "link"
+                            "link",
+                            "markdown"
                         ]
                     }
                 },
