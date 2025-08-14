@@ -1,0 +1,60 @@
+id: "python"
+version: "0.1"
+specVersion: "0.8"
+name: "python"
+description: "Workflow demonstrating usage of Python scripts and functions"
+start: Start
+extensions:
+  - extensionid: workflow-output-schema
+    outputSchema: schemas/workflow-output-schema.json
+functions:
+  - name: pythonScript
+    type: custom
+    operation: "script:python"
+  - name: pythonFunctionCtime
+    type: custom
+    operation: "service:python:time::ctime"
+  - name: successResult
+    type: expression
+    operation: '{
+      result: {
+      message: "Current date and time is: " + .timeStr + "\nYour greeting is: " + $WORKFLOW.python.myGreet,
+      outputs:[],
+      nextWorkflows:[
+      {
+      id:"next",
+      name:"next"
+      }
+      ]
+      }
+      }'
+states:
+  - name: Start
+    type: operation
+    actionMode: sequential
+    actions:
+      - name: pythonScriptImport
+        functionRef:
+          refName: pythonScript
+          arguments:
+            script: "from time import time; from my_scripts import my_script"
+      - name: pythonScriptTime
+        functionRef:
+          refName: pythonScript
+          arguments:
+            script: "pyNowSecs = time()"
+      - name: pythonFunctionCtime
+        functionRef:
+          refName: pythonFunctionCtime
+          arguments: "$WORKFLOW.python.pyNowSecs"
+        actionDataFilter:
+          toStateData: .timeStr
+      - name: pythonMyScript
+        functionRef:
+          refName: pythonScript
+          arguments:
+            script: "myGreet = my_script.greet('Superman')"
+      - name: setResult
+        functionRef:
+          refName: successResult
+    end: true

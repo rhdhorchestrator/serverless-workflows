@@ -116,7 +116,7 @@ prepare-workdir:
 # Depends on: prepare-workdir target.
 # Usage: make build-image
 ifeq ($(IS_WORKFLOW),true)
-build-image: BUILD_ARGS=--build-arg-file=workflows/$(WORKFLOW_ID)/argfile.conf --build-arg=BUILDER_IMAGE=$(BUILDER_IMAGE) --build-arg WF_RESOURCES=workflows/$(WORKFLOW_ID)
+build-image: BUILD_ARGS=--build-arg-file=workflows/$(WORKFLOW_ID)/argfile.conf --build-arg=WORKFLOW_ID=$(WORKFLOW_ID) --build-arg=BUILDER_IMAGE=$(BUILDER_IMAGE) --build-arg WF_RESOURCES=workflows/$(WORKFLOW_ID)
 endif
 build-image: EXTRA_ARGS=--ulimit nofile=4096:4096 --platform='linux/amd64'
 build-image: prepare-workdir
