@@ -152,7 +152,7 @@ spec:
             secretKeyRef:
               key: NOTIFICATIONS_BEARER_TOKEN
               name: rpj-secrets
-      image: quay.io/orchestrator/serverless-workflow-rpj:d347d903b21feac8e3f692d82382e0e226ed52bc
+      image: quay.io/orchestrator/serverless-workflow-rpj:3197a62072297e2eca0229c336b32fa78a03d22c
       resources: {}
   resources:
     configMaps:
