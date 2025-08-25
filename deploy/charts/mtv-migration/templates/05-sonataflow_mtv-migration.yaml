@@ -320,7 +320,7 @@ spec:
             secretKeyRef:
               key: NOTIFICATIONS_BEARER_TOKEN
               name: mtv-migration-secrets
-      image: quay.io/orchestrator/serverless-workflow-mtv-migration:30e1984769fe6e3f2c9d99e49c98a8b86b8d2b61
+      image: quay.io/orchestrator/serverless-workflow-mtv-migration:3197a62072297e2eca0229c336b32fa78a03d22c
       resources: {}
   resources:
     configMaps:
