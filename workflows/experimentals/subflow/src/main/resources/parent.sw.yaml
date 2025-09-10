@@ -1,0 +1,50 @@
+id: 'parent'
+version: '0.1'
+specVersion: '0.8'
+name: 'Parent'
+description: 'Parent workflow that calls the fail subflow'
+start: 'LogStartPassState'
+
+functions:
+  - name: logMessage
+    type: custom
+    operation: sysout:INFO
+
+states:
+  - name: LogStartPassState
+    type: operation
+    actions:
+      - name: log-action
+        functionRef:
+          refName: logMessage
+          arguments:
+            message: "Parent workflow started, about to call pass subflow"
+    transition: 'PassSubflowState'
+
+  - name: PassSubflowState
+    type: operation
+    actions:
+      - name: LaunchPassSubflow
+        subFlowRef: pass
+        actionDataFilter:
+          useResults: true
+    transition: LogStartFailState
+
+  - name: LogStartFailState
+    type: operation
+    actions:
+      - name: log-action
+        functionRef:
+          refName: logMessage
+          arguments:
+            message: "Parent workflow started, about to call fail subflow"
+    transition: 'FailSubflowState'
+
+  - name: FailSubflowState
+    type: operation
+    actions:
+      - name: LaunchFailSubflow
+        subFlowRef: fail
+        actionDataFilter:
+          useResults: true
+    end: true

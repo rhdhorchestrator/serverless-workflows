@@ -1,0 +1,105 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: Parent workflow that calls the fail subflow
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "0.1"
+  creationTimestamp: null
+  labels:
+    app: parent
+    sonataflow.org/workflow-app: parent
+  name: parent
+spec:
+  flow:
+    functions:
+      - name: logMessage
+        operation: sysout:INFO
+        type: custom
+    start:
+      stateName: LogStartPassState
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                message: Parent workflow started, about to call pass subflow
+              invoke: sync
+              refName: logMessage
+            name: log-action
+        name: LogStartPassState
+        transition:
+          nextState: PassSubflowState
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            name: LaunchPassSubflow
+            subFlowRef:
+              invoke: sync
+              onParentComplete: terminate
+              workflowId: pass
+        name: PassSubflowState
+        transition:
+          nextState: LogStartFailState
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                message: Parent workflow started, about to call fail subflow
+              invoke: sync
+              refName: logMessage
+            name: log-action
+        name: LogStartFailState
+        transition:
+          nextState: FailSubflowState
+        type: operation
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            name: LaunchFailSubflow
+            subFlowRef:
+              invoke: sync
+              onParentComplete: terminate
+              workflowId: fail
+        end:
+          terminate: true
+        name: FailSubflowState
+        type: operation
+  podTemplate:
+    container:
+      image: quay.io/eshalev/parentfail:latest
+      resources: {}
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-parent-resources-schemas
+        workflowPath: schemas
+      - configMap:
+          name: 02-parent-resources-specs
+        workflowPath: specs
+      - configMap:
+          name: 03-parent-resources-subflows
+        workflowPath: subflows
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: parent
+status:
+  address: {}
+  lastTimeRecoverAttempt: null

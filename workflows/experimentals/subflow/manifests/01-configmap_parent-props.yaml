@@ -1,0 +1,18 @@
+apiVersion: v1
+data:
+  application.properties: |-
+    quarkus.log.category."org.apache.http".level=DEBUG
+
+    quarkus.rest-client.httpbin_yaml.url=https://httpbin.org
+
+    kogito.httpclient.timeout=60000
+
+    # enable persistence
+    kie.flyway.enabled = true
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    app: parent
+    sonataflow.org/workflow-app: parent
+  name: parent-props

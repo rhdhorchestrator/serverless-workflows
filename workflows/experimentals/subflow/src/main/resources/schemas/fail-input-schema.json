@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Fail Workflow Input Parameters",
+  "type": "object",
+  "properties": {
+    "stall": {
+      "type": "object",
+      "properties": {
+        "seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of seconds to stall before failing"
+        }
+      },
+      "required": ["seconds"]
+    }
+  },
+  "required": ["stall", "failure"]
+}
