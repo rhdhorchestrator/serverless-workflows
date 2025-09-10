@@ -1,0 +1,36 @@
+id: 'fail'
+version: '0.1'
+specVersion: '0.8'
+name: 'Fail'
+description: 'Subflow that stalls and then fails'
+start: 'StallState'
+
+functions:
+  - name: 'stall'
+    type: rest
+    operation: "specs/httpbin.yaml#delayCall"
+  - name: 'failEndpoint'
+    type: rest
+    operation: "specs/httpbin.yaml#statusCall"
+
+states:
+  - name: 'StallState'
+    type: operation
+    actions:
+      - name: 'stall-action'
+        functionRef:
+          refName: 'stall'
+          arguments:
+            seconds: 600
+    transition: 'FailState'
+
+
+  - name: 'FailState'
+    type: operation
+    actions:
+      - name: 'fail-action'
+        functionRef:
+          refName: 'failEndpoint'
+        actionDataFilter:
+          results: .code
+    end: true

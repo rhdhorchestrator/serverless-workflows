@@ -1,0 +1,22 @@
+id: 'pass'
+version: '0.1'
+specVersion: '0.8'
+name: 'Pass'
+description: 'Subflow that stalls and then finishes successfully'
+start: 'StallState'
+
+functions:
+  - name: 'stall'
+    type: rest
+    operation: "specs/httpbin.yaml#delayCall"
+
+states:
+  - name: 'StallState'
+    type: operation
+    actions:
+      - name: 'stall-action'
+        functionRef:
+          refName: 'stall'
+          arguments:
+            seconds: 50
+    end: true

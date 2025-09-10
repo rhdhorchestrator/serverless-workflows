@@ -1,0 +1,66 @@
+apiVersion: v1
+data:
+  fail.sw.yaml: |
+    id: 'fail'
+    version: '0.1'
+    specVersion: '0.8'
+    name: 'Fail'
+    description: 'Subflow that stalls and then fails'
+    start: 'StallState'
+
+    functions:
+      - name: 'stall'
+        type: rest
+        operation: "specs/httpbin.yaml#delayCall"
+      - name: 'failEndpoint'
+        type: rest
+        operation: "specs/httpbin.yaml#statusCall"
+
+    states:
+      - name: 'StallState'
+        type: operation
+        actions:
+          - name: 'stall-action'
+            functionRef:
+              refName: 'stall'
+              arguments:
+                seconds: 600
+        transition: 'FailState'
+
+
+      - name: 'FailState'
+        type: operation
+        actions:
+          - name: 'fail-action'
+            functionRef:
+              refName: 'failEndpoint'
+            actionDataFilter:
+              results: .code
+        end: true
+  pass.sw.yaml: |-
+    id: 'pass'
+    version: '0.1'
+    specVersion: '0.8'
+    name: 'Pass'
+    description: 'Subflow that stalls and then finishes successfully'
+    start: 'StallState'
+
+    functions:
+      - name: 'stall'
+        type: rest
+        operation: "specs/httpbin.yaml#delayCall"
+
+    states:
+      - name: 'StallState'
+        type: operation
+        actions:
+          - name: 'stall-action'
+            functionRef:
+              refName: 'stall'
+              arguments:
+                seconds: 50
+        end: true
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 03-parent-resources-subflows
