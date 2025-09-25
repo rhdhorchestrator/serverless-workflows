@@ -11,6 +11,8 @@ functions:
     operation: sysout
   - name: patch
     operation: "specs/patch-k8s-resource.yaml#patchResource"
+    metadata:
+      configKey: ".clusterName"
 states:
   - name: SetApiVersion
     type: switch
