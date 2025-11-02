@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "authSetup": {
+      "type": "string",
+      "ui:widget": "AuthRequester",
+      "ui:props": {
+        "authTokenDescriptors": [
+          {
+            "provider": "oidc",
+            "customProviderApiId": "internal.auth.oidc",
+            "tokenType": "oauth",
+            "scope": "openid profile email"
+          }
+        ]
+      }
+    },
+    "language": {
+      "title": "Language",
+      "description": "Language to greet",
+      "type": "string",
+      "enum": ["English", "Spanish"],
+      "default": "English"
+    }
+  }
+}

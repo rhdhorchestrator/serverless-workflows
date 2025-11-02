@@ -1,0 +1,96 @@
+id: greeting-auth
+version: '1.0'
+specVersion: '1.0'
+name: Greeting workflow with OIDC authentication
+description: Demonstrates OIDC authentication with token propagation to external APIs
+annotations:
+  - "workflow-type/infrastructure"
+dataInputSchema: "schemas/greeting-auth.sw.input-schema.json"
+extensions:
+  - extensionid: workflow-output-schema
+    outputSchema: schemas/workflow-output-schema.json
+
+functions:
+  - name: getHeaders
+    operation: specs/httpbin.yaml#getHeaders
+  - name: greetFunction
+    type: custom
+    operation: sysout
+  - name: successResult
+    type: expression
+    operation: '{
+        "result": {
+          "message": "Greeting workflow with authentication completed successfully",
+          "outputs":[
+            {
+                "key":"Selected language",
+                "value": .language
+            },
+            {
+                "key":"Greeting message",
+                "value": .greeting
+            },
+            {
+                "key":"Authentication status",
+                "value": (if .authTestResponse.headers.Authorization then "Token propagated successfully" else "Token not propagated" end)
+            },
+            {
+                "key":"Token details",
+                "value": (if (.authTestResponse.headers.Authorization and (.authTestResponse.headers.Authorization | contains("Bearer ey"))) then (.authTestResponse.headers.Authorization | split(" ")[1] | split(".")[1] | @base64d | fromjson | tostring) else "No valid JWT token" end)
+            },
+            {
+                "key":"All headers received",
+                "value": (.authTestResponse.headers | tostring)
+            }
+          ]
+        }
+      }'
+
+start: ChooseOnLanguage
+
+states:
+  - name: ChooseOnLanguage
+    type: switch
+    dataConditions:
+      - condition: .language  == "English"
+        transition: GreetInEnglish
+      - condition: .language  == "Spanish"
+        transition: GreetInSpanish
+    defaultCondition:
+      transition: GreetInEnglish
+
+  - name: GreetInEnglish
+    type: inject
+    data:
+      greeting: 'Hello from Authenticated YAML Workflow'
+    transition: CallAuthenticatedAPI
+
+  - name: GreetInSpanish
+    type: inject
+    data:
+      greeting: 'Saludos desde flujo de trabajo YAML autenticado'
+    transition: CallAuthenticatedAPI
+
+  - name: CallAuthenticatedAPI
+    type: operation
+    actions:
+      - name: callHttpBinHeaders
+        functionRef:
+          refName: getHeaders
+        actionDataFilter:
+          toStateData: .authTestResponse
+    transition: GreetPerson
+
+  - name: GreetPerson
+    type: operation
+    actions:
+      - name: greetAction
+        functionRef:
+          refName: greetFunction
+          arguments:
+            message: .greeting
+      - name: setOutput
+        functionRef:
+          refName: successResult
+    end:
+      terminate: true
