@@ -1,0 +1,213 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: greeting-auth-resources
+  namespace: rhdh-operator
+  labels:
+    app: greeting-auth
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: greeting-auth
+    sonataflow.org/workflow-app: greeting-auth
+data:
+  greeting-auth.sw.yaml: |
+    id: greeting-auth
+    version: '1.0'
+    specVersion: '1.0'
+    name: Greeting workflow with OIDC authentication
+    description: Demonstrates OIDC authentication with token propagation to external APIs
+    annotations:
+      - "workflow-type/infrastructure"
+    dataInputSchema: "schemas/greeting-auth.sw.input-schema.json"
+    extensions:
+      - extensionid: workflow-output-schema
+        outputSchema: schemas/workflow-output-schema.json
+
+    functions:
+      - name: getHeaders
+        operation: specs/httpbin.yaml#getHeaders
+      - name: greetFunction
+        type: custom
+        operation: sysout
+      - name: successResult
+        type: expression
+        operation: '{
+            "result": {
+              "message": "Greeting workflow with authentication completed successfully",
+              "outputs":[
+                {
+                    "key":"Selected language",
+                    "value": .language
+                },
+                {
+                    "key":"Greeting message",
+                    "value": .greeting
+                },
+                {
+                    "key":"Authentication status",
+                    "value": (if .authTestResponse.headers.Authorization then "Token propagated successfully" else "Token not propagated" end)
+                },
+                {
+                    "key":"Token details",
+                    "value": (if (.authTestResponse.headers.Authorization and (.authTestResponse.headers.Authorization | contains("Bearer ey"))) then (.authTestResponse.headers.Authorization | split(" ")[1] | split(".")[1] | @base64d | fromjson | tostring) else "No valid JWT token" end)
+                },
+                {
+                    "key":"All headers received",
+                    "value": (.authTestResponse.headers | tostring)
+                }
+              ]
+            }
+          }'
+
+    start: ChooseOnLanguage
+
+    states:
+      - name: ChooseOnLanguage
+        type: switch
+        dataConditions:
+          - condition: .language  == "English"
+            transition: GreetInEnglish
+          - condition: .language  == "Spanish"
+            transition: GreetInSpanish
+        defaultCondition:
+          transition: GreetInEnglish
+
+      - name: GreetInEnglish
+        type: inject
+        data:
+          greeting: 'Hello from Authenticated YAML Workflow'
+        transition: CallAuthenticatedAPI
+
+      - name: GreetInSpanish
+        type: inject
+        data:
+          greeting: 'Saludos desde flujo de trabajo YAML autenticado'
+        transition: CallAuthenticatedAPI
+
+      - name: CallAuthenticatedAPI
+        type: operation
+        actions:
+          - name: callHttpBinHeaders
+            functionRef:
+              refName: getHeaders
+            actionDataFilter:
+              toStateData: .authTestResponse
+        transition: GreetPerson
+
+      - name: GreetPerson
+        type: operation
+        actions:
+          - name: greetAction
+            functionRef:
+              refName: greetFunction
+              arguments:
+                message: .greeting
+          - name: setOutput
+            functionRef:
+              refName: successResult
+        end:
+          terminate: true
+  greeting-auth.sw.input-schema.json: |
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "authSetup": {
+          "type": "string",
+          "ui:widget": "AuthRequester",
+          "ui:props": {
+            "authTokenDescriptors": [
+              {
+                "provider": "oidc",
+                "customProviderApiId": "internal.auth.oidc",
+                "tokenType": "oauth",
+                "scope": "openid profile email"
+              }
+            ]
+          }
+        },
+        "language": {
+          "title": "Language",
+          "description": "Language to greet",
+          "type": "string",
+          "enum": ["English", "Spanish"],
+          "default": "English"
+        }
+      }
+    }
+  workflow-output-schema.json: |
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string"
+            },
+            "outputs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  httpbin.yaml: |
+    openapi: 3.0.0
+    info:
+      title: HTTPBin API
+      version: 1.0.0
+      description: HTTPBin echo service for testing authentication token propagation
+
+    servers:
+      - url: http://httpbin.rhdh-operator.svc.cluster.local
+        description: HTTPBin echo server deployed in rhdh-operator namespace
+
+    security:
+      - BearerToken: []
+
+    paths:
+      /headers:
+        get:
+          summary: Returns request headers
+          operationId: getHeaders
+          description: |
+            Returns all HTTP headers sent in the request.
+            This is useful for verifying that authentication tokens are being propagated correctly.
+          security:
+            - BearerToken: []
+          responses:
+            '200':
+              description: Successful response with request headers
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      headers:
+                        type: object
+                        additionalProperties:
+                          type: string
+                        description: All HTTP headers received in the request
+            '401':
+              description: Unauthorized - missing or invalid token
+
+    components:
+      securitySchemes:
+        BearerToken:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
+          description: Propagate user's OIDC token from Backstage via X-Authorization-Oidc header

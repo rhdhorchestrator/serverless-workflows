@@ -1,0 +1,46 @@
+openapi: 3.0.0
+info:
+  title: HTTPBin API
+  version: 1.0.0
+  description: HTTPBin echo service for testing authentication token propagation
+
+servers:
+  - url: http://httpbin.rhdh-operator.svc.cluster.local
+    description: HTTPBin echo server deployed in rhdh-operator namespace
+
+security:
+  - BearerToken: []
+
+paths:
+  /headers:
+    get:
+      summary: Returns request headers
+      operationId: getHeaders
+      description: |
+        Returns all HTTP headers sent in the request.
+        This is useful for verifying that authentication tokens are being propagated correctly.
+      security:
+        - BearerToken: []
+      responses:
+        '200':
+          description: Successful response with request headers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  headers:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    description: All HTTP headers received in the request
+        '401':
+          description: Unauthorized - missing or invalid token
+
+components:
+  securitySchemes:
+    BearerToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Propagate user's OIDC token from Backstage via X-Authorization-Oidc header

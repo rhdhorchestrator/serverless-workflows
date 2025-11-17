@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: greeting-auth-props
+  namespace: rhdh-operator
+  labels:
+    app: greeting-auth
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: greeting-auth
+    sonataflow.org/workflow-app: greeting-auth
+data:
+  application.properties: |
+    # Swagger UI and CORS configuration
+    quarkus.swagger-ui.always-include=true
+    quarkus.http.cors=true
+    quarkus.http.cors.origins=*
+    quarkus.http.host=0.0.0.0
+    quarkus.http.enable-compression=true
+    quarkus.devservices.enabled=false
+
+    # Logging configuration
+    quarkus.log.category."org.apache.http".level=INFO
+    quarkus.log.level=INFO
+
+    # Flyway configuration for database migrations
+    kie.flyway.enabled=true
+
+    # OIDC Configuration for authentication
+    # Note: Environment variables KEYCLOAK_AUTH_SERVER_URL, KEYCLOAK_CLIENT_ID, and KEYCLOAK_CLIENT_SECRET
+    # are injected from the greeting-auth-creds secret
+    quarkus.oidc.auth-server-url=${KEYCLOAK_AUTH_SERVER_URL}
+    quarkus.oidc.client-id=${KEYCLOAK_CLIENT_ID}
+    quarkus.oidc.credentials.secret=${KEYCLOAK_CLIENT_SECRET}
+    quarkus.oidc.token.issuer=any
+
+    # OIDC Client configuration for token propagation
+    quarkus.oidc-client.BearerToken.auth-server-url=${KEYCLOAK_AUTH_SERVER_URL}
+    quarkus.oidc-client.BearerToken.token-path=${KEYCLOAK_AUTH_SERVER_URL}/protocol/openid-connect/token
+    quarkus.oidc-client.BearerToken.discovery-enabled=false
+    quarkus.oidc-client.BearerToken.client-id=${KEYCLOAK_CLIENT_ID}
+    quarkus.oidc-client.BearerToken.grant.type=client
+    quarkus.oidc-client.BearerToken.credentials.client-secret.method=basic
+    quarkus.oidc-client.BearerToken.credentials.client-secret.value=${KEYCLOAK_CLIENT_SECRET}
+
+    # OpenAPI Generator configuration for httpbin
+    quarkus.openapi-generator.httpbin_yaml.auth.BearerToken.token-propagation=true
+    quarkus.openapi-generator.httpbin_yaml.auth.BearerToken.header-name=Authorization
+
+    # REST client configuration for httpbin
+    quarkus.rest-client.httpbin_yaml.url=https://httpbin.org
