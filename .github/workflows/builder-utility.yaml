@@ -30,7 +30,7 @@ jobs:
           oci-archive:ubi9-pipeline-${{ github.sha }}.tar:quay.io/orchestrator/ubi9-pipeline:${{ github.sha }}
 
     - name: Save OCI archive
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ubi9-pipeline-${{ github.sha }}.tar
         path: ubi9-pipeline-${{ github.sha }}.tar
