@@ -62,7 +62,7 @@ jobs:
           oci-archive:serverless-workflow-${{ inputs.workflow_id }}-${{ github.sha }}.tar:quay.io/orchestrator/serverless-workflow-${{ inputs.workflow_id }}:${{ github.sha }}
     - name: Save OCI archive
       if: ${{ inputs.it_mode }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: serverless-workflow-${{ inputs.workflow_id }}-${{ github.sha }}.tar
         path: serverless-workflow-${{ inputs.workflow_id }}-${{ github.sha }}.tar
@@ -104,7 +104,7 @@ jobs:
         echo manifests_dir=${{ runner.temp }}/serverless-workflows/workflows/${{ inputs.workflow_id }}/manifests >> "$GITHUB_OUTPUT"
 
     - name: Archive manifests
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: serverless-workflow-${{ inputs.workflow_id }}-manifests
         path: ${{ steps.generate-manifests.outputs.manifests_dir }}
