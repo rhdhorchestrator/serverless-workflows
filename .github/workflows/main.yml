@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Log in to Red Hat Registry
       uses: redhat-actions/podman-login@v1
@@ -90,7 +90,7 @@ jobs:
         echo "Checking gh auth status..."
         gh auth status
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Generate Manifests
       id: generate-manifests
       run: |
