@@ -101,7 +101,7 @@ spec:
         type: operation
   podTemplate:
     container:
-      image: quay.io/gfarache/fail-switch:latest
+      image: quay.io/orchestrator/fail-switch:latest
       resources: {}
   resources:
     configMaps:
