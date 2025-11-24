@@ -70,6 +70,6 @@ states:
         functionRef:
           refName: httpbinGet
         sleep:
-          before: PT10S
+          before: PT60S
     end:
       terminate: true

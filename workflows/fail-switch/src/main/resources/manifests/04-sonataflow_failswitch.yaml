@@ -94,7 +94,7 @@ spec:
               refName: httpbinGet
             name: httpbinGet
             sleep:
-              before: PT10S
+              before: PT60S
         end:
           terminate: true
         name: WaitAndSuccess
