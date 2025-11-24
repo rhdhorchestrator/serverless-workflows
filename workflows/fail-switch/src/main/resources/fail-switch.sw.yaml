@@ -1,0 +1,75 @@
+id: failSwitch
+version: '1.0'
+specVersion: '1.0'
+name: FailSwitch workflow
+description: YAML based fail switch workflow for testing purpose
+annotations:
+  - "workflow-type/infrastructure"
+dataInputSchema: "schemas/fail-switch.sw.input-schema.json"
+start: ChooseFailOrSuccessOrWait
+functions:
+  - name: logInfo
+    type: custom
+    operation: sysout
+  - name: sendFailingGet
+    type: custom
+    operation: rest:get:https://toto.toto
+  - name: httpbinGet
+    type: rest
+    operation: specs/httpbin.yaml#get
+  - name: successResult
+    type: expression
+    operation: '{
+        "result": {
+          "message": "Success",
+          "outputs":[
+            {
+                "key":"switch",
+                "value": .switch
+            }
+          ]
+        }
+      }'
+states:
+  - name: ChooseFailOrSuccessOrWait
+    type: switch
+    dataConditions:
+      - condition: .switch  == "OK"
+        transition: SuccessOK
+      - condition: .switch  == "KO"
+        transition: FailKO
+      - condition: .switch  == "Wait"
+        transition: WaitAndSuccess
+    defaultCondition:
+      transition: SuccessOK
+  - name: SuccessOK
+    type: operation
+    actions:
+      - name: logMessage
+        functionRef:
+          refName: logInfo
+          arguments:
+            message: '"Success, input was: " + .switch'
+      - name: setOutput
+        functionRef:
+          refName: successResult
+    end:
+      terminate: true
+  - name: FailKO
+    type: operation
+    actions:
+      - name: sendFailingGet
+        functionRef:
+          refName: sendFailingGet
+    end:
+      terminate: true
+  - name: WaitAndSuccess
+    type: operation
+    actions:
+      - name: httpbinGet
+        functionRef:
+          refName: httpbinGet
+        sleep:
+          before: PT10S
+    end:
+      terminate: true

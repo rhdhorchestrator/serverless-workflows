@@ -1,0 +1,61 @@
+apiVersion: v1
+data:
+  httpbin.yaml: |
+    ---
+    openapi: 3.0.0
+    info:
+      title: HTTPBin GET Endpoint
+      version: 1.0.0
+      description: OpenAPI specification for the httpbin.org/get endpoint.
+    paths:
+      /get:
+        get:
+          summary: Returns request data
+          operationId: get
+          description: >
+            The /get endpoint returns the request details such as headers,
+            query parameters, origin IP, and URL.
+          parameters:
+            - name: any
+              in: query
+              description: Any optional query parameters to echo back.
+              required: false
+              schema:
+                type: string
+          responses:
+            '200':
+              description: Successful response with request information.
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      args:
+                        type: object
+                        additionalProperties:
+                          type: string
+                        description: Query parameters received.
+                      headers:
+                        type: object
+                        additionalProperties:
+                          type: string
+                        description: Request headers received.
+                      origin:
+                        type: string
+                        description: Client IP address.
+                      url:
+                        type: string
+                        description: The request URL.
+                  example:
+                    args:
+                      foo: bar
+                    headers:
+                      Accept: "*/*"
+                      Host: "httpbin.org"
+                      User-Agent: "curl/7.64.1"
+                    origin: "1.2.3.4"
+                    url: "https://httpbin.org/get?foo=bar"
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 02-failswitch-resources-specs
