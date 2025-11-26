@@ -36,6 +36,6 @@ helm install greeting orchestrator-workflows/greeting -n ${TARGET_NS}
 
 Verify the greeting workflow is ready:
 ```console
-oc wait sonataflow greeting -n -n ${TARGET_NS} --for=condition=Running=True --timeout=5m
+oc wait sonataflow greeting -n ${TARGET_NS} --for=condition=Running=True --timeout=5m
 sonataflow.sonataflow.org/greeting condition met
 ```
