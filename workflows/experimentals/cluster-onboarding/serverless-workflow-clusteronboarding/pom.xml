@@ -7,7 +7,7 @@
   <version>1.0.0-SNAPSHOT</version>
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
-    <compiler-plugin.version>3.14.0</compiler-plugin.version>
+    <compiler-plugin.version>3.14.1</compiler-plugin.version>
     <kogito.bom.artifact-id>kogito-bom</kogito.bom.artifact-id>
     <kogito.bom.group-id>org.kie.kogito</kogito.bom.group-id>
     <kogito.bom.version>10.1.0</kogito.bom.version>
