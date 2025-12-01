@@ -54,7 +54,7 @@ RUN if [ "$WORKFLOW_ID" = "python" ]; then \
 #=============================
 # Runtime Run
 #=============================
-FROM registry.access.redhat.com/ubi9/openjdk-17:1.21-2
+FROM registry.access.redhat.com/ubi9/openjdk-17:1.23-6.1764155314
 
 # Conditional JEP installation based on WORKFLOW_ID
 ARG WORKFLOW_ID
