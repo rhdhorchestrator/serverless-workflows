@@ -49,7 +49,7 @@ All the configuration items are on [./application.properties]
 For running and testing the workflow refer to [mta testing](https://github.com/rhdhorchestrator/serverless-workflows/tree/main/mta-v7.x#output).
 
 # Workflow Diagram
-![mta workflow diagram](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/mta-v7.x/mta.svg?raw=true)
+![mta workflow diagram](https://github.com/rhdhorchestrator/serverless-workflows/blob/main/workflows/mta-v7.x/mta.svg?raw=true)
 
 # Installation
 
