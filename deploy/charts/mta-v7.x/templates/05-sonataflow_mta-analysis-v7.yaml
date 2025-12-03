@@ -685,7 +685,7 @@ spec:
             secretKeyRef:
               key: NOTIFICATIONS_BEARER_TOKEN
               name: mta-analysis-v7-secrets
-      image: quay.io/orchestrator/serverless-workflow-mta-v7.x:30e1984769fe6e3f2c9d99e49c98a8b86b8d2b61
+      image: quay.io/orchestrator/serverless-workflow-mta-v7.x:23e5e065a818cbdc28d609a5cf2abd48e8cc5d4a
       resources: {}
   resources:
     configMaps:
