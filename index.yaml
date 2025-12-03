@@ -3,6 +3,17 @@ entries:
   create-ocp-project:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2025-12-03T12:19:54.590073382Z"
+    description: A Helm chart for the create OCP project serverless workflow
+    digest: fb125c1480816793b5cb0e291a15678210ec8ee4d246b3114dbb05096b024123
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: create-ocp-project
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/create-ocp-project-1.7.0-rc2/create-ocp-project-1.7.0-rc2.tgz
+    version: 1.7.0-rc2
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2025-06-30T11:58:27.314262848Z"
     description: A Helm chart for the create OCP project serverless workflow
     digest: 711fcc68d135ac630fd22f8c9781378a05d3584fe03d8cc3ed642cf59c3a2e7a
@@ -570,4 +581,4 @@ entries:
     urls:
     - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/rpj-1.6.0-rc0/rpj-1.6.0-rc0.tgz
     version: 1.6.0-rc0
-generated: "2025-12-03T12:19:18.669972356Z"
+generated: "2025-12-03T12:19:54.590192807Z"
