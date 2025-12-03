@@ -539,6 +539,17 @@ entries:
   rpj:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2025-12-03T12:20:22.594759902Z"
+    description: A Helm chart for the Report Portal to Jira (RPJ) serverless workflow
+    digest: 7a9447187048197314b866ade0958da50b384e0b04be844b672eab39cd0697db
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: rpj
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/rpj-1.7.0-rc2/rpj-1.7.0-rc2.tgz
+    version: 1.7.0-rc2
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2025-06-30T11:58:28.819396934Z"
     description: A Helm chart for the Report Portal to Jira (RPJ) serverless workflow
     digest: 7fa42a4637c1b4ace833495d28fe41877bc02124bf5cd7efc16758b0cfde5a91
@@ -581,4 +592,4 @@ entries:
     urls:
     - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/rpj-1.6.0-rc0/rpj-1.6.0-rc0.tgz
     version: 1.6.0-rc0
-generated: "2025-12-03T12:19:54.590192807Z"
+generated: "2025-12-03T12:20:22.594908751Z"
