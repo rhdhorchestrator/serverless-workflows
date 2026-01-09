@@ -1,0 +1,131 @@
+apiVersion: v1
+data:
+  user-onboarding-schema.json: |2
+      {
+        "$id": "classpath:/schemas/user-onboarding-schema.json",
+        "title": "Workflow input data",
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "userId": {
+            "title": "The user ID that triggers the workflow",
+            "description": "The user that triggers the workflow",
+            "type": "string",
+            "default": "user:default/guest"
+          },
+          "iterationNum": {
+            "title": "The iteration number for running the workflow",
+            "description": "The iteration number for running the workflow",
+            "type": "integer"
+          },
+          "username": {
+            "title": "The name of the user",
+            "description": "The name of the user",
+            "type": "string",
+            "pattern": "^[a-zA-Z]*"
+          },
+          "recipients": {
+            "title": "Recipients",
+            "type": "array",
+            "description": "A list of recipients for the notification in the format of 'user:<namespace>/<username>' or 'group:<namespace>/<groupname>', i.e. 'user:default/jsmith'",
+            "items": {
+              "title": "Recipient",
+              "type": "string",
+              "pattern": "^(user|group):[a-z0-9]([-a-z0-9]*[a-z0-9])?/([a-z0-9]([-a-z0-9]*[a-z0-9])?)$"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "userId",
+          "iterationNum",
+          "recipients"
+        ]
+      }
+  workflow-output-schema.json: |-
+    {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "WorkflowResult",
+        "description": "Schema of workflow output",
+        "type": "object",
+        "properties": {
+            "result": {
+                "$ref": "./workflow-result-schema.json",
+                "type": "object"
+            }
+        }
+    }
+  workflow-result-schema.json: |-
+    {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "WorkflowResult",
+        "description": "Result of a workflow execution",
+        "type": "object",
+        "properties": {
+            "message": {
+                "description": "High-level summary of the current status, free-form text, human readable.",
+                "type": "string"
+            },
+            "nextWorkflows": {
+                "description": "List of workflows suggested to run next. Items at lower indexes are of higher priority.",
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "description": "Workflow identifier",
+                            "type": "string"
+                        },
+                        "name": {
+                            "description": "Human readable title describing the workflow.",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "id",
+                        "name"
+                    ]
+                }
+            },
+            "outputs": {
+                "description": "Additional structured output of workflow processing. This can contain identifiers of created resources, links to resources, logs or other output.",
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "key": {
+                            "description": "Unique identifier of the option. Preferably human-readable.",
+                            "type": "string"
+                        },
+                        "value": {
+                            "description": "Free form value of the option.",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "number"
+                                }
+                            ]
+                        },
+                        "format": {
+                            "description": "More detailed type of the 'value' property. Defaults to 'text'.",
+                            "enum": [
+                                "text",
+                                "number",
+                                "link"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "key",
+                        "value"
+                    ]
+                }
+            }
+        }
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 01-user-onboarding-resources-schemas

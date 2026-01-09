@@ -1,6 +1,6 @@
 apiVersion: v1
 data:
-  application.properties: |
+  application.properties: |-
     # Backstage Notifications service
     quarkus.rest-client.notifications.url=${BACKSTAGE_NOTIFICATIONS_URL}
     quarkus.openapi-generator.notifications.auth.BearerToken.bearer-token=${NOTIFICATIONS_BEARER_TOKEN}
@@ -18,12 +18,14 @@ data:
     # and see https://quarkus.io/guides/logging for documentation
     quarkus.log.category."org.apache.http".level=INFO
     quarkus.log.level=INFO
-    kie.flyway.enabled = true
 kind: ConfigMap
 metadata:
   creationTimestamp: null
   labels:
     app: user-onboarding
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: user-onboarding
     sonataflow.org/workflow-app: user-onboarding
+    sonataflow.org/workflow-namespace: ""
   name: user-onboarding-props
-  namespace: ""
