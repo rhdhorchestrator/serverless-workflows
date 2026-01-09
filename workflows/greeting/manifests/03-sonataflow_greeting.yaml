@@ -1,0 +1,101 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: YAML based greeting workflow
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: greeting
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: greeting
+    sonataflow.org/workflow-app: greeting
+    sonataflow.org/workflow-namespace: ""
+  name: greeting
+spec:
+  flow:
+    annotations:
+      - workflow-type/infrastructure
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/greeting.sw.input-schema.json
+    functions:
+      - name: greetFunction
+        operation: sysout
+        type: custom
+      - name: successResult
+        operation: '{ "result": { "message": "Greeting workflow completed successfully", "outputs":[ { "key":"Selected language", "value": .language }, { "key":"Greeting message", "value": .greeting } ] } }'
+        type: expression
+    start:
+      stateName: ChooseOnLanguage
+    states:
+      - dataConditions:
+          - condition: .language  == "English"
+            transition:
+              nextState: GreetInEnglish
+          - condition: .language  == "Spanish"
+            transition:
+              nextState: GreetInSpanish
+        defaultCondition:
+          transition:
+            nextState: GreetInEnglish
+        name: ChooseOnLanguage
+        type: switch
+      - data:
+          greeting: Hello from YAML Workflow
+        name: GreetInEnglish
+        transition:
+          nextState: GreetPerson
+        type: inject
+      - data:
+          greeting: Saludos desde YAML Workflow
+        name: GreetInSpanish
+        transition:
+          nextState: GreetPerson
+        type: inject
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                message: .greeting
+              invoke: sync
+              refName: greetFunction
+            name: greetAction
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: successResult
+            name: setOutput
+        end:
+          terminate: true
+        name: GreetPerson
+        type: operation
+  podTemplate:
+    container:
+      image: quay.io/orchestrator/serverless-workflow-greeting:osl_1_37
+      resources: {}
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-greeting-resources-schemas
+        workflowPath: schemas
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: greeting
+status:
+  address: {}
+  lastTimeRecoverAttempt: null

@@ -1,0 +1,22 @@
+apiVersion: v1
+data:
+  application.properties: |
+    # This property is used to select the log level, which controls the amount
+    # of information logged on HTTP requests based on the severity of the events.
+    # Possible values: OFF, FATAL, ERROR, WARN, INFO, DEBUG, ALL.
+    # and see https://quarkus.io/guides/logging for documentation
+    quarkus.log.category."org.apache.http".level=INFO
+    quarkus.log.level=INFO
+
+    kie.flyway.enabled=true
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    app: greeting
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: greeting
+    sonataflow.org/workflow-app: greeting
+    sonataflow.org/workflow-namespace: ""
+  name: greeting-props

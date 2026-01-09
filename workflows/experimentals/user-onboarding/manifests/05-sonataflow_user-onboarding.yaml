@@ -9,9 +9,12 @@ metadata:
   creationTimestamp: null
   labels:
     app: user-onboarding
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: user-onboarding
     sonataflow.org/workflow-app: user-onboarding
+    sonataflow.org/workflow-namespace: ""
   name: user-onboarding
-  namespace: ""
 spec:
   flow:
     dataInputSchema:
@@ -180,11 +183,24 @@ spec:
         type: operation
   podTemplate:
     container:
+      env:
+        - name: ONBOARDING_SERVER_URL
+          valueFrom:
+            secretKeyRef:
+              key: ONBOARDING_SERVER_URL
+              name: user-onboarding-secrets
+        - name: BACKSTAGE_NOTIFICATIONS_URL
+          valueFrom:
+            secretKeyRef:
+              key: BACKSTAGE_NOTIFICATIONS_URL
+              name: user-onboarding-secrets
+        - name: NOTIFICATIONS_BEARER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: NOTIFICATIONS_BEARER_TOKEN
+              name: user-onboarding-secrets
+      image: quay.io/orchestrator/demo-user-onboarding:osl_1_37
       resources: {}
-      image: quay.io/orchestrator/demo-user-onboarding:latest
-      envFrom:
-        - secretRef:
-            name: user-onboarding-creds
   resources:
     configMaps:
       - configMap:

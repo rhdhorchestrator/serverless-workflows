@@ -1,0 +1,68 @@
+apiVersion: v1
+data:
+  onboarding-openapi.yaml: |
+    openapi: 3.0.3
+    info:
+      title: User Onboarding API
+      description: API for simulating a user onboarding process, where a user reaches "Ready" status after three requests.
+      version: 1.0.0
+    paths:
+      /onboard:
+        post:
+          summary: Initiates or checks the onboarding status of a user
+          description: |
+            - The first two requests for a given `user_id` return `"In Progress"`.
+            - The third request returns `"Ready"`, and starts a **5-minute** cleanup timer.
+            - After 5 minutes, the user is removed from the cache and starts fresh.
+          operationId: onboardUser
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/OnboardRequest"
+          responses:
+            "200":
+              description: Successfully retrieved onboarding status.
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/OnboardResponse"
+            "400":
+              description: Invalid request payload.
+            "405":
+              description: Invalid request method.
+    components:
+      schemas:
+        OnboardRequest:
+          type: object
+          required:
+            - user_id
+            - name
+          properties:
+            user_id:
+              type: string
+              description: Unique identifier for the user.
+              example: "12345"
+            name:
+              type: string
+              description: Name of the user.
+              example: "Alice Johnson"
+        OnboardResponse:
+          type: object
+          properties:
+            user_id:
+              type: string
+              description: Unique identifier for the user.
+              example: "12345"
+            status:
+              type: string
+              description: Current onboarding status.
+              enum:
+                - "In Progress"
+                - "Ready"
+              example: "In Progress"
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 02-user-onboarding-resources-specs
