@@ -33,7 +33,7 @@ spec:
         operation: specs/httpbin.yaml#get
         type: rest
       - name: successResult
-        operation: '{ "result": { "message": "Success", "outputs":[ { "key":"switch", "value": .switch } ] } }'
+        operation: '{ "result": { "message": "Success", "outputs":[ { "key":"switch", "value": .switch } ], nextWorkflows:[ { id:"greeting", name:"greeting" } ] } }'
         type: expression
     start:
       stateName: ChooseFailOrSuccessOrWait

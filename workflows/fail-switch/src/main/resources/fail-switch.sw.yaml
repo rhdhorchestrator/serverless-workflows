@@ -27,6 +27,12 @@ functions:
                 "key":"switch",
                 "value": .switch
             }
+          ],
+          nextWorkflows:[
+            {
+              id:"greeting",
+              name:"greeting"
+            }
           ]
         }
       }'
