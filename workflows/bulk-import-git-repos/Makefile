@@ -22,15 +22,11 @@ help:
 
 gen-manifests:
 	@echo "🛠️  Generating manifests for $(WORKFLOW_ID)..."
-	@echo -e "\nkie.flyway.enabled=true" >> application.properties
 	@$(CONTAINER_ENGINE) run --rm \
 		-v $(PWD):/workdir:Z \
 		-w /workdir \
 		$(LINUX_IMAGE) \
-		kn-workflow gen-manifest \
-			--profile=gitops \
-			--namespace='' \
-			--image=$(WORKFLOW_IMAGE_REGISTRY)/$(WORKFLOW_IMAGE_NAMESPACE)/$(WORKFLOW_IMAGE_REPO):$(WORKFLOW_IMAGE_TAG)
+		/bin/bash -c "echo -e '\nkie.flyway.enabled=false' >> application.properties && kn-workflow gen-manifest --profile=gitops --namespace='' --image=$(WORKFLOW_IMAGE_REGISTRY)/$(WORKFLOW_IMAGE_NAMESPACE)/$(WORKFLOW_IMAGE_REPO):$(WORKFLOW_IMAGE_TAG)"
 	@echo "✅ Manifests generated in ./manifests/"
 
 clean:
