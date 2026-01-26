@@ -1,0 +1,41 @@
+{
+  "$id": "classpath:/schemas/create-pr-universal-input-schema.json",
+  "title": "Create Universal PR/MR Input Schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "approvalTool": {
+      "title": "Approval Tool",
+      "description": "The Git provider to use: GIT for GitHub or GITLAB for GitLab",
+      "type": "string",
+      "enum": ["GIT", "GITLAB"]
+    },
+    "owner": {
+      "title": "Owner",
+      "description": "The owner/namespace of the repository",
+      "type": "string"
+    },
+    "repo": {
+      "title": "Repository",
+      "description": "The repository name",
+      "type": "string"
+    },
+    "baseBranch": {
+      "title": "Base Branch",
+      "description": "The base branch to create the PR/MR from",
+      "type": "string"
+    },
+    "targetBranch": {
+      "title": "Target Branch",
+      "description": "The target branch name for the PR/MR",
+      "type": "string"
+    }
+  },
+  "required": [
+    "approvalTool",
+    "owner",
+    "repo",
+    "baseBranch",
+    "targetBranch"
+  ]
+}
