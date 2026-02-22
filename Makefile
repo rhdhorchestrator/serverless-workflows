@@ -165,8 +165,11 @@ save-oci: build-image
 # Depends on: prepare-workdir target.
 # Usage: make gen-manifests
 gen-manifests: prepare-workdir
-	cd $(WORKDIR)
-	$(CONTAINER_ENGINE) run --rm -v $(WORKDIR):/workdir:Z -w /workdir \
+	@# Ensure WORKDIR exists and is accessible (important for macOS Podman)
+	@test -d $(WORKDIR) || mkdir -p $(WORKDIR)
+	@# Use absolute path for volume mount (required for Podman on macOS)
+	@# On macOS, use realpath or fallback to WORKDIR if realpath fails
+	@$(CONTAINER_ENGINE) run --rm -v "$(shell realpath $(WORKDIR) 2>/dev/null || echo $(WORKDIR)):/workdir:Z" -w /workdir \
 		$(LINUX_IMAGE) /bin/bash -c "ENABLE_PERSISTENCE=$(ENABLE_PERSISTENCE) WORKFLOW_IMAGE_TAG=$(IMAGE_TAG) ${SCRIPTS_DIR}/gen_manifests.sh workflows/$(WORKFLOW_ID) $(WORKFLOW_ID)"
 	@echo "Manifests are available in workdir $(WORKDIR)/workflows/$(WORKFLOW_ID)/manifests"
 
