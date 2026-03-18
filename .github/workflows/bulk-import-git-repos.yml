@@ -1,0 +1,19 @@
+name: Bulk Import Git Repos workflow container image and manifest push
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'workflows/experimentals/bulk-import-git-repos/**'
+      - 'pipeline/**'
+      - 'scripts/**'
+      - .github/workflows/bulk-import-git-repos.yml
+      - .github/workflows/main.yml
+
+jobs:
+  bulk-import-git-repos:
+    uses: ./.github/workflows/main.yml
+    with:
+      workflow_id: experimentals/bulk-import-git-repos
+    secrets: inherit

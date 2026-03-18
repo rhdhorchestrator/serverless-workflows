@@ -20,6 +20,7 @@ data:
     kie.flyway.enabled=true
 
     quarkus.oidc.enabled=false
+    quarkus.oidc.tenant-enabled=false
     quarkus.kogito.devservices.enabled=false
     quarkus.openapi-generator.github_yaml.auth.BearerToken.token-propagation=true
     quarkus.openapi-generator.github_yaml.auth.BearerToken.header-name=X-Authorization-Github
@@ -32,6 +33,8 @@ data:
 
     quarkus.openapi-generator.gitlab_yaml.auth.BearerToken.token-propagation=true
     quarkus.openapi-generator.gitlab_yaml.auth.BearerToken.header-name=X-Authorization-gitlab
+
+    kie.flyway.enabled=true
 kind: ConfigMap
 metadata:
   creationTimestamp: null

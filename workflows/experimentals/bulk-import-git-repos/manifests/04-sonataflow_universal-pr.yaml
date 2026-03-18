@@ -341,7 +341,7 @@ spec:
         type: operation
   podTemplate:
     container:
-      image: quay.io/aandriienko/example-token-propagation
+      image: quay.io/aandriienko/serverless-workflow-bulk-import-git-repos:latest
       resources: {}
       envFrom:
         - secretRef:
@@ -357,14 +357,15 @@ spec:
   persistence:
     postgresql:
       secretRef:
-        name: postgres-secret
-        userKey: POSTGRESQL_USER
-        passwordKey: POSTGRESQL_PASSWORD
+        name: "backstage-psql-secret"
+        userKey: "POSTGRES_USER"
+        passwordKey: "POSTGRES_PASSWORD"
       serviceRef:
-        name: postgres
+        name: "backstage-psql"
         port: 5432
-        databaseName: sonata
-        databaseSchema: public
+        databaseName: "backstage_plugin_orchestrator"
+        databaseSchema: bulk-import-git-repos
+        namespace: "orchestrator"
 status:
   address: {}
   lastTimeRecoverAttempt: null

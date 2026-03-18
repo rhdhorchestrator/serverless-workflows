@@ -33,6 +33,10 @@ ARG QUARKUS_EXTENSIONS=io.quarkiverse.openapi.generator:quarkus-openapi-generato
 #   YAML input files, and is currently set to 35000000 characters (~33MB in UTF-8).  
 ARG MAVEN_ARGS_APPEND="-DmaxYamlCodePoints=35000000 -Dkogito.persistence.type=jdbc -Dquarkus.datasource.db-kind=postgresql -Dkogito.persistence.proto.marshaller=false"
 
+# Expose to RUN so build-app.sh can use them (--build-arg-file from argfile.conf overrides ARG above)
+ENV QUARKUS_EXTENSIONS=${QUARKUS_EXTENSIONS}
+ENV MAVEN_ARGS_APPEND=${MAVEN_ARGS_APPEND}
+
 # Argument for passing the resources folder if not current context dir
 ARG WF_RESOURCES
 
@@ -41,8 +45,8 @@ COPY --chown=1001 ${WF_RESOURCES} ./resources/
 RUN ls -la ./resources
 
 ENV swf_home_dir=/home/kogito/serverless-workflow-project
-RUN if [[ -d "./resources/src" ]]; then cp -r ./resources/src/* ./src/; fi
-
+# Do not cp resources/src to ./src to avoid duplicate workflow id (Kogito scans both and fails with "Duplicated item found with id")
+# build-app.sh ./resources builds from ./resources only.
 RUN /home/kogito/launch/build-app.sh ./resources
 
 #=============================

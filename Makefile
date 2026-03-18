@@ -85,8 +85,10 @@ else
 DOCKERFILE ?= src/main/docker/Dockerfile.jvm
 endif
 
+# For image name strip experimentals/ prefix so image is serverless-workflow-bulk-import-git-repos not serverless-workflow-experimentals/bulk-import-git-repos
+WORKFLOW_ID_FOR_IMAGE ?= $(patsubst experimentals/%,%,$(WORKFLOW_ID))
 ifeq ($(IS_WORKFLOW),true)
-IMAGE_NAME = $(REGISTRY)/$(REGISTRY_REPO)/$(IMAGE_PREFIX)-$(WORKFLOW_ID)
+IMAGE_NAME = $(REGISTRY)/$(REGISTRY_REPO)/$(IMAGE_PREFIX)-$(WORKFLOW_ID_FOR_IMAGE)
 else
 IMAGE_NAME = $(REGISTRY)/$(REGISTRY_REPO)/$(IMAGE_PREFIX)-$(APPLICATION_ID)
 endif
@@ -164,14 +166,17 @@ save-oci: build-image
 # Description: Generates the k8s manifests for the WORKFLOW_ID workflow under the configured WORKDIR.
 # Depends on: prepare-workdir target.
 # Usage: make gen-manifests
+# Optional: WORKFLOW_SUBDIR — when set, first arg is workflows/$(WORKFLOW_SUBDIR); when unset, workflows/$(WORKFLOW_ID)
+#   make WORKFLOW_ID=bulk-import-git-repos WORKFLOW_SUBDIR=experimentals/bulk-import-git-repos/src/main/resources gen-manifests 
+GEN_MANIFESTS_WORKFLOW_FOLDER = workflows/$(if $(WORKFLOW_SUBDIR),$(WORKFLOW_SUBDIR),$(WORKFLOW_ID))
 gen-manifests: prepare-workdir
 	@# Ensure WORKDIR exists and is accessible (important for macOS Podman)
 	@test -d $(WORKDIR) || mkdir -p $(WORKDIR)
 	@# Use absolute path for volume mount (required for Podman on macOS)
 	@# On macOS, use realpath or fallback to WORKDIR if realpath fails
 	@$(CONTAINER_ENGINE) run --rm -v "$(shell realpath $(WORKDIR) 2>/dev/null || echo $(WORKDIR)):/workdir:Z" -w /workdir \
-		$(LINUX_IMAGE) /bin/bash -c "ENABLE_PERSISTENCE=$(ENABLE_PERSISTENCE) WORKFLOW_IMAGE_TAG=$(IMAGE_TAG) ${SCRIPTS_DIR}/gen_manifests.sh workflows/$(WORKFLOW_ID) $(WORKFLOW_ID)"
-	@echo "Manifests are available in workdir $(WORKDIR)/workflows/$(WORKFLOW_ID)/manifests"
+		$(LINUX_IMAGE) /bin/bash -c "ENABLE_PERSISTENCE=$(ENABLE_PERSISTENCE) WORKFLOW_IMAGE_TAG=$(IMAGE_TAG) ${SCRIPTS_DIR}/gen_manifests.sh $(GEN_MANIFESTS_WORKFLOW_FOLDER) $(WORKFLOW_ID)"
+	@echo "Manifests are available in workdir $(WORKDIR)/$(GEN_MANIFESTS_WORKFLOW_FOLDER)/manifests"
 
 remove-trailing-whitespaces:
 	@echo "Removing all trailing whitespaces from application.properties files"
