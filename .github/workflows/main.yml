@@ -18,7 +18,7 @@ on:
         default: false
     secrets:
       HELM_REPO_TOKEN:
-        required: true
+        required: false
 
 permissions:
   contents: write
@@ -26,7 +26,7 @@ permissions:
 
 env:
   WF_DEPLOY_REPO: rhdhorchestrator/serverless-workflows
-  REGISTRY_REPO: orchestrator
+  REGISTRY_REPO: aandriienko
   # GH_TOKEN: ${{ secrets.HELM_REPO_TOKEN }}
 
 jobs:
