@@ -1,7 +1,6 @@
 ARG BUILDER_IMAGE
 ARG RUNTIME_IMAGE
 
-#  registry.redhat.io/openshift-serverless-1/logic-swf-devmode-rhel8:1.36.0       
 FROM ${BUILDER_IMAGE:-registry.redhat.io/openshift-serverless-1/logic-swf-builder-rhel8:1.35.0-6} AS builder
 
 ARG QUARKUS_EXTENSIONS
