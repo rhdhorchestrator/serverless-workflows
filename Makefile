@@ -74,7 +74,8 @@ MVN_OPTS ?= -B
 
 IMAGE_NAME := ""
 REGISTRY ?= quay.io
-REGISTRY_REPO ?= $(shell id -un)
+REGISTRY_REPO ?= "aandriienko"
+#$(shell id -un)
 REGISTRY_USERNAME ?= ""
 REGISTRY_PASSWORD ?= ""
 IMAGE_PREFIX ?= serverless-workflow
