@@ -26,3 +26,23 @@ The workflow expects the following input parameters:
 
 - For GitHub: Returns PR URL in `PR_URL` output
 - For GitLab: Returns MR URL in `MR_URL` output
+
+# Development
+
+Java artifacts build(prerequisites: pre-installed java and maven): 
+
+```
+mvn clean install
+```
+
+Generate manifests, from the root of the repository:
+
+```
+make WORKFLOW_ID=bulk-import-git-repos WORKFLOW_SUBDIR=bulk-import-git-repos/src/main/resources gen-manifests 
+```
+
+Build image: 
+
+```
+make WORKFLOW_ID=bulk-import-git-repos build-image
+```

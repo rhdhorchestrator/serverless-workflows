@@ -86,10 +86,8 @@ else
 DOCKERFILE ?= src/main/docker/Dockerfile.jvm
 endif
 
-# For image name strip experimentals/ prefix so image is serverless-workflow-bulk-import-git-repos not serverless-workflow-experimentals/bulk-import-git-repos
-WORKFLOW_ID_FOR_IMAGE ?= $(patsubst experimentals/%,%,$(WORKFLOW_ID))
 ifeq ($(IS_WORKFLOW),true)
-IMAGE_NAME = $(REGISTRY)/$(REGISTRY_REPO)/$(IMAGE_PREFIX)-$(WORKFLOW_ID_FOR_IMAGE)
+IMAGE_NAME = $(REGISTRY)/$(REGISTRY_REPO)/$(IMAGE_PREFIX)-$(WORKFLOW_ID)
 else
 IMAGE_NAME = $(REGISTRY)/$(REGISTRY_REPO)/$(IMAGE_PREFIX)-$(APPLICATION_ID)
 endif
@@ -168,7 +166,7 @@ save-oci: build-image
 # Depends on: prepare-workdir target.
 # Usage: make gen-manifests
 # Optional: WORKFLOW_SUBDIR — when set, first arg is workflows/$(WORKFLOW_SUBDIR); when unset, workflows/$(WORKFLOW_ID)
-#   make WORKFLOW_ID=bulk-import-git-repos WORKFLOW_SUBDIR=experimentals/bulk-import-git-repos/src/main/resources gen-manifests 
+#   make WORKFLOW_ID=bulk-import-git-repos WORKFLOW_SUBDIR=bulk-import-git-repos/src/main/resources gen-manifests 
 GEN_MANIFESTS_WORKFLOW_FOLDER = workflows/$(if $(WORKFLOW_SUBDIR),$(WORKFLOW_SUBDIR),$(WORKFLOW_ID))
 gen-manifests: prepare-workdir
 	@# Ensure WORKDIR exists and is accessible (important for macOS Podman)

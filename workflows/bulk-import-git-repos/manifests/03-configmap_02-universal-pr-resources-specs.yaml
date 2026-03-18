@@ -13,7 +13,44 @@ data:
     security:
     - BearerToken: []
     paths:
-      /repos/{owner}/{repo}/git/ref/{ref}:
+      /repos/{owner}/{repo}/git/refs/{ref}:
+        patch:
+          summary: Update a branch reference
+          operationId: updateBranchRef
+          parameters:
+            - name: owner
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: repo
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: ref
+              in: path
+              required: true
+              schema:
+                type: string
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    sha:
+                      type: string
+                    force:
+                      type: boolean
+          responses:
+            '200':
+              description: Branch updated successfully
+              content:
+                application/json:
+                  schema:
+                    type: object
         get:
           summary: Get the SHA of a ref
           operationId: getBranchSHA
@@ -81,44 +118,6 @@ data:
                 application/json:
                   schema:
                     type: object
-      /repos/{owner}/{repo}/git/refs/{ref}:
-        patch:
-          summary: Update a branch reference
-          operationId: updateBranchRef
-          parameters:
-            - name: owner
-              in: path
-              required: true
-              schema:
-                type: string
-            - name: repo
-              in: path
-              required: true
-              schema:
-                type: string
-            - name: ref
-              in: path
-              required: true
-              schema:
-                type: string
-          requestBody:
-            required: true
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    sha:
-                      type: string
-                    force:
-                      type: boolean
-          responses:
-            '200':
-              description: Branch updated successfully
-              content:
-                application/json:
-                  schema:
-                    type: object
       /repos/{owner}/{repo}/git/blobs:
         post:
           summary: Create a new blob
@@ -152,9 +151,6 @@ data:
                 application/json:
                   schema:
                     type: object
-                    properties:
-                      sha:
-                        type: string
       /repos/{owner}/{repo}/git/trees:
         post:
           summary: Create a new tree
@@ -199,9 +195,6 @@ data:
                 application/json:
                   schema:
                     type: object
-                    properties:
-                      sha:
-                        type: string
       /repos/{owner}/{repo}/git/commits:
         post:
           summary: Create a new commit
@@ -239,9 +232,6 @@ data:
                 application/json:
                   schema:
                     type: object
-                    properties:
-                      sha:
-                        type: string
       /repos/{owner}/{repo}/git/commits/{commit_sha}:
         get:
           summary: Get details of a commit
@@ -269,12 +259,6 @@ data:
                 application/json:
                   schema:
                     type: object
-                    properties:
-                      tree:
-                        type: object
-                        properties:
-                          sha:
-                            type: string
       /repos/{owner}/{repo}/pulls:
         post:
           summary: Create a pull request

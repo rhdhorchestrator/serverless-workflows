@@ -15,5 +15,5 @@ jobs:
   bulk-import-git-repos:
     uses: ./.github/workflows/main.yml
     with:
-      workflow_id: experimentals/bulk-import-git-repos
+      workflow_id: bulk-import-git-repos
     secrets: inherit
