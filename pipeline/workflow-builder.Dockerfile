@@ -41,7 +41,6 @@ COPY --chown=1001 ${WF_RESOURCES} ./resources/
 RUN ls -la ./resources
 
 ENV swf_home_dir=/home/kogito/serverless-workflow-project
-RUN if [[ -d "./resources/src" ]]; then cp -r ./resources/src/* ./src/; fi
 
 RUN /home/kogito/launch/build-app.sh ./resources
 
