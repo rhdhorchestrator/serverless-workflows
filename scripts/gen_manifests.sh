@@ -18,10 +18,7 @@ command -v kubectl
 
 cd "${WORKFLOW_FOLDER}"
 
-# Append to application.properties when present (WORKFLOW_FOLDER is already the dir with .sw.yaml, possibly a subdir)
-if [ -f application.properties ]; then
-  echo -e "\nkie.flyway.enabled=true" >> application.properties
-fi
+echo -e "\nkie.flyway.enabled=true" >> application.properties
 
 kn-workflow gen-manifest --profile='gitops' \
         --image="${WORKFLOW_IMAGE_REGISTRY}/${WORKFLOW_IMAGE_NAMESPACE}/${WORKFLOW_IMAGE_REPO}:${WORKFLOW_IMAGE_TAG}" \

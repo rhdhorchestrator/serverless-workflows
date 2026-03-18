@@ -212,14 +212,14 @@ spec:
   persistence:
     postgresql:
       secretRef:
-        name: backstage-psql-secret
-        userKey: POSTGRES_USER
-        passwordKey: POSTGRES_PASSWORD
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
       serviceRef:
-        name: backstage-psql
+        name: sonataflow-psql-postgresql
         port: 5432
-        databaseName: postgres
-        databaseSchema: public
+        databaseName: sonataflow
+        databaseSchema: gh-pr
 status:
   address: {}
   lastTimeRecoverAttempt: null

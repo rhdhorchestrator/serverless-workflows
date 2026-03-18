@@ -38,7 +38,7 @@ mvn clean install
 Generate manifests, from the root of the repository:
 
 ```
-make WORKFLOW_ID=bulk-import-git-repos WORKFLOW_SUBDIR=bulk-import-git-repos/src/main/resources gen-manifests \
+make WORKFLOW_ID=bulk-import-git-repos WORKFLOW_SUBDIR=bulk-import-git-repos/src/main/resources gen-manifests
 cp -rf /tmp/serverless-workflows/workflows/bulk-import-git-repos/src/main/resources/manifests ./workflows/bulk-import-git-repos 
 ```
 
