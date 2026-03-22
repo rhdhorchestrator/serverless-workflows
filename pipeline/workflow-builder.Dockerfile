@@ -43,7 +43,6 @@ COPY --chown=1001 ${WF_RESOURCES} ./resources/
 RUN ls -la ./resources
 
 ENV swf_home_dir=/home/kogito/serverless-workflow-project
-RUN if [[ -d "./resources/src" ]]; then cp -r ./resources/src/* ./src/; fi
 
 RUN if [ "$WORKFLOW_ID" = "python" ]; then \
     QUARKUS_EXTENSIONS="${QUARKUS_EXTENSIONS},org.apache.kie.sonataflow:sonataflow-addons-quarkus-python:10.1.0"; \
