@@ -14,6 +14,8 @@ WORKFLOWS = \
 	mtv-migration \
 	modify-vm-resources \
 	rpj \
+	test-object-type-uiprops \
+	sample-retry-test \
 	$(NULL)
 
 # Dynamic rule patten that uses one of the workflows and sets the workflow id

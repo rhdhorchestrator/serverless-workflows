@@ -1,0 +1,45 @@
+{
+  "$id": "classpath:/schemas/test-object-type-uiprops__main-schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Test Object Type Support in ui:props",
+  "type": "object",
+  "description": "Testing object type support for fetch:response:* properties in ui:props - RHIDP-11054",
+  "properties": {
+    "basicInfo": {
+      "type": "object",
+      "title": "Basic Information",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "description": "Enter your name",
+          "type": "string"
+        },
+        "email": {
+          "title": "Email",
+          "description": "Enter your email",
+          "type": "string",
+          "format": "email"
+        }
+      },
+      "required": ["name"]
+    },
+    "demonstrationFields": {
+      "type": "object",
+      "title": "Object Type in ui:props Demonstration",
+      "description": "These fields demonstrate that ui:props now supports JsonValue (objects, arrays, etc.) not just strings",
+      "properties": {
+        "simpleText": {
+          "title": "Simple Text Field",
+          "description": "Traditional string-based ui:props still work",
+          "type": "string"
+        },
+        "objectExample": {
+          "title": "Object Type Example",
+          "description": "This field demonstrates object type support in ui:props fetch:response:* properties",
+          "type": "string",
+          "ui:help": "The fetch:response:* properties in ui:props can now be objects or other JsonValue types, not just strings"
+        }
+      }
+    }
+  }
+}
