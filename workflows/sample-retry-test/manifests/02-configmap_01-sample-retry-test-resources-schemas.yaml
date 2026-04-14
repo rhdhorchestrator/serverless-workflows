@@ -1,0 +1,62 @@
+apiVersion: v1
+data:
+  sample-retry-test.input-schema.json: |
+    {
+      "$id": "classpath:/schemas/sample-retry-test.input-schema.json",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "retryAllProps": {
+          "type": "string",
+          "title": "Retry Test (all props)",
+          "ui:widget": "ActiveTextInput",
+          "ui:props": {
+            "fetch:url": "$${{backend.baseUrl}}/api/retry-test/all-props",
+            "fetch:response:value": "value",
+            "fetch:retry:maxAttempts": 3,
+            "fetch:retry:delay": 1500,
+            "fetch:retry:backoff": 2,
+            "fetch:retry:statusCodes": [404, 408, 429, 500, 502, 503, 504]
+          }
+        },
+        "retryStatusCodesNoMatch": {
+          "type": "string",
+          "title": "Retry Test (status codes missing 404)",
+          "ui:widget": "ActiveTextInput",
+          "ui:props": {
+            "fetch:url": "$${{backend.baseUrl}}/api/retry-test/status-codes-no-404",
+            "fetch:response:value": "value",
+            "fetch:retry:maxAttempts": 2,
+            "fetch:retry:delay": 500,
+            "fetch:retry:backoff": 2,
+            "fetch:retry:statusCodes": [408, 429, 500, 502, 503, 504]
+          }
+        },
+        "retryNoProps": {
+          "type": "string",
+          "title": "Retry Test (no retry props)",
+          "ui:widget": "ActiveTextInput",
+          "ui:props": {
+            "fetch:url": "$${{backend.baseUrl}}/api/retry-test/no-retry-props",
+            "fetch:response:value": "value"
+          }
+        }
+      }
+    }
+  workflow-output-schema.json: |-
+    {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "WorkflowResult",
+        "description": "Schema of workflow output",
+        "type": "object",
+        "properties": {
+            "result": {
+                "$ref": "../shared/schemas/workflow-result-schema.json",
+                "type": "object"
+            }
+        }
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: 01-sample-retry-test-resources-schemas

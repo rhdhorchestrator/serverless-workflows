@@ -12,6 +12,8 @@ This repository contains multiple workflows. Each workflow is represented by a d
 | `mta-v7.x`                       | Migration toolkit for applications, version 7.x.  |
 | `mtv-migration`                  | Migration tasks using Migration Toolkit for Virtualization (MTV). |
 | `request-vm-cnv`                 | Requests and provisions VMs using Container Native Virtualization (CNV). |
+| `test-object-type-uiprops`       | E2E-style schema for object-type `ui:props` |
+| `sample-retry-test`              | Sample form with ActiveTextInput fetch retry `ui:props` for CI testing. |
 
 Each workflow is organized in its own directory, containing the following components:
 * `application.properties` — Contains configuration properties specific to the workflow application.

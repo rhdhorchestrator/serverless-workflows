@@ -1,0 +1,32 @@
+id: test-object-type-uiprops
+version: "1.0"
+specVersion: "0.8"
+name: Test Object Type Support in ui:props
+description: "Testing object type support for fetch:response:* properties in ui:props - RHIDP-11054"
+annotations:
+  - "workflow-type/infrastructure"
+dataInputSchema: schemas/test-object-type-uiprops__main-schema.json
+extensions:
+  - extensionid: workflow-output-schema
+    outputSchema: schemas/workflow-output-schema.json
+start: StartState
+functions:
+  - name: runActionFunction
+    type: custom
+    operation: sysout
+  - name: successResult
+    type: expression
+    operation: '{ "result": { "message": "Workflow completed successfully", "outputs":[ { "key":"Name", "value": (.basicInfo.name // "") }, { "key":"Email", "value": (.basicInfo.email // "") } ] } }'
+states:
+  - name: StartState
+    type: operation
+    actions:
+      - name: runAction
+        functionRef:
+          refName: runActionFunction
+          arguments:
+            message: '"Workflow completed with input: " + (. | tostring)'
+      - name: setOutput
+        functionRef:
+          refName: successResult
+    end: true

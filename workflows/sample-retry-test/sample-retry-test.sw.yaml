@@ -1,0 +1,18 @@
+id: sample-retry-test
+version: '1.0'
+specVersion: '0.8'
+name: Sample Retry Test
+description: Simple workflow for local testing
+annotations:
+  - "workflow-type/infrastructure"
+dataInputSchema: schemas/sample-retry-test.input-schema.json
+extensions:
+  - extensionid: workflow-output-schema
+    outputSchema: schemas/workflow-output-schema.json
+start: InjectState
+states:
+  - name: InjectState
+    type: inject
+    data:
+      message: Hello from sample-retry-test
+    end: true

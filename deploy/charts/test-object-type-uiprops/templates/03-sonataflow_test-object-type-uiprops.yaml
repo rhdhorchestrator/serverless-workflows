@@ -1,0 +1,77 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: "Testing object type support for fetch:response:* properties in ui:props - RHIDP-11054"
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "1.0"
+  creationTimestamp: null
+  labels:
+    app: test-object-type-uiprops
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: test-object-type-uiprops
+    sonataflow.org/workflow-app: test-object-type-uiprops
+    sonataflow.org/workflow-namespace: ""
+  name: test-object-type-uiprops
+spec:
+  flow:
+    annotations:
+      - workflow-type/infrastructure
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/test-object-type-uiprops__main-schema.json
+    functions:
+      - name: runActionFunction
+        operation: sysout
+        type: custom
+      - name: successResult
+        operation: '{ "result": { "message": "Workflow completed successfully", "outputs":[ { "key":"Name", "value": (.basicInfo.name // "") }, { "key":"Email", "value": (.basicInfo.email // "") } ] } }'
+        type: expression
+    start:
+      stateName: StartState
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              arguments:
+                message: '"Workflow completed with input: " + (. | tostring)'
+              invoke: sync
+              refName: runActionFunction
+            name: runAction
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: successResult
+            name: setOutput
+        end:
+          terminate: true
+        name: StartState
+        type: operation
+  podTemplate:
+    container:
+      image: quay.io/orchestrator/serverless-workflow-test-object-type-uiprops:osl_1_37
+      resources: {}
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-test-object-type-uiprops-resources-schemas
+        workflowPath: schemas
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: test-object-type-uiprops
+status:
+  address: {}
+  lastTimeRecoverAttempt: null
