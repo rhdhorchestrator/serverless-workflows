@@ -640,6 +640,17 @@ entries:
   test-object-type-uiprops:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2026-04-17T12:54:52.841783842Z"
+    description: A Helm chart for the test-object-type-uiprops serverless workflow
+    digest: 2bf2443f64d5a687a65c525678a7bf3b487896053a9157f49bea4badb00c16bd
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: test-object-type-uiprops
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/test-object-type-uiprops-1.7.0-rc4/test-object-type-uiprops-1.7.0-rc4.tgz
+    version: 1.7.0-rc4
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2026-04-14T13:04:28.096222006Z"
     description: A Helm chart for the test-object-type-uiprops serverless workflow
     digest: 70480ff1a5a088be7e4f17ef15aeede09e15b4c80cb9c04538125f82a58f0bb0
@@ -649,4 +660,4 @@ entries:
     urls:
     - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/test-object-type-uiprops-1.7.0-rc3/test-object-type-uiprops-1.7.0-rc3.tgz
     version: 1.7.0-rc3
-generated: "2026-04-17T12:54:23.878269874Z"
+generated: "2026-04-17T12:54:52.841922872Z"
