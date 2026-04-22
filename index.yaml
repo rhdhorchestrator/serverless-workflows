@@ -637,6 +637,17 @@ entries:
     urls:
     - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/sample-retry-test-1.7.0-rc3/sample-retry-test-1.7.0-rc3.tgz
     version: 1.7.0-rc3
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2026-04-22T12:13:07.231572926Z"
+    description: A Helm chart for the sample-retry-test serverless workflow
+    digest: 8920ded3280a397e32cfa38863dfbf1e810302cb16b580bad333e728c7127b81
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: sample-retry-test
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/sample-retry-test-1.7.0-rc3/sample-retry-test-1.7.0-rc3.tgz
+    version: 1.7.0-rc3
   test-object-type-uiprops:
   - apiVersion: v2
     appVersion: 1.16.0
@@ -660,4 +671,15 @@ entries:
     urls:
     - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/test-object-type-uiprops-1.7.0-rc3/test-object-type-uiprops-1.7.0-rc3.tgz
     version: 1.7.0-rc3
-generated: "2026-04-17T12:54:52.841922872Z"
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2026-04-22T12:13:07.423085173Z"
+    description: A Helm chart for the test-object-type-uiprops serverless workflow
+    digest: 51caf9cdadc6b77197d5986c2c8d47fbb376f26bae6ada2925cda63ca2dc0472
+    icon: https://raw.githubusercontent.com/rhdhorchestrator/rhdhorchestrator.github.io/main/assets/images/WO_black.svg
+    name: test-object-type-uiprops
+    type: application
+    urls:
+    - https://github.com/rhdhorchestrator/serverless-workflows/releases/download/test-object-type-uiprops-1.7.0-rc3/test-object-type-uiprops-1.7.0-rc3.tgz
+    version: 1.7.0-rc3
+generated: "2026-04-22T12:13:07.423212436Z"
