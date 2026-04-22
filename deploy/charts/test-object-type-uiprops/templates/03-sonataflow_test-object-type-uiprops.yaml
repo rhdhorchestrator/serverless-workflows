@@ -2,7 +2,7 @@ apiVersion: sonataflow.org/v1alpha08
 kind: SonataFlow
 metadata:
   annotations:
-    sonataflow.org/description: Testing object type support for fetch:response:* properties in ui:props - RHIDP-11054
+    sonataflow.org/description: "Testing object type support for fetch:response:* properties in ui:props - RHIDP-11054"
     sonataflow.org/expressionLang: jq
     sonataflow.org/profile: gitops
     sonataflow.org/version: "1.0"
@@ -54,7 +54,7 @@ spec:
         type: operation
   podTemplate:
     container:
-      image: quay.io/orchestrator/serverless-workflow-test-object-type-uiprops:daeeee8dec16beab6d96a81774ef500081a2c2b0
+      image: quay.io/orchestrator/serverless-workflow-test-object-type-uiprops:osl_1_37
       resources: {}
   resources:
     configMaps:
