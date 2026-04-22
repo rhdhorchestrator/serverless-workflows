@@ -33,7 +33,7 @@ spec:
         type: inject
   podTemplate:
     container:
-      image: quay.io/orchestrator/serverless-workflow-sample-retry-test:daeeee8dec16beab6d96a81774ef500081a2c2b0
+      image: quay.io/orchestrator/serverless-workflow-sample-retry-test:osl_1_37
       resources: {}
   resources:
     configMaps:

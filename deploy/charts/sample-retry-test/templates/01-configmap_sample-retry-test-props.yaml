@@ -9,8 +9,6 @@ data:
     quarkus.log.level=INFO
 
     kie.flyway.enabled=true
-
-    kie.flyway.enabled=true
 kind: ConfigMap
 metadata:
   creationTimestamp: null
