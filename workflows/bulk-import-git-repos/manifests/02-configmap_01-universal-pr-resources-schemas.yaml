@@ -44,5 +44,4 @@ data:
     }
 kind: ConfigMap
 metadata:
-  creationTimestamp: null
   name: 01-universal-pr-resources-schemas

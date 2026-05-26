@@ -490,5 +490,4 @@ data:
           description: Bearer Token authentication
 kind: ConfigMap
 metadata:
-  creationTimestamp: null
   name: 02-universal-pr-resources-specs

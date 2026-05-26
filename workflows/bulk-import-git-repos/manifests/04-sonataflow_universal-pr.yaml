@@ -6,7 +6,6 @@ metadata:
     sonataflow.org/expressionLang: jq
     sonataflow.org/profile: gitops
     sonataflow.org/version: "1.0"
-  creationTimestamp: null
   labels:
     app: universal-pr
     app.kubernetes.io/component: serverless-workflow
@@ -341,13 +340,7 @@ spec:
         type: operation
   podTemplate:
     container:
-      env:
-        - name: GHTOKEN
-          valueFrom:
-            secretKeyRef:
-              key: ghToken
-              name: universal-pr-secrets
-      image: quay.io/aandriienko/serverless-workflow-bulk-import-git-repos:latest
+      image: quay.io/orchestrator/serverless-workflow-bulk-import-git-repos:latest
       resources: {}
   resources:
     configMaps:
@@ -369,6 +362,3 @@ spec:
         databaseName: backstage_plugin_orchestrator
         databaseSchema: bulk-import-git-repos
         namespace: orchestrator
-status:
-  address: {}
-  lastTimeRecoverAttempt: null

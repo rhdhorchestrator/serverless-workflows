@@ -10,11 +10,20 @@ WORKFLOW_IMAGE_NAMESPACE="${WORKFLOW_IMAGE_NAMESPACE:-orchestrator}"
 WORKFLOW_IMAGE_REPO="${WORKFLOW_IMAGE_REPO:-serverless-workflow-${WORKFLOW_ID}}"
 WORKFLOW_IMAGE_TAG="${WORKFLOW_IMAGE_TAG:-latest}"
 
+# Red Hat Developer Hub (RHDH) orchestrator e2e persistence — backstage Postgres from installOrchestrator()
+RHDH_PG_SECRET_NAME="${RHDH_PG_SECRET_NAME:-backstage-psql-secret}"
+RHDH_PG_USER_KEY="${RHDH_PG_USER_KEY:-POSTGRES_USER}"
+RHDH_PG_PASSWORD_KEY="${RHDH_PG_PASSWORD_KEY:-POSTGRES_PASSWORD}"
+RHDH_PG_SERVICE_NAME="${RHDH_PG_SERVICE_NAME:-backstage-psql}"
+RHDH_PG_DATABASE="${RHDH_PG_DATABASE:-backstage_plugin_orchestrator}"
+RHDH_PG_NAMESPACE="${RHDH_PG_NAMESPACE:-orchestrator}"
+
 # helper binaries should be either on the developer machine or in the helper
 # image quay.io/orchestrator/ubi9-pipeline from setup/Dockerfile, which we use
 # to exeute this script. See the Makefile gen-manifests target.
 command -v kn-workflow
 command -v kubectl
+command -v yq
 
 cd "${WORKFLOW_FOLDER}"
 
@@ -50,9 +59,50 @@ fi
 # gen-manifests are now sorted by name. We need to take *-sonataflow-$workflow_id.yaml to resolve that.
 SONATAFLOW_CR=$(printf '%s' manifests/*-sonataflow_"${workflow_id}".yaml)
 
+cleanup_generated_manifests() {
+    for manifest in manifests/*.yaml; do
+        [ -f "${manifest}" ] || continue
+        yq --inplace 'del(.metadata.creationTimestamp) | del(.status)' "${manifest}"
+    done
+}
+
+apply_rhdh_manifest_cleanup() {
+    echo "Applying RHDH manifest cleanup (token propagation only, no GHTOKEN secret)..."
+    yq --inplace '
+      .spec.podTemplate.container.env |= (
+        (. // []) | map(select(.name != "GHTOKEN"))
+      )
+      | (if .spec.podTemplate.container.env == [] then del(.spec.podTemplate.container.env) else . end)
+    ' "${SONATAFLOW_CR}"
+    rm -f manifests/*secret*.yaml
+    cleanup_generated_manifests
+}
+
 # The following properties are set in the Sonataflow CR, for each workflow to enable persistence.
 # TODO: It should be replaced with a single definition in the SonataflowPlatform CR
-if [ "${ENABLE_PERSISTENCE}" = true ]; then
+if [ "${RHDH_PERSISTENCE}" = true ]; then
+    yq --inplace ".spec |= (
+      . + {
+        \"persistence\": {
+          \"postgresql\": {
+            \"secretRef\": {
+              \"name\": \"${RHDH_PG_SECRET_NAME}\",
+              \"userKey\": \"${RHDH_PG_USER_KEY}\",
+              \"passwordKey\": \"${RHDH_PG_PASSWORD_KEY}\"
+            },
+            \"serviceRef\": {
+              \"name\": \"${RHDH_PG_SERVICE_NAME}\",
+              \"port\": 5432,
+              \"databaseName\": \"${RHDH_PG_DATABASE}\",
+              \"databaseSchema\": \"${WORKFLOW_ID}\",
+              \"namespace\": \"${RHDH_PG_NAMESPACE}\"
+            }
+          }
+        }
+      }
+    )" "${SONATAFLOW_CR}"
+    apply_rhdh_manifest_cleanup
+elif [ "${ENABLE_PERSISTENCE}" = true ]; then
     yq --inplace ".spec |= (
       . + {
         \"persistence\": {

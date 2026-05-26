@@ -5,14 +5,10 @@ data:
     # of information logged on HTTP requests based on the severity of the events.
     # Possible values: OFF, FATAL, ERROR, WARN, INFO, DEBUG, ALL.
     # and see https://quarkus.io/guides/logging for documentation
-    quarkus.log.category."org.apache.http".level=DEBUG
-    quarkus.log.level=DEBUG
+    quarkus.log.category."org.apache.http".level=INFO
+    quarkus.log.level=INFO
 
-    # Datasource
     quarkus.datasource.db-kind=postgresql
-    quarkus.datasource.jdbc.url=jdbc:postgresql://postgres.showcase.svc.cluster.local:5432/sonata
-    quarkus.datasource.username=sonata
-    quarkus.datasource.password=sonata
 
     # Persistence
     kogito.persistence.type=jdbc
@@ -24,12 +20,6 @@ data:
     quarkus.kogito.devservices.enabled=false
     quarkus.openapi-generator.github_yaml.auth.BearerToken.token-propagation=true
     quarkus.openapi-generator.github_yaml.auth.BearerToken.header-name=X-Authorization-Github
-    # quarkus.rest-client.github_yaml.headers.Accept=application/vnd.github+json
-    # quarkus.openapi-generator.github_yaml.auth.BearerToken.header-name=X-Authorization-github
-    # quarkus.openapi-generator.github_yaml.auth.BearerToken.bearer-token=${ghToken}
-
-    # quarkus.openapi-generator.githubtwo_yaml.auth.BearerToken.token-propagation=true
-    # quarkus.openapi-generator.githubtwo_yaml.auth.BearerToken.header-name=X-Authorization-github-two
 
     quarkus.openapi-generator.gitlab_yaml.auth.BearerToken.token-propagation=true
     quarkus.openapi-generator.gitlab_yaml.auth.BearerToken.header-name=X-Authorization-gitlab
@@ -37,7 +27,6 @@ data:
     kie.flyway.enabled=true
 kind: ConfigMap
 metadata:
-  creationTimestamp: null
   labels:
     app: universal-pr
     app.kubernetes.io/component: serverless-workflow

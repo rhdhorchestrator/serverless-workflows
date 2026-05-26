@@ -169,13 +169,22 @@ save-oci: build-image
 # Optional: WORKFLOW_SUBDIR — when set, first arg is workflows/$(WORKFLOW_SUBDIR); when unset, workflows/$(WORKFLOW_ID)
 #   make WORKFLOW_ID=bulk-import-git-repos WORKFLOW_SUBDIR=bulk-import-git-repos/src/main/resources gen-manifests 
 GEN_MANIFESTS_WORKFLOW_FOLDER = workflows/$(if $(WORKFLOW_SUBDIR),$(WORKFLOW_SUBDIR),$(WORKFLOW_ID))
+ifeq ($(WORKFLOW_ID),bulk-import-git-repos)
+WORKFLOW_SUBDIR ?= bulk-import-git-repos/src/main/resources
+RHDH_PERSISTENCE ?= true
+endif
 gen-manifests: prepare-workdir
 	@# Ensure WORKDIR exists and is accessible (important for macOS Podman)
 	@test -d $(WORKDIR) || mkdir -p $(WORKDIR)
 	@# Use absolute path for volume mount (required for Podman on macOS)
 	@# On macOS, use realpath or fallback to WORKDIR if realpath fails
 	@$(CONTAINER_ENGINE) run --rm -v "$(shell realpath $(WORKDIR) 2>/dev/null || echo $(WORKDIR)):/workdir:Z" -w /workdir \
-		$(LINUX_IMAGE) /bin/bash -c "ENABLE_PERSISTENCE=$(ENABLE_PERSISTENCE) WORKFLOW_IMAGE_TAG=$(IMAGE_TAG) ${SCRIPTS_DIR}/gen_manifests.sh $(GEN_MANIFESTS_WORKFLOW_FOLDER) $(WORKFLOW_ID)"
+		$(LINUX_IMAGE) /bin/bash -c "ENABLE_PERSISTENCE=$(ENABLE_PERSISTENCE) RHDH_PERSISTENCE=$(RHDH_PERSISTENCE) WORKFLOW_IMAGE_TAG=$(IMAGE_TAG) ${SCRIPTS_DIR}/gen_manifests.sh $(GEN_MANIFESTS_WORKFLOW_FOLDER) $(WORKFLOW_ID)"
+ifeq ($(WORKFLOW_ID),bulk-import-git-repos)
+	@mkdir -p $(WORKDIR)/workflows/$(WORKFLOW_ID)/manifests
+	@cp -f $(WORKDIR)/$(GEN_MANIFESTS_WORKFLOW_FOLDER)/manifests/* $(WORKDIR)/workflows/$(WORKFLOW_ID)/manifests/
+	@echo "Manifests copied to $(WORKDIR)/workflows/$(WORKFLOW_ID)/manifests"
+endif
 	@echo "Manifests are available in workdir $(WORKDIR)/$(GEN_MANIFESTS_WORKFLOW_FOLDER)/manifests"
 
 remove-trailing-whitespaces:

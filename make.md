@@ -45,6 +45,7 @@ Variables can be used to configure the behavior of the [Makefile](./Makefile):
 | IMAGE_PREFIX | Automatically added image prefix | `serverless-workflow` |
 | IMAGE_TAG | Automatically added image tag | 8 chars commit hash of the latest commit |
 | ENABLE_PERSISTENCE | Enables the addition of persistence to the generated manifests. Useful for local testing | `false` |
+| RHDH_PERSISTENCE | Uses backstage Postgres refs for RHDH `installOrchestrator`; removes GHTOKEN secret from generated manifests. Set automatically for `bulk-import-git-repos` | `false` |
 
 Override the default values with:
 ```bash

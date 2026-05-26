@@ -5,7 +5,7 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'workflows/experimentals/bulk-import-git-repos/**'
+      - 'workflows/bulk-import-git-repos/**'
       - 'pipeline/**'
       - 'scripts/**'
       - .github/workflows/bulk-import-git-repos.yml
