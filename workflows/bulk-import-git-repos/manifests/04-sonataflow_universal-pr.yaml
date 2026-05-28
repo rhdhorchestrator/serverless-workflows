@@ -5,14 +5,14 @@ metadata:
     sonataflow.org/description: This workflow creates a pull request (GitHub) or merge request (GitLab) based on approvalTool parameter.
     sonataflow.org/expressionLang: jq
     sonataflow.org/profile: gitops
-    sonataflow.org/version: "1.0"
+    sonataflow.org/version: '1.0'
   labels:
     app: universal-pr
     app.kubernetes.io/component: serverless-workflow
     app.kubernetes.io/managed-by: sonataflow-operator
     app.kubernetes.io/name: universal-pr
     sonataflow.org/workflow-app: universal-pr
-    sonataflow.org/workflow-namespace: ""
+    sonataflow.org/workflow-namespace: ''
   name: universal-pr
 spec:
   flow:
@@ -230,7 +230,7 @@ spec:
             functionRef:
               arguments:
                 base: .baseBranch
-                body: ""
+                body: ''
                 head: .targetBranch
                 owner: .owner
                 repo: .repo
@@ -340,7 +340,7 @@ spec:
         type: operation
   podTemplate:
     container:
-      image: quay.io/orchestrator/serverless-workflow-bulk-import-git-repos:latest
+      image: quay.io/orchestrator/serverless-workflow-bulk-import-git-repos:8126876dc118aa1ada813ef42d5e65dc11925a0a
       resources: {}
   resources:
     configMaps:
