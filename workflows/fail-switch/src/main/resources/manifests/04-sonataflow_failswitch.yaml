@@ -101,7 +101,7 @@ spec:
         type: operation
   podTemplate:
     container:
-      image: quay.io/orchestrator/fail-switch:osl_1_37
+      image: quay.io/orchestrator/fail-switch:osl_1_38
       resources: {}
   resources:
     configMaps:

@@ -6,7 +6,7 @@ set -euo pipefail
 script_name="${BASH_SOURCE:-$0}"
 
 # Default container images
-DEFAULT_BUILDER_IMAGE="registry.redhat.io/openshift-serverless-1/logic-swf-builder-rhel9:1.37.0-19"
+DEFAULT_BUILDER_IMAGE="registry.redhat.io/openshift-serverless-1/logic-swf-builder-rhel9:1.38.0-3"
 DEFAULT_RUNTIME_IMAGE="registry.access.redhat.com/ubi9/openjdk-17:1.21-2"
 
 # Logger functions
@@ -232,7 +232,7 @@ function create_default_dockerfile() {
     cat > "$dockerfile_path" << 'EOF'
 
 
-FROM registry.redhat.io/openshift-serverless-1/logic-swf-builder-rhel9:1.37.0-19 AS builder
+FROM registry.redhat.io/openshift-serverless-1/logic-swf-builder-rhel9:1.38.0-3 AS builder
 
 # Variables that can be overridden by the builder
 # To add a Quarkus extension to your application
