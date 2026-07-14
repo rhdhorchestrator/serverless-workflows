@@ -1,0 +1,64 @@
+apiVersion: sonataflow.org/v1alpha08
+kind: SonataFlow
+metadata:
+  annotations:
+    sonataflow.org/description: select-user
+    sonataflow.org/expressionLang: jq
+    sonataflow.org/profile: gitops
+    sonataflow.org/version: "0.1"
+  creationTimestamp: null
+  labels:
+    app: select-user
+    app.kubernetes.io/component: serverless-workflow
+    app.kubernetes.io/managed-by: sonataflow-operator
+    app.kubernetes.io/name: select-user
+    sonataflow.org/workflow-app: select-user
+    sonataflow.org/workflow-namespace: ""
+  name: select-user
+spec:
+  flow:
+    dataInputSchema:
+      failOnValidationErrors: true
+      schema: schemas/select-user.json
+    functions:
+      - name: successResult
+        operation: '{ "result": { "message": "Selected user is: " + .selectUser, "outputs":[], "nextWorkflows":[ ] } }'
+        type: expression
+    start:
+      stateName: Start
+    states:
+      - actionMode: sequential
+        actions:
+          - actionDataFilter:
+              useResults: true
+            functionRef:
+              invoke: sync
+              refName: successResult
+            name: successResult
+        end:
+          terminate: true
+        name: Start
+        type: operation
+  podTemplate:
+    container:
+      image: quay.io/orchestrator/serverless-workflows-select-user:1.6
+      resources: {}
+  resources:
+    configMaps:
+      - configMap:
+          name: 01-select-user-resources-schemas
+        workflowPath: schemas
+  persistence:
+    postgresql:
+      secretRef:
+        name: sonataflow-psql-postgresql
+        userKey: postgres-username
+        passwordKey: postgres-password
+      serviceRef:
+        name: sonataflow-psql-postgresql
+        port: 5432
+        databaseName: sonataflow
+        databaseSchema: select-user
+status:
+  address: {}
+  lastTimeRecoverAttempt: null
